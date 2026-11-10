@@ -1,0 +1,29 @@
+# Baut ein Release, sobald ein Versions-Tag wie v1.0.0 hochgeladen wird:
+#   git tag v1.0.0
+#   git push origin v1.0.0
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+# Darf Releases anlegen.
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code holen
+        uses: actions/checkout@v4
+
+      - name: Spiel als ZIP verpacken
+        run: zip "zack-${GITHUB_REF_NAME}.zip" index.html
+
+      - name: Release auf GitHub anlegen
+        # gh ist auf den GitHub-Servern schon installiert.
+        # --generate-notes schreibt die Änderungsliste automatisch aus den Commits/PRs.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" "zack-${GITHUB_REF_NAME}.zip" --title "Zack $GITHUB_REF_NAME" --generate-notes

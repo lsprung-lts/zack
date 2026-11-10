@@ -1,0 +1,63 @@
+# Veröffentlicht das Spiel auf GitHub Pages.
+# Läuft bei jedem Push auf main und auf Knopfdruck (Reiter "Actions" → "Run workflow").
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Was dieser Workflow darf: Code lesen, auf Pages veröffentlichen.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Nie zwei Veröffentlichungen gleichzeitig.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code holen
+        uses: actions/checkout@v4
+
+      - name: Prüfen (CI)
+        # Liest das <script> aus index.html und lässt Node die Syntax prüfen.
+        # Geht dabei etwas schief, bricht der Workflow ab und nichts wird veröffentlicht.
+        run: |
+          node -e "
+            const s = require('fs').readFileSync('index.html', 'utf8');
+            const m = s.match(/<script>([\s\S]*?)<\/script>/);
+            if (!m) { console.error('Kein <script> in index.html gefunden'); process.exit(1); }
+            new Function(m[1]);
+            console.log('Syntax ok');
+          "
+
+      - name: Website zusammenstellen (Build)
+        # Nur das, was online gehört, kommt in den Ordner _site.
+        run: |
+          mkdir _site
+          cp index.html _site/
+
+      - name: Pages vorbereiten
+        uses: actions/configure-pages@v5
+
+      - name: Paket hochladen
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Veröffentlichen (Deploy)
+        id: deployment
+        uses: actions/deploy-pages@v4
