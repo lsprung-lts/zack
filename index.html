@@ -74,6 +74,8 @@ kbd{font-family:var(--font-body);font-weight:600;background:rgba(246,239,255,.14
         <li><b>Treffer</b> laden den Sprung sofort nach. <b>Daneben</b> heißt kurz wehrlos.</li>
         <li><b>Serie halten:</b> Alle 5 Treffer steigt der Multiplikator. Der Ring um dich läuft ab.</li>
         <li><b>Knapp ist doppelt:</b> Wer bis zum letzten Moment wartet, kassiert ×2.</li>
+        <li><b>Haarscharf</b> vorbeilassen bringt Punkte und Zeit. Läuft die Serie aus, wird sie <b>einkassiert</b>.</li>
+        <li>Bei <b>×5, ×10, ×15</b> gibt's <b>Vollgas</b>: weitere Sprünge, keine Pause nach Fehlern.</li>
         <li><b>Eisblaue Igel</b> nur treffen, wenn die Stacheln drin sind. <b>Gold</b> bringt den Rausch.</li>
       </ul>
       <button class="primary" id="go">Los geht's</button>
@@ -100,7 +102,7 @@ const C={you:'#ffd23f',foe:'#ff5d73',run:'#ff9a3c',igel:'#5ce1e6',gold:'#fff3b0'
 
 /* ---------- Zustand ---------- */
 let st='menu',clock=0,runT=0,score=0,shown=0,punch=0,combo=0,comboT=0,bestCombo=0,kills=0,dashes=0,hits=0;
-let cd=0,inv=0,frenzy=0,hitStop=0,shake=0,flash=0,dieT=0,overLock=0,attempt=0,reason='',recordHit=false;
+let cd=0,inv=0,frenzy=0,boost=0,hitStop=0,shake=0,flash=0,dieT=0,overLock=0,attempt=0,reason='',recordHit=false;
 let best=0,spawnT=0,goldT=14;
 const p={x:W/2,y:H/2},aim={x:W/2+200,y:H/2};
 let foes=[],parts=[],floats=[],trails=[],calls=[];
@@ -127,6 +129,29 @@ const mult=()=>Math.min(15,1+Math.floor(combo/5));
 const comboMax=()=>Math.max(1.15,2.3-runT*.012);
 const MILE={5:'Sauber!',10:'Leiwand!',20:'Oida!',35:'Wahnsinn!',50:'Bist du deppert!',75:'Legende!',100:'Gottgleich!'};
 const MULTI=['','','Doppel!','Tripel!','Quadrupel!','Kehraus!'];
+const BOOST_AT={20:1,45:1,70:1};                 // ×5, ×10, ×15 zünden Vollgas
+const GRAZE=28;                                  // Abstand über der Todesgrenze, der als "haarscharf" gilt
+const reach=()=>RANGE*(boost>0?1.5:1);
+const bonusMul=()=>frenzy>0?2:1;
+function checkRecord(){
+  if(best>0&&!recordHit&&score>best){recordHit=true;call('Neuer Rekord!',C.you);for(let j=0;j<4;j++)tone(note(10+j),.25,'square',.05,0,j*.07);}}
+/* Serie läuft aus: ab 5 Treffern wird sie gutgeschrieben statt zu verfallen */
+function bank(){
+  if(combo<5)return;
+  const pts=combo*5*mult()*bonusMul();score+=pts;punch=1;
+  call('Einkassiert! +'+fmt(pts),C.you);
+  floats.push({x:p.x,y:p.y-60,text:'+'+fmt(pts),life:1.1,col:C.you,big:true});
+  for(let j=0;j<4;j++)tone(note(7+j*2),.18,'triangle',.06,0,j*.05);
+  checkRecord();
+}
+/* Gegner ganz knapp vorbeigelassen und überlebt */
+function graze(e){
+  const pts=5*mult()*bonusMul();score+=pts;
+  if(combo>0)comboT=Math.min(comboMax(),comboT+.4);
+  floats.push({x:e.x,y:e.y-20,text:'Haarscharf +'+fmt(pts),life:.8,col:C.igel,big:false});
+  burst(p.x,p.y,C.igel,8,260);tone(1500,.07,'sine',.04,2200);
+  checkRecord();
+}
 function call(text,col){calls.push({text,col:col||C.you,t:0});if(calls.length>2)calls.shift();}
 function burst(x,y,col,n,spd){for(let i=0;i<n&&parts.length<700;i++){const a=rnd(0,6.283),s=rnd(.2,1)*spd;
   parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:rnd(.25,.7),max:.7,col,size:rnd(2,5)});}}
@@ -152,7 +177,7 @@ const spikeAmt=e=>{const t=e.ph%2.7;return t<1.25?0:t<1.55?(t-1.25)/.3:t<2.55?1:
 function reset(){
   foes=[];parts=[];floats=[];trails=[];calls=[];
   p.x=W/2;p.y=H/2;runT=0;score=0;shown=0;combo=0;comboT=0;bestCombo=0;kills=0;dashes=0;hits=0;
-  cd=0;inv=.6;frenzy=0;hitStop=0;spawnT=.2;goldT=rnd(11,17);recordHit=false;
+  cd=0;inv=.6;frenzy=0;boost=0;hitStop=0;spawnT=.2;goldT=rnd(11,17);recordHit=false;
 }
 function start(){wake();reset();attempt++;st='play';$('ov').hidden=true;
   for(let i=0;i<4;i++)spawn('d');tone(440,.1,'triangle',.07,880);}
@@ -164,16 +189,16 @@ function segDist(px,py,x1,y1,x2,y2){const dx=x2-x1,dy=y2-y1,l=dx*dx+dy*dy||1;
 function dash(){
   if(st!=='play'||cd>0)return;
   let dx=aim.x-p.x,dy=aim.y-p.y;const d=Math.hypot(dx,dy);if(d<6)return;
-  const L=Math.min(d,RANGE),sx=p.x,sy=p.y;
+  const L=Math.min(d,reach()),sx=p.x,sy=p.y;
   const ex=Math.max(18,Math.min(W-18,sx+dx/d*L)),ey=Math.max(18,Math.min(H-18,sy+dy/d*L));
   dashes++;
   const hit=[];let fatal=null;
   for(const e of foes){const q=segDist(e.x,e.y,sx,sy,ex,ey);
     if(q.d<e.r+15){if(spiky(e)){if(!fatal||q.t<fatal.t)fatal={e,t:q.t};}else hit.push({e,t:q.t});}}
   if(fatal){const fx=sx+(ex-sx)*fatal.t,fy=sy+(ey-sy)*fatal.t;
-    trails.push({x1:sx,y1:sy,x2:fx,y2:fy,life:.22});p.x=fx;p.y=fy;die('Aufgespießt');return;}
-  trails.push({x1:sx,y1:sy,x2:ex,y2:ey,life:.22});p.x=ex;p.y=ey;
-  if(!hit.length){cd=frenzy>0?.08:.38;inv=.08;hiss(.12,.05,900);return;}
+    trails.push({x1:sx,y1:sy,x2:fx,y2:fy,life:.22,b:boost>0});p.x=fx;p.y=fy;die('Aufgespießt');return;}
+  trails.push({x1:sx,y1:sy,x2:ex,y2:ey,life:.22,b:boost>0});p.x=ex;p.y=ey;
+  if(!hit.length){cd=boost>0?0:frenzy>0?.08:.38;inv=.08;hiss(.12,.05,900);return;}
   hit.sort((a,b)=>a.t-b.t);hits++;cd=0;inv=.24;
   const n=hit.length;
   hit.forEach((h,i)=>{const e=h.e,close=Math.hypot(e.x-sx,e.y-sy)<e.r+72;
@@ -185,13 +210,14 @@ function dash(){
     tone(note(Math.min(combo,22)),.14,'triangle',.08,0,i*.045);
     if(e.k==='g'){frenzy=5;call('Rausch!',C.gold);for(let j=0;j<5;j++)tone(note(8+j*2),.2,'sine',.06,0,j*.06);}
     if(MILE[combo]){call(MILE[combo]+'  ×'+mult());tone(note(5),.3,'square',.04,0,.05);tone(note(9),.3,'square',.04,0,.12);}
+    if(BOOST_AT[combo]){boost=4;call('Vollgas!',C.igel);for(let j=0;j<6;j++)tone(note(5+j*2),.16,'sawtooth',.035,0,.15+j*.04);}
     foes.splice(foes.indexOf(e),1);});
   comboT=comboMax();punch=1;
   if(n>=2)call(MULTI[Math.min(n,5)],C.ink);
   hiss(.08,.07,2500);
   hitStop=.045+.018*Math.min(n,4);
   if(!calm){shake=Math.min(1,.3+.14*n);flash=Math.min(.22,.06+.04*n);}
-  if(best>0&&!recordHit&&score>best){recordHit=true;call('Neuer Rekord!',C.you);for(let j=0;j<4;j++)tone(note(10+j),.25,'square',.05,0,j*.07);}
+  checkRecord();
 }
 function die(why){
   if(st!=='play')return;reason=why;st='dying';dieT=.75;
@@ -222,8 +248,8 @@ function update(rdt){
   if(hitStop>0){hitStop-=rdt;dt=0;}             // Treffer-Stopp: die Welt friert kurz ein
   else if(st==='dying')dt=rdt*.12;              // Zeitlupe beim Tod
   if(st==='play'&&dt>0){
-    runT+=dt;if(cd>0)cd-=dt;if(inv>0)inv-=dt;if(frenzy>0)frenzy-=dt;
-    if(combo>0){comboT-=dt;if(comboT<=0){if(combo>=5)tone(220,.2,'sine',.05,110);combo=0;}}
+    runT+=dt;if(cd>0)cd-=dt;if(inv>0)inv-=dt;if(frenzy>0)frenzy-=dt;if(boost>0)boost-=dt;
+    if(combo>0){comboT-=dt;if(comboT<=0){bank();combo=0;}}
     spawnT-=dt;
     if(spawnT<=0&&foes.length<42){spawnT=Math.max(.27,.95-runT*.009);
       const r=Math.random();spawn(runT>10&&r<.17?'r':runT>22&&r<.38?'i':'d');}
@@ -240,8 +266,11 @@ function update(rdt){
       const a=Math.atan2(ty-e.y,tx-e.x),k=ease(2.6,edt);
       e.vx+=(Math.cos(a)*e.spd-e.vx)*k;e.vy+=(Math.sin(a)*e.spd-e.vy)*k;
       e.x+=e.vx*edt;e.y+=e.vy*edt;if(e.k==='i')e.ph+=edt;}
-    if(st==='play'&&inv<=0&&!(e.k==='r'&&e.warn>0)&&e.k!=='g'&&Math.hypot(e.x-p.x,e.y-p.y)<e.r+7){
-      die(e.k==='r'?'Überfahren':e.k==='i'?'Aufgespießt':'Erwischt');}
+    if(st!=='play'||e.k==='g'||(e.k==='r'&&e.warn>0))continue;
+    const dd=Math.hypot(e.x-p.x,e.y-p.y);
+    if(inv<=0&&dd<e.r+7){die(e.k==='r'?'Überfahren':e.k==='i'?'Aufgespießt':'Erwischt');continue;}
+    if(dd<e.r+7+GRAZE){if(!e.gz&&inv<=0)e.gz=1;}     // drin im knappen Bereich
+    else if(e.gz===1){e.gz=2;graze(e);}            // wieder draußen und noch am Leben
   }
   if(st==='menu'&&foes.length<7)spawn('d');
   for(let i=parts.length-1;i>=0;i--){const q=parts[i];q.life-=dt;if(q.life<=0){parts.splice(i,1);continue;}
@@ -294,18 +323,20 @@ function render(){
   for(const e of foes)if(e.k==='r'&&e.warn>0){g.strokeStyle='rgba(255,154,60,'+(.25+(1-e.warn/.85)*.5)+')';g.lineWidth=2+(1-e.warn/.85)*5;
     g.beginPath();g.moveTo(e.x,e.y);g.lineTo(e.x+e.dx*1700,e.y+e.dy*1700);g.stroke();}
   /* Ziellinie */
-  if(st==='play'||st==='menu'){const dx=aim.x-p.x,dy=aim.y-p.y,d=Math.hypot(dx,dy)||1,L=Math.min(d,RANGE),ex=p.x+dx/d*L,ey=p.y+dy/d*L;
+  if(st==='play'||st==='menu'){const dx=aim.x-p.x,dy=aim.y-p.y,d=Math.hypot(dx,dy)||1,L=Math.min(d,reach()),ex=p.x+dx/d*L,ey=p.y+dy/d*L;
     g.strokeStyle='rgba(246,239,255,'+(cd>0?.12:.38)+')';g.lineWidth=2;g.setLineDash([3,11]);g.lineDashOffset=-clock*60;
     g.beginPath();g.moveTo(p.x,p.y);g.lineTo(ex,ey);g.stroke();g.setLineDash([]);
     g.beginPath();g.arc(ex,ey,9,0,6.3);g.stroke();}
   g.globalCompositeOperation='lighter';
-  for(const t of trails){const a=t.life/.22;g.strokeStyle='rgba(255,210,63,'+a*.9+')';g.lineWidth=4+18*a;g.beginPath();g.moveTo(t.x1,t.y1);g.lineTo(t.x2,t.y2);g.stroke();
+  for(const t of trails){const a=t.life/.22;g.strokeStyle=(t.b?'rgba(92,225,230,':'rgba(255,210,63,')+a*.9+')';g.lineWidth=4+18*a;g.beginPath();g.moveTo(t.x1,t.y1);g.lineTo(t.x2,t.y2);g.stroke();
     g.strokeStyle='rgba(255,255,255,'+a+')';g.lineWidth=2+5*a;g.stroke();}
   g.globalCompositeOperation='source-over';
   for(const e of foes)drawFoe(e);
   /* Spieler mit Serien-Ring */
   if(st!=='dying'&&st!=='over'){
     const m=mult(),ready=cd<=0;
+    if(boost>0){g.strokeStyle='rgba(92,225,230,'+(.35+Math.sin(clock*14)*.2)*Math.min(1,boost)+')';g.lineWidth=3;
+      g.beginPath();g.arc(p.x,p.y,36+Math.sin(clock*9)*3,0,6.3);g.stroke();}
     if(combo>0){g.lineWidth=5;g.strokeStyle='rgba(246,239,255,.14)';g.beginPath();g.arc(p.x,p.y,28,0,6.3);g.stroke();
       const fr=comboT/comboMax();g.strokeStyle=fr<.3?C.foe:C.you;g.beginPath();g.arc(p.x,p.y,28,-1.571,-1.571+fr*6.283);g.stroke();
       g.font='18px '+DISP;g.textAlign='center';g.textBaseline='middle';g.fillStyle=C.you;g.fillText('×'+m,p.x,p.y-46);}
@@ -332,6 +363,7 @@ function render(){
     g.font='18px '+DISP;g.textAlign='left';g.fillStyle=combo>0?C.you:'rgba(246,239,255,.4)';g.fillText('Serie '+combo,26,34);
     g.textAlign='right';g.fillStyle='rgba(246,239,255,.4)';g.fillText('Versuch '+attempt,W-26,34);
     if(frenzy>0){g.textAlign='center';g.fillStyle=C.gold;g.fillText('Rausch  '+frenzy.toFixed(1)+' s  ·  alles doppelt',W/2,H-30);}
+    if(boost>0){g.textAlign='center';g.fillStyle=C.igel;g.fillText('Vollgas  '+boost.toFixed(1)+' s  ·  weiter und ohne Pause',W/2,frenzy>0?H-58:H-30);}
     g.textAlign='center';
   }
   calls.forEach((c,i)=>{const t=c.t,s=t<.12?.5+t/.12*.7:1.2-Math.min(.2,(t-.12)*1.5),a=t>.8?1-(t-.8)/.3:1;
