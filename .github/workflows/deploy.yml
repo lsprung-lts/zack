@@ -26,22 +26,17 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Prüfen (CI)
-        # Liest das <script> aus index.html und lässt Node die Syntax prüfen.
+        # Lässt Node jede JavaScript-Datei in js/ auf Syntaxfehler prüfen.
         # Geht dabei etwas schief, bricht der Workflow ab und nichts wird veröffentlicht.
         run: |
-          node -e "
-            const s = require('fs').readFileSync('index.html', 'utf8');
-            const m = s.match(/<script>([\s\S]*?)<\/script>/);
-            if (!m) { console.error('Kein <script> in index.html gefunden'); process.exit(1); }
-            new Function(m[1]);
-            console.log('Syntax ok');
-          "
+          for f in js/*.js; do node --check "$f"; done
+          echo "Syntax ok"
 
       - name: Website zusammenstellen (Build)
         # Nur das, was online gehört, kommt in den Ordner _site.
         run: |
           mkdir _site
-          cp index.html _site/
+          cp -r index.html css js _site/
 
       - name: Pages vorbereiten
         uses: actions/configure-pages@v6

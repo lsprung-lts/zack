@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Spiel als ZIP verpacken
-        run: zip "zack-${GITHUB_REF_NAME}.zip" index.html
+        run: zip -r "zack-${GITHUB_REF_NAME}.zip" index.html css js
 
       - name: Release auf GitHub anlegen
         # gh ist auf den GitHub-Servern schon installiert.

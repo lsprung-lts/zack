@@ -1,7 +1,16 @@
 # Zack
 
-Arcade-Spiel für den Browser. Aktuell komplett in `index.html` (HTML, CSS,
-JavaScript, Canvas 2D). Keine Bibliotheken, kein Build-Schritt.
+Arcade-Spiel für den Browser. HTML, CSS, JavaScript, Canvas 2D.
+Keine Bibliotheken, kein Build-Schritt.
+
+## Dateien
+- `index.html` – Markup (Menü, Ergebnis, Bedienleiste), lädt CSS und Skripte
+- `css/style.css` – alle Styles
+- `js/*.js` – klassische Skripte (kein ES-Modul), in dieser Reihenfolge geladen:
+  `core` (Konstanten, Zustand, Soundeffekte) → `rules` (Regeln, Spawn, Sprung,
+  Tod, Ergebnis) → `menu` → `update` (Simulation) → `render` (Zeichnen, Größe)
+  → `main` (Schleife, Eingabe, Start). Alle teilen sich den globalen Gültigkeitsbereich,
+  Reihenfolge beachten. Läuft auch ohne Server per Doppelklick.
 
 Lokal testen: `npx serve -l 5173 .` (oder `python -m http.server 5173`),
 dann http://localhost:5173 öffnen.
@@ -36,7 +45,6 @@ dann http://localhost:5173 öffnen.
 - Simpel halten.
 
 ## Arbeitsweise
-- Datei erst aufteilen, wenn die Struktur abgesprochen ist.
 - `docs/wiki.html` beschreibt alle Regeln und Spielwerte mit Kürzeln (z. B. `G-R2`).
   Wer einen Spielwert in `index.html` ändert, pflegt ihn dort mit (inkl. „Stand“ oben).
 - Neue Features über Feature-Branch + Pull Request nach `main` (GitHub Flow);

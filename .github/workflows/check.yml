@@ -1,0 +1,22 @@
+# Prüft jeden Pull Request, bevor er nach main darf.
+# Gleiche Prüfung wie im Deploy – nur ohne Veröffentlichen.
+name: Check
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code holen
+        uses: actions/checkout@v7
+
+      - name: Syntax prüfen
+        run: |
+          for f in js/*.js; do node --check "$f"; done
+          echo "Syntax ok"
