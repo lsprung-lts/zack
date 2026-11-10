@@ -6,7 +6,7 @@ function frame(ts){
   const raw=last?(ts-last)/1000:0;last=ts;
   if(raw>0&&raw<.1){hzAcc+=raw;hzN++;if(hzAcc>.6){$('hz').textContent='≈ '+Math.round(hzN/hzAcc)+' Hz';hzAcc=hzN=0;}}
   if(st!=='pause')update(Math.min(raw,.05));
-  render();drawCast();requestAnimationFrame(frame);
+  render();drawCast();Music.tick();requestAnimationFrame(frame);
 }
 
 /* ---------- Eingabe ---------- */
@@ -27,6 +27,8 @@ $('toMenu').addEventListener('click',()=>{if(st==='over')showMenu();$('toMenu').
 $('how').addEventListener('click',toggleHow);
 $('pz').addEventListener('click',()=>{togglePause();$('pz').blur();});
 $('snd').addEventListener('click',()=>{muted=!muted;$('snd').textContent=muted?'Ton an':'Ton aus';if(!muted)wake();$('snd').blur();});
+$('mus').textContent=Music.on?'Musik aus':'Musik an';
+$('mus').addEventListener('click',()=>{wake();$('mus').textContent=Music.toggle()?'Musik aus':'Musik an';$('mus').blur();});
 
 /* ---------- Start ---------- */
 function boot(data){

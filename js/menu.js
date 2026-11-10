@@ -9,7 +9,20 @@ function showMenu(){
   $('mBest').hidden=!(best>0);$('mBestV').textContent=fmt(best);
   $('ovResult').hidden=true;$('ovMenu').hidden=false;$('ov').classList.add('menu-on');$('ov').hidden=false;
   if(!$('ovRules').hidden)toggleHow();
+  buildSkins();
 }
+/* Spurfarben-Auswahl: freigespielte wählbar, gesperrte zeigen, was fehlt */
+function buildSkins(){
+  const el=$('skins'),cur=skin().id;
+  el.innerHTML='<span class="lbl">Spur · gesamt '+fmt(total)+'</span>'+SKINS.map(s=>{
+    const open=total>=s.need,sw=s.rgb?'rgb('+s.rgb.join(',')+')':'conic-gradient(#ff5d73,#ffd23f,#5ce1e6,#7aa2ff,#ff5d73)';
+    return '<button class="skin'+(s.id===cur?' on':'')+'" role="radio" aria-checked="'+(s.id===cur)+'" data-id="'+s.id+'"'+(open?'':' disabled')
+      +' title="'+s.name+(open?'':' – ab '+fmt(s.need)+' Punkten gesamt')+'"><i style="background:'+sw+'"></i>'
+      +(open?'':'<small>'+(s.need>=1000?fmt(s.need/1000)+'k':s.need)+'</small>')+'</button>';}).join('');
+}
+$('skins').addEventListener('click',e=>{const b=e.target.closest('button.skin');if(!b||b.disabled)return;
+  skinId=b.dataset.id;try{localStorage.setItem('zack.trail',skinId)}catch(err){}
+  buildSkins();tone(880,.08,'triangle',.05,1320);});
 function toggleHow(){const open=$('ovRules').hidden;$('ovRules').hidden=!open;$('cast').hidden=open;
   $('ov').classList.toggle('how',open);$('how').setAttribute('aria-expanded',open);$('how').textContent=open?'Gegner zeigen':"So geht's";}
 /* Kleine Gegner-Vorschau im Menü, gezeichnet mit drawFoe() */

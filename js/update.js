@@ -11,8 +11,10 @@ function update(rdt){
   let dt=rdt;
   if(hitStop>0){hitStop-=rdt;dt=0;}             // Treffer-Stopp: die Welt friert kurz ein
   else if(st==='dying')dt=rdt*.12;              // Zeitlupe beim Tod
+  if(slow>0){slow-=rdt;if(st==='play')dt*=.35;}  // kurze Zeitlupe nach „Feld leer“
   if(st==='play'&&dt>0){
-    runT+=dt;if(cd>0)cd-=dt;if(inv>0)inv-=dt;if(frenzy>0)frenzy-=dt;if(boost>0)boost-=dt;
+    runT+=dt;if(cd>0)cd-=dt;if(inv>0)inv-=dt;if(frenzy>0)frenzy-=dt;if(boost>0)boost-=dt;if(clearCd>0)clearCd-=dt;
+    const nl=1+Math.floor(runT/LVL_T);if(nl>lvl){lvl=nl;lvlUp();}
     if(combo>0){comboT-=dt;if(comboT<=0){bank();combo=0;}}
     spawnT-=dt;
     if(spawnT<=0&&foes.length<42){spawnT=Math.max(.27,.95-runT*.009);
@@ -41,5 +43,9 @@ function update(rdt){
     const dr=Math.exp(-3.2*dt);q.vx*=dr;q.vy*=dr;q.x+=q.vx*dt;q.y+=q.vy*dt;}
   for(let i=floats.length-1;i>=0;i--){const f=floats[i];f.life-=rdt;f.y-=46*rdt;if(f.life<=0)floats.splice(i,1);}
   for(let i=trails.length-1;i>=0;i--){trails[i].life-=rdt;if(trails[i].life<=0)trails.splice(i,1);}
+  for(let i=rings.length-1;i>=0;i--){const o=rings[i];o.life-=rdt;o.r+=(o.max-o.r)*ease(6,rdt);if(o.life<=0)rings.splice(i,1);}
+  /* Farbton der Stufe weich überblenden (Echtzeit) */
+  const tt=LVL_TINT[st==='menu'?0:(lvl-1)%LVL_TINT.length],tk=ease(1.2,rdt);
+  for(let i=0;i<4;i++)tint[i]+=(tt[i]-tint[i])*tk;
 }
 

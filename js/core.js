@@ -35,3 +35,25 @@ function hiss(d,vol,hp){if(!ac||muted)return;try{
 const PENTA=[0,2,4,7,9];
 const note=i=>330*Math.pow(2,(PENTA[i%5]+12*Math.floor(i/5))/12);   // jede Serie klingt höher
 
+/* ---------- Stufen, Feld leer, Ringe ---------- */
+let slow=0,clearCd=0,lvl=1,rings=[];
+const tint=[0,0,0,0];                              // aktueller Farbton des Feldes (r,g,b,a), weich überblendet
+const LVL_T=30;                                    // alle 30 s eine neue Stufe
+const LVL_TINT=[[0,0,0,0],[92,225,230,.07],[255,93,115,.07],[255,154,60,.07],[122,162,255,.08],[255,210,63,.07]];
+
+/* ---------- Spurfarben (über alle Runden freigespielt) ---------- */
+const SKINS=[
+  {id:'funke',     name:'Funke',         need:0,      rgb:[255,210,63]},
+  {id:'paradeiser',name:'Paradeiser',    need:10000,  rgb:[255,93,115]},
+  {id:'donau',     name:'Donau',         need:30000,  rgb:[122,162,255]},
+  {id:'herz',      name:'Goldenes Herz', need:75000,  rgb:[255,243,176]},
+  {id:'prater',    name:'Prater',        need:150000, rgb:null},          // Regenbogen
+  {id:'opernball', name:'Opernball',     need:300000, rgb:[246,239,255]},
+];
+let total=0,skinId='funke';
+try{total=+localStorage.getItem('zack.total')||0;skinId=localStorage.getItem('zack.trail')||'funke';}catch(e){}
+const skin=()=>SKINS.find(s=>s.id===skinId&&total>=s.need)||SKINS[0];
+/* Farbe der Sprungspur; Prater wechselt laufend den Farbton */
+function skinCol(a,hueShift){const s=skin();
+  return s.rgb?'rgba('+s.rgb.join(',')+','+a+')':'hsla('+((clock*140+(hueShift||0))%360)+',95%,62%,'+a+')';}
+

@@ -12,8 +12,13 @@ function drawFoe(e,c){c=c||g;
   c.save();c.translate(e.x,e.y);
   if(e.k==='d'){
     const a=Math.atan2(e.vy,e.vx),wob=1+Math.sin(e.age*9+e.seed)*.06;
-    c.fillStyle='rgba(255,93,115,.18)';c.beginPath();c.arc(0,0,e.r+8,0,6.3);c.fill();
+    c.fillStyle=e.crown?'rgba(255,243,176,'+(.25+Math.sin(clock*8)*.1)+')':'rgba(255,93,115,.18)';
+    c.beginPath();c.arc(0,0,e.r+(e.crown?12:8),0,6.3);c.fill();
     c.fillStyle=C.foe;c.beginPath();c.ellipse(0,0,e.r*wob,e.r/wob,0,0,6.3);c.fill();
+    if(e.crown){const y=-e.r-5+Math.sin(clock*6+e.seed)*1.5;   /* Kopfgeld-Krone */
+      c.fillStyle=C.you;c.strokeStyle='#120a28';c.lineWidth=2;c.beginPath();
+      c.moveTo(-11,y);c.lineTo(-12,y-11);c.lineTo(-5,y-5);c.lineTo(0,y-14);c.lineTo(5,y-5);c.lineTo(12,y-11);c.lineTo(11,y);c.closePath();
+      c.stroke();c.fill();c.fillStyle='#fff';c.beginPath();c.arc(0,y-14,2,0,6.3);c.fill();}
     c.rotate(a);c.fillStyle='#fff';c.beginPath();c.arc(6,-5,4.2,0,6.3);c.arc(6,5,4.2,0,6.3);c.fill();
     c.fillStyle='#1b1036';c.beginPath();c.arc(8,-5,2,0,6.3);c.arc(8,5,2,0,6.3);c.fill();
   }else if(e.k==='r'){
@@ -38,6 +43,7 @@ function render(){
   if(bg)g.drawImage(bg,0,0);
   const sx=Math.sin(clock*91)*14*shake*shake,sy=Math.cos(clock*77)*14*shake*shake;
   g.setTransform(scale,0,0,scale,sx*scale,sy*scale);
+  if(tint[3]>.003){g.fillStyle='rgba('+(tint[0]|0)+','+(tint[1]|0)+','+(tint[2]|0)+','+tint[3]+')';g.fillRect(-20,-20,W+40,H+40);}
   if(frenzy>0){g.fillStyle='rgba(255,210,63,'+(.07+Math.sin(clock*10)*.03)*Math.min(1,frenzy)+')';g.fillRect(-20,-20,W+40,H+40);}
   g.lineCap='round';
   /* Raser-Warnung */
@@ -49,8 +55,10 @@ function render(){
     g.beginPath();g.moveTo(p.x,p.y);g.lineTo(ex,ey);g.stroke();g.setLineDash([]);
     g.beginPath();g.arc(ex,ey,9,0,6.3);g.stroke();}
   g.globalCompositeOperation='lighter';
-  for(const t of trails){const a=t.life/.22;g.strokeStyle=(t.b?'rgba(92,225,230,':'rgba(255,210,63,')+a*.9+')';g.lineWidth=4+18*a;g.beginPath();g.moveTo(t.x1,t.y1);g.lineTo(t.x2,t.y2);g.stroke();
+  for(const t of trails){const a=t.life/.22;g.strokeStyle=t.b?'rgba(92,225,230,'+a*.9+')':skinCol(a*.9);g.lineWidth=4+18*a;g.beginPath();g.moveTo(t.x1,t.y1);g.lineTo(t.x2,t.y2);g.stroke();
     g.strokeStyle='rgba(255,255,255,'+a+')';g.lineWidth=2+5*a;g.stroke();}
+  for(const o of rings){const a=Math.max(0,o.life/o.dur);g.strokeStyle='rgba('+o.col+','+a*.8+')';g.lineWidth=2+10*a;
+    g.beginPath();g.arc(o.x,o.y,o.r,0,6.3);g.stroke();}
   g.globalCompositeOperation='source-over';
   for(const e of foes)drawFoe(e);
   /* Spieler mit Serien-Ring */
@@ -83,6 +91,9 @@ function render(){
       g.font='600 14px "Outfit",sans-serif';g.fillStyle='rgba(246,239,255,.7)';g.fillText(recordHit?'Rekord gebrochen':'Rekord '+fmt(best),W/2,112);}
     g.font='18px '+DISP;g.textAlign='left';g.fillStyle=combo>0?C.you:'rgba(246,239,255,.4)';g.fillText('Serie '+combo,26,34);
     g.textAlign='right';g.fillStyle='rgba(246,239,255,.4)';g.fillText('Versuch '+attempt,W-26,34);
+    /* Stufe mit Fortschrittsbalken bis zur nächsten */
+    const lf=(runT%LVL_T)/LVL_T;g.fillStyle='rgba(246,239,255,.55)';g.fillText('Stufe '+lvl,W-26,60);
+    g.fillStyle='rgba(246,239,255,.12)';g.fillRect(W-126,74,100,3);g.fillStyle='rgba(246,239,255,.5)';g.fillRect(W-126,74,100*lf,3);
     if(frenzy>0){g.textAlign='center';g.fillStyle=C.gold;g.fillText('Rausch  '+frenzy.toFixed(1)+' s  ·  alles doppelt',W/2,H-30);}
     if(boost>0){g.textAlign='center';g.fillStyle=C.igel;g.fillText('Vollgas  '+boost.toFixed(1)+' s  ·  weiter und ohne Pause',W/2,frenzy>0?H-58:H-30);}
     g.textAlign='center';

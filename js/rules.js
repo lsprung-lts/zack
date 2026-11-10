@@ -38,7 +38,8 @@ function spawn(kind){
     x=side===0?-30:side===1?W+30:rnd(0,W);y=side===2?-30:side===3?H+30:rnd(0,H);
   }while(Math.hypot(x-p.x,y-p.y)<380&&++tries<8);
   const e={k:kind,x,y,vx:0,vy:0,age:0,seed:rnd(0,99),r:16,pts:10,spd:0,warn:0,ph:0};
-  if(kind==='d'){e.spd=75+Math.min(95,runT*1.2)+rnd(0,30);}
+  if(kind==='d'){e.spd=75+Math.min(95,runT*1.2)+rnd(0,30);
+    if(st==='play'&&runT>5&&Math.random()<BOUNTY_CHANCE){e.crown=1;e.pts=50;}}   // Kopfgeld: ×5 wert
   else if(kind==='r'){e.r=14;e.pts=30;e.warn=.85;e.spd=Math.min(820,540+runT*2.5);
     const a=Math.atan2(p.y-y,p.x-x)+rnd(-.08,.08);e.dx=Math.cos(a);e.dy=Math.sin(a);}
   else if(kind==='i'){e.r=21;e.pts=25;e.spd=55+Math.min(60,runT*.7);e.ph=rnd(0,1);}
@@ -54,6 +55,38 @@ function reset(){
   foes=[];parts=[];floats=[];trails=[];calls=[];
   p.x=W/2;p.y=H/2;runT=0;score=0;shown=0;combo=0;comboT=0;bestCombo=0;kills=0;dashes=0;hits=0;
   cd=0;inv=.6;frenzy=0;boost=0;hitStop=0;spawnT=.2;goldT=rnd(11,17);recordHit=false;
+  slow=0;clearCd=0;lvl=1;rings=[];
+}
+
+/* ---------- Gerettet!, Feld leergeräumt, Stufen ---------- */
+const BOUNTY_CHANCE=.04;                         // Anteil Verfolger mit Krone (ab 5 s)
+const RESCUE_AT=.3;                              // Serien-Timer unter 30 % = „rot“
+function rescue(){
+  const pts=20*mult()*bonusMul();score+=pts;
+  call('Gerettet!',C.foe);
+  floats.push({x:p.x,y:p.y-84,text:'Gerettet +'+fmt(pts),life:1,col:C.foe,big:true});
+  rings.push({x:p.x,y:p.y,r:24,max:130,life:.4,dur:.4,col:'255,93,115'});
+  tone(392,.24,'triangle',.07,1568);tone(1175,.2,'sine',.05,0,.09);
+  Music.accent('rescue');
+}
+/* Kein feindlicher Gegner mehr im Bild */
+const onField=e=>e.x>-e.r&&e.x<W+e.r&&e.y>-e.r&&e.y<H+e.r;
+function fieldClear(){
+  clearCd=4;slow=.8;spawnT=Math.max(spawnT,1.2);punch=1;
+  const pts=100*mult()*bonusMul();score+=pts;
+  call('Sauber gmacht!',C.you);
+  floats.push({x:W/2,y:H/2+60,text:'Feld leer +'+fmt(pts),life:1.3,col:C.you,big:true});
+  rings.push({x:p.x,y:p.y,r:30,max:1500,life:.9,dur:.9,col:'255,210,63'});
+  if(!calm)flash=Math.max(flash,.25);
+  [0,4,7,12].forEach((s,j)=>tone(330*Math.pow(2,(s+12)/12),.4,'triangle',.05,0,j*.06));
+  Music.accent('clear');
+}
+function lvlUp(){
+  call('Stufe '+lvl+'!',C.ink);
+  spawnT=Math.max(spawnT,2);                     // 2 s Atempause
+  rings.push({x:W/2,y:H/2,r:40,max:900,life:1,dur:1,col:'246,239,255'});
+  [0,7,12].forEach((s,j)=>tone(440*Math.pow(2,s/12),.35,'square',.035,0,j*.1));
+  Music.accent('lvl');
 }
 function start(){wake();reset();attempt++;st='play';$('ov').hidden=true;
   for(let i=0;i<4;i++)spawn('d');tone(440,.1,'triangle',.07,880);}
@@ -76,7 +109,8 @@ function dash(){
   trails.push({x1:sx,y1:sy,x2:ex,y2:ey,life:.22,b:boost>0});p.x=ex;p.y=ey;
   if(!hit.length){cd=boost>0?0:frenzy>0?.08:.38;inv=.08;hiss(.12,.05,900);return;}
   hit.sort((a,b)=>a.t-b.t);hits++;cd=0;inv=.24;
-  const n=hit.length;
+  const n=hit.length,saved=combo>=5&&comboT<comboMax()*RESCUE_AT;
+  const wasOnField=hit.some(h=>h.e.k!=='g'&&onField(h.e));
   hit.forEach((h,i)=>{const e=h.e,close=Math.hypot(e.x-sx,e.y-sy)<e.r+72;
     combo++;kills++;bestCombo=Math.max(bestCombo,combo);
     const pts=e.pts*mult()*n*(close?2:1)*(frenzy>0?2:1);score+=pts;
@@ -84,7 +118,9 @@ function dash(){
     if(close)floats.push({x:e.x,y:e.y-44,text:'KNAPP ×2',life:.8,col:C.you});
     burst(e.x,e.y,e.k==='g'?C.gold:e.k==='i'?C.igel:e.k==='r'?C.run:C.foe,24,520);
     tone(note(Math.min(combo,22)),.14,'triangle',.08,0,i*.045);
-    if(e.k==='g'){frenzy=5;call('Rausch!',C.gold);for(let j=0;j<5;j++)tone(note(8+j*2),.2,'sine',.06,0,j*.06);}
+    if(e.k==='g'){frenzy=5;call('Rausch!',C.gold);for(let j=0;j<5;j++)tone(note(8+j*2),.2,'sine',.06,0,j*.06);Music.accent('gold');}
+    if(e.crown){call('Kopfgeld!',C.gold);burst(e.x,e.y,C.gold,30,600);
+      tone(1319,.08,'square',.04,0,.02);tone(1760,.3,'square',.04,0,.09);}
     if(MILE[combo]){call(MILE[combo]+'  ×'+mult());tone(note(5),.3,'square',.04,0,.05);tone(note(9),.3,'square',.04,0,.12);}
     if(BOOST_AT[combo]){boost=4;call('Vollgas!',C.igel);for(let j=0;j<6;j++)tone(note(5+j*2),.16,'sawtooth',.035,0,.15+j*.04);}
     foes.splice(foes.indexOf(e),1);});
@@ -93,6 +129,8 @@ function dash(){
   hiss(.08,.07,2500);
   hitStop=.045+.018*Math.min(n,4);
   if(!calm){shake=Math.min(1,.3+.14*n);flash=Math.min(.22,.06+.04*n);}
+  if(saved)rescue();
+  if(wasOnField&&clearCd<=0&&runT>3&&!foes.some(e=>e.k!=='g'&&onField(e)))fieldClear();
   checkRecord();
 }
 function die(why){
@@ -109,5 +147,11 @@ function over(){
     :old<=0?'noch kein Rekord, da geht was':(score>=old*.8?'nur '+fmt(gap)+' am Rekord vorbei':'Rekord: '+fmt(old)+', dir fehlen '+fmt(gap)));
   $('sCombo').textContent=bestCombo;$('sKills').textContent=kills;
   $('sAcc').textContent=(dashes?Math.round(hits/dashes*100):0)+' %';$('sTime').textContent=Math.round(runT)+' s';
+  /* Gesamtpunkte für Spurfarben */
+  const before=total;total+=score;try{localStorage.setItem('zack.total',total)}catch(e){}
+  const fresh=SKINS.filter(s=>s.need>before&&s.need<=total),next=SKINS.find(s=>s.need>total);
+  $('ovUnlock').innerHTML=fresh.length?'Neue Spurfarbe frei: <b>'+fresh.map(s=>s.name).join(', ')+'</b>! Im Menü auswählen.'
+    :next?'Noch <b>'+fmt(next.need-total)+'</b> Punkte bis zur Spurfarbe <b>'+next.name+'</b>':'Alle Spurfarben freigespielt. Respekt!';
+  $('ovUnlock').classList.toggle('new',fresh.length>0);
   $('ovMenu').hidden=true;$('ovResult').hidden=false;$('ov').classList.remove('menu-on','how');$('ov').hidden=false;
 }

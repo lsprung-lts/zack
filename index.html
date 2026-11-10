@@ -13,6 +13,7 @@
 <div class="bar">
   <span class="name">ZACK</span>
   <span id="hz">– Hz</span>
+  <button class="ghost" id="mus">Musik aus</button>
   <button class="ghost" id="snd">Ton aus</button>
   <button class="ghost" id="pz">Pause</button>
 </div>
@@ -30,6 +31,7 @@
         <button class="ghost big" id="how" aria-expanded="false">So geht's</button>
       </div>
       <p class="press">oder <kbd>Leertaste</kbd> drücken</p>
+      <div class="skins nostart" id="skins" role="radiogroup" aria-label="Spurfarbe"></div>
       <div class="cast nostart" id="cast">
         <figure><canvas data-k="d"></canvas><figcaption><b>Verfolger</b>rennt dir nach</figcaption></figure>
         <figure><canvas data-k="r"></canvas><figcaption><b>Raser</b>warnt, dann zischt er</figcaption></figure>
@@ -44,6 +46,9 @@
         <li><b>Haarscharf</b> vorbeilassen bringt Punkte und Zeit. Läuft die Serie aus, wird sie <b>einkassiert</b>.</li>
         <li>Bei <b>×5, ×10, ×15</b> gibt's <b>Vollgas</b>: weitere Sprünge, keine Pause nach Fehlern.</li>
         <li><b>Eisblaue Igel</b> nur treffen, wenn die Stacheln drin sind. <b>Gold</b> bringt den Rausch.</li>
+        <li>Treffer bei <b>rotem Ring</b>: <b>Gerettet!</b> Gegner mit <b>Krone</b> sind ×5 wert.</li>
+        <li><b>Feld leer</b> geräumt? Fetter Bonus. Alle 30 s kommt eine neue <b>Stufe</b>.</li>
+        <li>Deine Punkte zählen über alle Runden: Sie schalten neue <b>Spurfarben</b> frei.</li>
       </ul>
      </div>
      <div class="screen" id="ovResult" hidden>
@@ -55,6 +60,7 @@
         <div><dt>Trefferquote</dt><dd id="sAcc">0 %</dd></div>
         <div><dt>Zeit</dt><dd id="sTime">0 s</dd></div>
       </dl>
+      <p class="unlock" id="ovUnlock"></p>
       <div class="row">
         <button class="primary" id="again">Nochmal</button>
         <button class="ghost big" id="toMenu">Menü</button>
@@ -68,6 +74,7 @@
 </div>
 
 <script src="js/core.js"></script>
+<script src="js/music.js"></script>
 <script src="js/rules.js"></script>
 <script src="js/menu.js"></script>
 <script src="js/update.js"></script>

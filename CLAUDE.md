@@ -7,7 +7,8 @@ Keine Bibliotheken, kein Build-Schritt.
 - `index.html` – Markup (Menü, Ergebnis, Bedienleiste), lädt CSS und Skripte
 - `css/style.css` – alle Styles
 - `js/*.js` – klassische Skripte (kein ES-Modul), in dieser Reihenfolge geladen:
-  `core` (Konstanten, Zustand, Soundeffekte) → `rules` (Regeln, Spawn, Sprung,
+  `core` (Konstanten, Zustand, Soundeffekte, Spurfarben) → `music` (mitwachsende
+  Musik, WebAudio-Sequencer) → `rules` (Regeln, Spawn, Sprung,
   Tod, Ergebnis) → `menu` → `update` (Simulation) → `render` (Zeichnen, Größe)
   → `main` (Schleife, Eingabe, Start). Alle teilen sich den globalen Gültigkeitsbereich,
   Reihenfolge beachten. Läuft auch ohne Server per Doppelklick.
@@ -46,12 +47,11 @@ dann http://localhost:5173 öffnen.
 
 ## Arbeitsweise
 - `docs/wiki.html` beschreibt alle Regeln und Spielwerte mit Kürzeln (z. B. `G-R2`).
-  Wer einen Spielwert in `index.html` ändert, pflegt ihn dort mit (inkl. „Stand“ oben).
+  Wer einen Spielwert in `js/*.js` ändert, pflegt ihn dort mit (inkl. „Stand“ oben).
 - Neue Features über Feature-Branch + Pull Request nach `main` (GitHub Flow);
   Push auf `main` geht automatisch live, Tags `v*` erzeugen Releases.
 
 ## Geplante Erweiterungen (Kontext, noch nicht umgesetzt)
-- Serie beim Ablaufen als Bonus einzahlen
 - Neuer Gegner "Bomber" mit Kettenreaktion
 - Medaillen/Ränge nach Punkten
 - Online-Bestenliste und Tages-Challenge mit fester Gegnerfolge

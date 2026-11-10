@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Outfit:wght@400;600&display=swap" rel="stylesheet">
 <style>
-/* Gleiche Farbwelt wie das Spiel. Werte hier von Hand aus index.html übernommen –
+/* Gleiche Farbwelt wie das Spiel. Werte hier von Hand aus js/*.js übernommen –
    bei Änderungen an Spielwerten bitte mitpflegen (Stand siehe Kopfzeile). */
 :root{
   color-scheme:dark;
@@ -82,7 +82,7 @@ tbody tr:target{background:rgba(255,210,63,.12)}
 <div class="wrap">
 <nav aria-label="Inhalt">
   <p class="brand">ZACK<small>WIKI</small></p>
-  <p class="meta">Stand: v1.0.0 · 10.11.2026<br>Quelle: <code>index.html</code></p>
+  <p class="meta">Stand: nach v1.0.0 (feat/dopamin-2) · 10.11.2026<br>Quelle: <code>js/*.js</code></p>
   <ol id="toc">
     <li><a href="#ueberblick">Überblick</a></li>
     <li><a href="#steuerung">Steuerung &amp; Sprung</a></li>
@@ -91,9 +91,12 @@ tbody tr:target{background:rgba(255,210,63,.12)}
     <li><a href="#serie">Serie &amp; Multiplikator</a></li>
     <li><a href="#gegner">Gegner</a></li>
     <li><a href="#boni">Rausch, Vollgas, Haarscharf</a></li>
+    <li><a href="#neu2">Gerettet, Kopfgeld, Feld leer, Stufen</a></li>
     <li><a href="#zeit">Schwierigkeit über Zeit</a></li>
     <li><a href="#rechner">Punkte-Rechner</a></li>
     <li><a href="#gefuehl">Spielgefühl (Juice)</a></li>
+    <li><a href="#musik">Musik</a></li>
+    <li><a href="#spuren">Spurfarben</a></li>
     <li><a href="#texte">Ausrufe &amp; Texte</a></li>
     <li><a href="#technik">Technik</a></li>
     <li><a href="#plan">Geplant</a></li>
@@ -168,6 +171,9 @@ tbody tr:target{background:rgba(255,210,63,.12)}
       <tr id="P6"><td class="k"><a href="#P6">P6</a></td><td>KNAPP</td><td>Gegner war beim Absprung näher als Radius + 72 → ×2</td><td><code>close</code></td></tr>
       <tr id="P7"><td class="k"><a href="#P7">P7</a></td><td>Einkassiert</td><td>Serie läuft ab (ab 5): <code>Serie × 5 × Multiplikator × Rausch</code></td><td><code>bank()</code></td></tr>
       <tr id="P8"><td class="k"><a href="#P8">P8</a></td><td>Haarscharf</td><td><code>5 × Multiplikator × Rausch</code></td><td><code>graze()</code></td></tr>
+      <tr id="P11"><td class="k"><a href="#P11">P11</a></td><td>Gerettet!</td><td><code>20 × Multiplikator × Rausch</code></td><td><code>rescue()</code></td></tr>
+      <tr id="P12"><td class="k"><a href="#P12">P12</a></td><td>Kopfgeld (Verfolger mit Krone)</td><td class="num">50 statt 10 (×5)</td><td><code>spawn('d')</code></td></tr>
+      <tr id="P13"><td class="k"><a href="#P13">P13</a></td><td>Feld leergeräumt</td><td><code>100 × Multiplikator × Rausch</code></td><td><code>fieldClear()</code></td></tr>
       <tr id="P9"><td class="k"><a href="#P9">P9</a></td><td>Tod</td><td>nicht eingezahlte Serie verfällt</td><td><code>die()</code></td></tr>
       <tr id="P10"><td class="k"><a href="#P10">P10</a></td><td>Rekord</td><td>lokal im Browser, Schlüssel <code>zack.best</code>, pro Adresse getrennt</td><td><code>over()</code></td></tr>
     </tbody>
@@ -285,6 +291,49 @@ tbody tr:target{background:rgba(255,210,63,.12)}
 </section>
 
 <!-- ===================================================== -->
+<section id="neu2">
+  <h2>Gerettet, Kopfgeld, Feld leer, Stufen</h2>
+  <div class="cards">
+    <div class="card" id="N-G">
+      <h3><span class="dot" style="background:var(--foe)"></span>Gerettet!</h3>
+      <dl>
+        <dt>N-G1 Bedingung</dt><dd>Treffer bei Serie ≥ 5, während der Serien-Ring rot ist (unter 30 %)</dd>
+        <dt>N-G2 Belohnung</dt><dd>20 × Mult × Rausch, roter Ring, eigener Ton</dd>
+        <dt>N-G3 Code</dt><dd><code>RESCUE_AT</code>, <code>rescue()</code></dd>
+      </dl>
+    </div>
+    <div class="card" id="N-K">
+      <h3><span class="dot" style="background:var(--spark)"></span>Kopfgeld</h3>
+      <dl>
+        <dt>N-K1 Wer</dt><dd>Verfolger mit Krone und goldenem Schein</dd>
+        <dt>N-K2 Chance</dt><dd>4 % der Verfolger, ab 5 s</dd>
+        <dt>N-K3 Wert</dt><dd>50 statt 10</dd>
+        <dt>N-K4 Code</dt><dd><code>BOUNTY_CHANCE</code></dd>
+      </dl>
+    </div>
+    <div class="card" id="N-F">
+      <h3><span class="dot" style="background:var(--spark)"></span>Feld leergeräumt</h3>
+      <dl>
+        <dt>N-F1 Bedingung</dt><dd>Nach einem Treffer ist kein feindlicher Gegner mehr im Bild (Gold zählt nicht), ab 3 s</dd>
+        <dt>N-F2 Belohnung</dt><dd>100 × Mult × Rausch, „Sauber gmacht!“</dd>
+        <dt>N-F3 Wirkung</dt><dd>0,8 s Zeitlupe (35 %), 1,2 s kein Nachschub, großer Ring, Becken + Bass-Drop</dd>
+        <dt>N-F4 Sperre</dt><dd>höchstens alle 4 s</dd>
+      </dl>
+    </div>
+    <div class="card" id="N-S">
+      <h3><span class="dot" style="background:var(--ink)"></span>Stufen</h3>
+      <dl>
+        <dt>N-S1 Takt</dt><dd>alle 30 s Spielzeit: „Stufe N!“</dd>
+        <dt>N-S2 Atempause</dt><dd>2 s kein neuer Gegner</dd>
+        <dt>N-S3 Farbton</dt><dd>1 keiner · 2 eisblau · 3 koralle · 4 orange · 5 blau · 6 gold, dann von vorn (weich überblendet)</dd>
+        <dt>N-S4 Anzeige</dt><dd>oben rechts mit Balken bis zur nächsten Stufe</dd>
+        <dt>N-S5 Hinweis</dt><dd>reine Show, die Schwierigkeit steigt weiter stufenlos</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== -->
 <section id="zeit">
   <h2>Schwierigkeit über Zeit</h2>
   <p>Alles hängt an der Spielzeit <code>t</code> (Sekunden seit Rundenstart). Werte für typische Zeitpunkte:</p>
@@ -328,6 +377,48 @@ tbody tr:target{background:rgba(255,210,63,.12)}
 </section>
 
 <!-- ===================================================== -->
+<section id="musik">
+  <h2>Musik</h2>
+  <p>Synthwave, 124 BPM, Akkorde Cis-Moll → A → E → H (je 2 Takte). Live erzeugt in <code>js/music.js</code>, keine Audiodateien. Die Treffertöne (E-Dur-Pentatonik) passen zu jedem Akkord.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Kürzel</th><th>Intensität</th><th>Ab</th><th>Was dazukommt</th></tr></thead>
+    <tbody>
+      <tr id="MU0"><td class="k"><a href="#MU0">MU0</a></td><td class="num">0</td><td>Serie 0</td><td>Pad (pumpt), Bass auf Vierteln, Filter fast zu</td></tr>
+      <tr id="MU1"><td class="k"><a href="#MU1">MU1</a></td><td class="num">1</td><td>Serie läuft</td><td>+ Bassdrum (Pad und Bass ducken darunter)</td></tr>
+      <tr id="MU2"><td class="k"><a href="#MU2">MU2</a></td><td class="num">2</td><td>×2</td><td>+ Hi-Hat auf den Offbeats</td></tr>
+      <tr id="MU3"><td class="k"><a href="#MU3">MU3</a></td><td class="num">3</td><td>×4</td><td>+ Clap auf 2 und 4, Bass in Achteln</td></tr>
+      <tr id="MU4"><td class="k"><a href="#MU4">MU4</a></td><td class="num">4</td><td>×7</td><td>+ Arpeggio mit Echo, Wirbel vor jedem Akkordwechsel</td></tr>
+      <tr id="MU5"><td class="k"><a href="#MU5">MU5</a></td><td class="num">5</td><td>×10</td><td>+ Hi-Hat in Sechzehnteln</td></tr>
+      <tr id="MU6"><td class="k"><a href="#MU6">MU6</a></td><td class="num">6</td><td>×13</td><td>+ Arpeggio eine Oktave höher, Ride</td></tr>
+      <tr id="MU7"><td class="k"><a href="#MU7">MU7</a></td><td>Rausch</td><td>Gold</td><td>Glocken, Filter ganz offen</td></tr>
+      <tr id="MU8"><td class="k"><a href="#MU8">MU8</a></td><td>Vollgas</td><td>×5 / ×10 / ×15</td><td>schnelle Hi-Hats</td></tr>
+      <tr id="MU9"><td class="k"><a href="#MU9">MU9</a></td><td>Akzente</td><td>–</td><td>Becken bei Rausch, Feld leer, Stufe (+ Bass-Drop); Rauschen bei Gerettet</td></tr>
+      <tr id="MU10"><td class="k"><a href="#MU10">MU10</a></td><td>Tod / Pause</td><td>–</td><td>Tod: Filter fällt zu, blendet aus · Pause: stumm</td></tr>
+      <tr id="MU11"><td class="k"><a href="#MU11">MU11</a></td><td>Menü / Ergebnis</td><td>–</td><td>ruhiges Pad (Menü mit leisem Arpeggio)</td></tr>
+      <tr id="MU12"><td class="k"><a href="#MU12">MU12</a></td><td>Lautstärke</td><td>–</td><td>Spiel 0,38 · Menü 0,30 · Ergebnis 0,24 (unter den Effekten); Knopf „Musik aus“ merkt sich die Wahl</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ===================================================== -->
+<section id="spuren">
+  <h2>Spurfarben</h2>
+  <p>Alle Punkte aus allen Runden werden zusammengezählt (<code>zack.total</code>). Damit schaltest du Farben für die Sprungspur frei, im Menü auswählbar. Bei Vollgas bleibt die Spur eisblau.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Kürzel</th><th>Farbe</th><th>Ab Gesamtpunkten</th></tr></thead>
+    <tbody>
+      <tr id="SP1"><td class="k"><a href="#SP1">SP1</a></td><td><span class="dot" style="display:inline-block;vertical-align:middle;background:#ffd23f"></span> Funke</td><td class="num">0</td></tr>
+      <tr id="SP2"><td class="k"><a href="#SP2">SP2</a></td><td><span class="dot" style="display:inline-block;vertical-align:middle;background:#ff5d73"></span> Paradeiser</td><td class="num">10.000</td></tr>
+      <tr id="SP3"><td class="k"><a href="#SP3">SP3</a></td><td><span class="dot" style="display:inline-block;vertical-align:middle;background:#7aa2ff"></span> Donau</td><td class="num">30.000</td></tr>
+      <tr id="SP4"><td class="k"><a href="#SP4">SP4</a></td><td><span class="dot" style="display:inline-block;vertical-align:middle;background:#fff3b0"></span> Goldenes Herz</td><td class="num">75.000</td></tr>
+      <tr id="SP5"><td class="k"><a href="#SP5">SP5</a></td><td><span class="dot" style="display:inline-block;vertical-align:middle;background:conic-gradient(#ff5d73,#ffd23f,#5ce1e6,#7aa2ff,#ff5d73)"></span> Prater (Regenbogen)</td><td class="num">150.000</td></tr>
+      <tr id="SP6"><td class="k"><a href="#SP6">SP6</a></td><td><span class="dot" style="display:inline-block;vertical-align:middle;background:#f6efff"></span> Opernball</td><td class="num">300.000</td></tr>
+    </tbody>
+  </table></div>
+  <p>Am Rundenende steht, ob eine neue Farbe frei ist oder wie viel bis zur nächsten fehlt.</p>
+</section>
+
+<!-- ===================================================== -->
 <section id="texte">
   <h2>Ausrufe &amp; Texte</h2>
   <div class="tw"><table>
@@ -335,7 +426,7 @@ tbody tr:target{background:rgba(255,210,63,.12)}
     <tbody>
       <tr id="T1"><td class="k"><a href="#T1">T1</a></td><td>Serie 5 / 10 / 20 / 35 / 50 / 75 / 100</td><td>Sauber! · Leiwand! · Oida! · Wahnsinn! · Bist du deppert! · Legende! · Gottgleich!</td></tr>
       <tr id="T2"><td class="k"><a href="#T2">T2</a></td><td>2 / 3 / 4 / 5+ in einem Sprung</td><td>Doppel! · Tripel! · Quadrupel! · Kehraus!</td></tr>
-      <tr id="T3"><td class="k"><a href="#T3">T3</a></td><td>Boni</td><td>Rausch! · Vollgas! · Einkassiert! +X · Haarscharf +X · KNAPP ×2</td></tr>
+      <tr id="T3"><td class="k"><a href="#T3">T3</a></td><td>Boni</td><td>Rausch! · Vollgas! · Einkassiert! +X · Haarscharf +X · KNAPP ×2 · Gerettet! · Kopfgeld! · Sauber gmacht! · Stufe N!</td></tr>
       <tr id="T4"><td class="k"><a href="#T4">T4</a></td><td>Rekord geknackt</td><td>Neuer Rekord!</td></tr>
       <tr id="T5"><td class="k"><a href="#T5">T5</a></td><td>Menü-Sprüche (zufällig)</td><td>Ein Klick, ein Sprung. Wer danebenhaut, steht blöd da. · Zielen, klicken, Zack. Mehr is ned dabei. · Knapp vorbei is a vorbei. Und bringt Punkte. · Heut is a guater Tag für an Rekord.</td></tr>
     </tbody>
@@ -348,7 +439,7 @@ tbody tr:target{background:rgba(255,210,63,.12)}
   <div class="tw"><table>
     <thead><tr><th>Kürzel</th><th>Was</th><th>Wie</th></tr></thead>
     <tbody>
-      <tr id="X1"><td class="k"><a href="#X1">X1</a></td><td>Aufbau</td><td>eine Datei <code>index.html</code>, Canvas 2D, keine Bibliotheken, kein Build</td></tr>
+      <tr id="X1"><td class="k"><a href="#X1">X1</a></td><td>Aufbau</td><td><code>index.html</code> + <code>css/style.css</code> + <code>js/*.js</code> (klassische Skripte), Canvas 2D, keine Bibliotheken, kein Build</td></tr>
       <tr id="X2"><td class="k"><a href="#X2">X2</a></td><td>Bildrate</td><td>rechnet mit echter Zeit (<code>update(rdt)</code>, max. 0,05 s pro Schritt) – gleich bei 60 und 144 Hz</td></tr>
       <tr id="X3"><td class="k"><a href="#X3">X3</a></td><td>Glätten</td><td><code>ease(k, dt) = 1 − e<sup>−k·dt</sup></code></td></tr>
       <tr id="X4"><td class="k"><a href="#X4">X4</a></td><td>Ton</td><td>WebAudio, synthetisch (<code>tone()</code>, <code>hiss()</code>), erst nach erster Eingabe</td></tr>
