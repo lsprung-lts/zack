@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zack Wiki</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Outfit:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Gleiche Farbwelt wie das Spiel. Werte hier von Hand aus index.html übernommen –
+   bei Änderungen an Spielwerten bitte mitpflegen (Stand siehe Kopfzeile). */
+:root{
+  color-scheme:dark;
+  --night:#0e0820;--arena:#1b1036;--line:#2c1a55;
+  --spark:#ffd23f;--foe:#ff5d73;--run:#ff9a3c;--ice:#5ce1e6;--gold:#fff3b0;--ink:#f6efff;
+  --mute:rgba(246,239,255,.62);
+  --font-display:"Bungee","Arial Black",Impact,sans-serif;
+  --font-body:"Outfit",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:16px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--night);color:var(--ink);font:16px/1.55 var(--font-body)}
+a{color:var(--ice)}
+code{font-family:ui-monospace,Consolas,monospace;font-size:.88em;background:rgba(246,239,255,.08);padding:1px 5px;border-radius:5px}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 16px 80px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:40px}
+@media (max-width:860px){.wrap{grid-template-columns:1fr;gap:16px}}
+nav{position:sticky;top:16px;align-self:start;max-height:calc(100vh - 32px);overflow:auto}
+@media (max-width:860px){nav{position:static;max-height:none}}
+.brand{font-family:var(--font-display);font-size:34px;line-height:1;color:var(--spark);transform:skewX(-8deg);text-shadow:.05em .05em 0 var(--foe);margin:0 0 4px}
+.brand small{display:block;font-size:13px;color:var(--ink);text-shadow:none;letter-spacing:.2em;margin-top:6px}
+.meta{font-size:13px;color:var(--mute);margin:10px 0 18px}
+nav ol{list-style:none;margin:0;padding:0;display:grid;gap:2px;counter-reset:n}
+nav li a{display:flex;gap:10px;padding:6px 10px;border-radius:8px;color:var(--ink);text-decoration:none;font-size:14px}
+nav li a::before{counter-increment:n;content:counter(n,decimal-leading-zero);font-family:var(--font-display);font-size:11px;color:var(--spark);opacity:.7;padding-top:2px}
+nav li a:hover,nav li a.on{background:var(--arena)}
+@media (max-width:860px){nav ol{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}}
+main{min-width:0}
+section{padding:8px 0 28px;border-bottom:1px solid var(--line)}
+section:last-child{border-bottom:0}
+h2{font-family:var(--font-display);font-weight:400;font-size:26px;color:var(--spark);margin:18px 0 6px;letter-spacing:.02em}
+h2 .id{font-size:13px;color:var(--mute);margin-left:10px;letter-spacing:.1em}
+h3{font-family:var(--font-display);font-weight:400;font-size:17px;margin:22px 0 6px}
+p{margin:8px 0;max-width:75ch}
+.lead{font-size:18px;color:var(--ink);max-width:70ch}
+.note{border-left:3px solid var(--ice);background:rgba(92,225,230,.07);padding:10px 14px;border-radius:0 10px 10px 0;margin:12px 0;font-size:15px;max-width:80ch}
+.note.warn{border-color:var(--run);background:rgba(255,154,60,.08)}
+.tw{overflow-x:auto;margin:10px 0;border-radius:12px;box-shadow:0 0 0 1px var(--line)}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--mute);font-size:12px;text-transform:uppercase;letter-spacing:.08em;background:var(--arena);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.num{text-align:right;white-space:nowrap}
+td.k{font-family:var(--font-display);font-size:11px;color:var(--spark);white-space:nowrap;opacity:.85}
+tbody tr:target{background:rgba(255,210,63,.12)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin:12px 0}
+.card{background:var(--arena);border-radius:14px;padding:14px 16px;box-shadow:inset 0 0 0 1px rgba(246,239,255,.08)}
+.card h3{margin:0 0 4px;display:flex;align-items:center;gap:10px}
+.card dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:8px 0 0;font-size:14px}
+.card dt{color:var(--mute)}
+.card dd{margin:0;font-variant-numeric:tabular-nums}
+.dot{width:18px;height:18px;border-radius:50%;flex:none}
+.pill{display:inline-block;font-size:12px;padding:1px 8px;border-radius:99px;background:rgba(246,239,255,.1);color:var(--mute);margin-left:4px}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0}
+.flow span{background:var(--arena);border-radius:10px;padding:6px 12px;font-family:var(--font-display);font-size:13px;box-shadow:inset 0 0 0 1px rgba(246,239,255,.12)}
+.flow i{font-style:normal;color:var(--mute)}
+.calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;background:var(--arena);border-radius:14px;padding:16px;margin:12px 0}
+.calc label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--mute)}
+.calc select,.calc input[type=number]{font:inherit;color:var(--ink);background:var(--night);border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.calc .chk{flex-direction:row;align-items:center;gap:8px;color:var(--ink);font-size:14px}
+.calc output{grid-column:1/-1;font-family:var(--font-display);font-size:30px;color:var(--spark)}
+.calc output small{display:block;font-family:var(--font-body);font-size:13px;color:var(--mute)}
+.mine{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
+.mine div{background:var(--arena);border-radius:12px;padding:10px 16px}
+.mine b{display:block;font-family:var(--font-display);font-weight:400;font-size:24px;color:var(--spark)}
+.mine span{font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.1em}
+.play{display:inline-block;margin-top:8px;font-family:var(--font-display);text-decoration:none;color:var(--night);background:var(--spark);padding:.45em 1em;border-radius:10px;box-shadow:0 4px 0 #b98a00}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav aria-label="Inhalt">
+  <p class="brand">ZACK<small>WIKI</small></p>
+  <p class="meta">Stand: v1.0.0 · 10.11.2026<br>Quelle: <code>index.html</code></p>
+  <ol id="toc">
+    <li><a href="#ueberblick">Überblick</a></li>
+    <li><a href="#steuerung">Steuerung &amp; Sprung</a></li>
+    <li><a href="#ablauf">Ablauf &amp; Zustände</a></li>
+    <li><a href="#punkte">Punkte</a></li>
+    <li><a href="#serie">Serie &amp; Multiplikator</a></li>
+    <li><a href="#gegner">Gegner</a></li>
+    <li><a href="#boni">Rausch, Vollgas, Haarscharf</a></li>
+    <li><a href="#zeit">Schwierigkeit über Zeit</a></li>
+    <li><a href="#rechner">Punkte-Rechner</a></li>
+    <li><a href="#gefuehl">Spielgefühl (Juice)</a></li>
+    <li><a href="#texte">Ausrufe &amp; Texte</a></li>
+    <li><a href="#technik">Technik</a></li>
+    <li><a href="#plan">Geplant</a></li>
+  </ol>
+</nav>
+
+<main>
+<!-- ===================================================== -->
+<section id="ueberblick">
+  <h2>Überblick</h2>
+  <p class="lead">Du bist ein Funke. Du bewegst dich nur durch Sprünge – und alles, was auf der Sprunglinie liegt, ist weg. Triffst du, darfst du sofort wieder springen. Triffst du nicht, bist du kurz wehrlos. Ein Gegner berührt dich: aus.</p>
+  <div class="flow"><span>Zielen</span><i>→</i><span>Sprung</span><i>→</i><span>Treffer</span><i>→</i><span>Serie wächst</span><i>→</i><span>Multiplikator</span><i>→</i><span>Rekord</span></div>
+  <div class="mine" id="mine">
+    <div><span>Dein Rekord (dieses Gerät)</span><b id="myBest">–</b></div>
+  </div>
+  <a class="play" href="../">Spielen</a>
+  <p class="note">Jede Zeile in den Tabellen hat ein Kürzel (z. B. <code>G-R2</code>). Wenn dir etwas auffällt, nenn einfach das Kürzel: „<code>G-R2</code> ist zu schnell“. Ein Klick aufs Kürzel gibt dir einen direkten Link.</p>
+</section>
+
+<!-- ===================================================== -->
+<section id="steuerung">
+  <h2>Steuerung &amp; Sprung</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Kürzel</th><th>Was</th><th>Wert</th><th>Code</th></tr></thead>
+    <tbody>
+      <tr id="S1"><td class="k"><a href="#S1">S1</a></td><td>Zielen</td><td>Maus / Finger</td><td><code>toWorld()</code></td></tr>
+      <tr id="S2"><td class="k"><a href="#S2">S2</a></td><td>Springen</td><td>Klick, Tippen, <code>Leertaste</code>, <code>Enter</code></td><td><code>act()</code></td></tr>
+      <tr id="S3"><td class="k"><a href="#S3">S3</a></td><td>Pause</td><td><code>P</code>, <code>Esc</code>, Fenster verlassen pausiert automatisch</td><td><code>togglePause()</code></td></tr>
+      <tr id="S4"><td class="k"><a href="#S4">S4</a></td><td>Sprungweite</td><td class="num">330 Einheiten <span class="pill">Vollgas: 495</span></td><td><code>RANGE</code>, <code>reach()</code></td></tr>
+      <tr id="S5"><td class="k"><a href="#S5">S5</a></td><td>Sprungdauer</td><td>sofort (kein Flug)</td><td><code>dash()</code></td></tr>
+      <tr id="S6"><td class="k"><a href="#S6">S6</a></td><td>Trefferbreite der Linie</td><td class="num">Gegnerradius + 15</td><td><code>dash()</code></td></tr>
+      <tr id="S7"><td class="k"><a href="#S7">S7</a></td><td>Abstand zum Rand</td><td class="num">mind. 18</td><td><code>dash()</code></td></tr>
+      <tr id="S8"><td class="k"><a href="#S8">S8</a></td><td>Abklingzeit nach Fehlsprung</td><td class="num">0,38 s <span class="pill">Rausch: 0,08 s</span> <span class="pill">Vollgas: 0 s</span></td><td><code>cd</code></td></tr>
+      <tr id="S9"><td class="k"><a href="#S9">S9</a></td><td>Abklingzeit nach Treffer</td><td class="num">0 s</td><td><code>cd=0</code></td></tr>
+      <tr id="S10"><td class="k"><a href="#S10">S10</a></td><td>Unverwundbar nach Treffer / Fehlsprung / Start</td><td class="num">0,24 s / 0,08 s / 0,6 s</td><td><code>inv</code></td></tr>
+      <tr id="S11"><td class="k"><a href="#S11">S11</a></td><td>Igel mit Stacheln auf der Linie</td><td>Sprung endet dort – tot („Aufgespießt“)</td><td><code>dash()</code></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ===================================================== -->
+<section id="ablauf">
+  <h2>Ablauf &amp; Zustände</h2>
+  <div class="flow"><span>menu</span><i>→</i><span>play</span><i>⇄</i><span>pause</span><i>→</i><span>dying</span><i>→</i><span>over</span><i>→</i><span>play / menu</span></div>
+  <div class="tw"><table>
+    <thead><tr><th>Kürzel</th><th>Was</th><th>Wert</th></tr></thead>
+    <tbody>
+      <tr id="A1"><td class="k"><a href="#A1">A1</a></td><td>Spielfeld (logisch)</td><td class="num">1280 × 720, skaliert aufs Fenster</td></tr>
+      <tr id="A2"><td class="k"><a href="#A2">A2</a></td><td>Start einer Runde</td><td>Funke in der Mitte, 4 Verfolger</td></tr>
+      <tr id="A3"><td class="k"><a href="#A3">A3</a></td><td>Tod</td><td>0,75 s Zeitlupe (Welt läuft mit 12 %), dann Ergebnis</td></tr>
+      <tr id="A4"><td class="k"><a href="#A4">A4</a></td><td>Sperre nach Ergebnis</td><td class="num">0,35 s (kein versehentlicher Neustart)</td></tr>
+      <tr id="A5"><td class="k"><a href="#A5">A5</a></td><td>Ergebnis-Titel</td><td>„Neuer Rekord!“ · „So knapp!“ (≥ 80 % vom Rekord) · sonst Todesgrund</td></tr>
+      <tr id="A6"><td class="k"><a href="#A6">A6</a></td><td>Ergebnis-Werte</td><td>Beste Serie, Abschüsse, Trefferquote (Treffer-Sprünge / alle Sprünge), Zeit</td></tr>
+      <tr id="A7"><td class="k"><a href="#A7">A7</a></td><td>Todesgründe</td><td>Erwischt (Verfolger) · Überfahren (Raser) · Aufgespießt (Igel)</td></tr>
+      <tr id="A8"><td class="k"><a href="#A8">A8</a></td><td>Menü-Hintergrund</td><td>bis zu 7 Verfolger kreisen frei</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ===================================================== -->
+<section id="punkte">
+  <h2>Punkte</h2>
+  <p><b>Treffer:</b> <code>Grundwert × Multiplikator × Anzahl im Sprung × (Knapp ? 2 : 1) × (Rausch ? 2 : 1)</code></p>
+  <div class="tw"><table>
+    <thead><tr><th>Kürzel</th><th>Quelle</th><th>Formel / Wert</th><th>Code</th></tr></thead>
+    <tbody>
+      <tr id="P1"><td class="k"><a href="#P1">P1</a></td><td>Verfolger</td><td class="num">10</td><td><code>spawn('d')</code></td></tr>
+      <tr id="P2"><td class="k"><a href="#P2">P2</a></td><td>Igel</td><td class="num">25</td><td><code>spawn('i')</code></td></tr>
+      <tr id="P3"><td class="k"><a href="#P3">P3</a></td><td>Raser</td><td class="num">30</td><td><code>spawn('r')</code></td></tr>
+      <tr id="P4"><td class="k"><a href="#P4">P4</a></td><td>Gold</td><td class="num">250</td><td><code>spawn('g')</code></td></tr>
+      <tr id="P5"><td class="k"><a href="#P5">P5</a></td><td>Mehrfachtreffer</td><td>jeder Treffer im Sprung × Anzahl (2 Gegner = je ×2, 3 = je ×3 …)</td><td><code>n</code></td></tr>
+      <tr id="P6"><td class="k"><a href="#P6">P6</a></td><td>KNAPP</td><td>Gegner war beim Absprung näher als Radius + 72 → ×2</td><td><code>close</code></td></tr>
+      <tr id="P7"><td class="k"><a href="#P7">P7</a></td><td>Einkassiert</td><td>Serie läuft ab (ab 5): <code>Serie × 5 × Multiplikator × Rausch</code></td><td><code>bank()</code></td></tr>
+      <tr id="P8"><td class="k"><a href="#P8">P8</a></td><td>Haarscharf</td><td><code>5 × Multiplikator × Rausch</code></td><td><code>graze()</code></td></tr>
+      <tr id="P9"><td class="k"><a href="#P9">P9</a></td><td>Tod</td><td>nicht eingezahlte Serie verfällt</td><td><code>die()</code></td></tr>
+      <tr id="P10"><td class="k"><a href="#P10">P10</a></td><td>Rekord</td><td>lokal im Browser, Schlüssel <code>zack.best</code>, pro Adresse getrennt</td><td><code>over()</code></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ===================================================== -->
+<section id="serie">
+  <h2>Serie &amp; Multiplikator</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Kürzel</th><th>Was</th><th>Formel / Wert</th><th>Code</th></tr></thead>
+    <tbody>
+      <tr id="M1"><td class="k"><a href="#M1">M1</a></td><td>Serie</td><td>+1 pro getroffenem Gegner</td><td><code>combo</code></td></tr>
+      <tr id="M2"><td class="k"><a href="#M2">M2</a></td><td>Multiplikator</td><td><code>1 + ⌊Serie / 5⌋</code>, max. ×15 (ab Serie 70)</td><td><code>mult()</code></td></tr>
+      <tr id="M3"><td class="k"><a href="#M3">M3</a></td><td>Serien-Timer (voll)</td><td><code>max(1,15 s; 2,3 s − 0,012 × Spielzeit)</code> → Minimum ab ca. 96 s</td><td><code>comboMax()</code></td></tr>
+      <tr id="M4"><td class="k"><a href="#M4">M4</a></td><td>Timer auffüllen</td><td>jeder Treffer: voll · Haarscharf: +0,4 s (max. voll)</td><td><code>comboT</code></td></tr>
+      <tr id="M5"><td class="k"><a href="#M5">M5</a></td><td>Anzeige</td><td>Ring um den Funken, rot unter 30 %, „×N“ darüber</td><td><code>render()</code></td></tr>
+      <tr id="M6"><td class="k"><a href="#M6">M6</a></td><td>Ton pro Treffer</td><td>Pentatonik ab 330 Hz, steigt mit der Serie (bis Stufe 22)</td><td><code>note()</code></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ===================================================== -->
+<section id="gegner">
+  <h2>Gegner</h2>
+  <p>Gegner erscheinen am Rand, mindestens 380 vom Funken entfernt. Maximal 42 gleichzeitig. Berührung = tot, wenn der Abstand kleiner als Radius + 7 ist.</p>
+  <div class="cards">
+    <div class="card" id="G-D">
+      <h3><span class="dot" style="background:var(--foe)"></span>Verfolger <span class="pill">k = 'd'</span></h3>
+      <p>Läuft dir weich nach (Lenkung <code>ease(2.6)</code>).</p>
+      <dl>
+        <dt><a href="#G-D">G-D1</a> Radius</dt><dd>16</dd>
+        <dt>G-D2 Tempo</dt><dd>75 + min(95; 1,2 × t) + 0…30 → max. 170–200</dd>
+        <dt>G-D3 Punkte</dt><dd>10</dd>
+        <dt>G-D4 Ab</dt><dd>Start</dd>
+      </dl>
+    </div>
+    <div class="card" id="G-R">
+      <h3><span class="dot" style="background:var(--run)"></span>Raser <span class="pill">k = 'r'</span></h3>
+      <p>Zeigt eine Warnlinie, dann schießt er geradeaus in deine Richtung (±4,6° Streuung).</p>
+      <dl>
+        <dt><a href="#G-R">G-R1</a> Radius</dt><dd>14</dd>
+        <dt>G-R2 Tempo</dt><dd>540 + 2,5 × t → max. 820 (ab 112 s)</dd>
+        <dt>G-R3 Vorwarnung</dt><dd>0,85 s (harmlos)</dd>
+        <dt>G-R4 Punkte</dt><dd>30</dd>
+        <dt>G-R5 Ab</dt><dd>10 s</dd>
+      </dl>
+    </div>
+    <div class="card" id="G-I">
+      <h3><span class="dot" style="background:var(--ice)"></span>Igel <span class="pill">k = 'i'</span></h3>
+      <p>Langsam. Stacheln im 2,7-s-Takt: nur ohne Stacheln treffbar.</p>
+      <dl>
+        <dt><a href="#G-I">G-I1</a> Radius</dt><dd>21</dd>
+        <dt>G-I2 Tempo</dt><dd>55 + min(60; 0,7 × t) → max. 115</dd>
+        <dt>G-I3 Takt</dt><dd>1,55 s sicher · 1,15 s tödlich</dd>
+        <dt>G-I4 Warnung</dt><dd>Stacheln wachsen 0,3 s vor Gefahr</dd>
+        <dt>G-I5 Punkte</dt><dd>25</dd>
+        <dt>G-I6 Ab</dt><dd>22 s</dd>
+      </dl>
+    </div>
+    <div class="card" id="G-G">
+      <h3><span class="dot" style="background:var(--gold)"></span>Gold <span class="pill">k = 'g'</span></h3>
+      <p>Prallt im Feld herum, harmlos. Treffer startet den Rausch.</p>
+      <dl>
+        <dt><a href="#G-G">G-G1</a> Radius</dt><dd>15</dd>
+        <dt>G-G2 Tempo</dt><dd>90, prallt am Rand ab</dd>
+        <dt>G-G3 Lebensdauer</dt><dd>6,5 s (blinkt die letzten 2 s)</dd>
+        <dt>G-G4 Erscheint</dt><dd>erstes nach 11–17 s, dann alle 13–24 s</dd>
+        <dt>G-G5 Punkte</dt><dd>250</dd>
+      </dl>
+    </div>
+  </div>
+  <h3>Spawn-Mischung <span class="pill">G-S</span></h3>
+  <div class="tw"><table>
+    <thead><tr><th>Spielzeit</th><th>Verfolger</th><th>Raser</th><th>Igel</th></tr></thead>
+    <tbody>
+      <tr><td>0–10 s</td><td class="num">100 %</td><td class="num">–</td><td class="num">–</td></tr>
+      <tr><td>10–22 s</td><td class="num">83 %</td><td class="num">17 %</td><td class="num">–</td></tr>
+      <tr><td>ab 22 s</td><td class="num">62 %</td><td class="num">17 %</td><td class="num">21 %</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ===================================================== -->
+<section id="boni">
+  <h2>Rausch, Vollgas, Haarscharf</h2>
+  <div class="cards">
+    <div class="card" id="B-R">
+      <h3><span class="dot" style="background:var(--gold)"></span>Rausch</h3>
+      <dl>
+        <dt>B-R1 Auslöser</dt><dd>Gold treffen</dd>
+        <dt>B-R2 Dauer</dt><dd>5 s</dd>
+        <dt>B-R3 Wirkung</dt><dd>Gegner halb so schnell, alle Punkte ×2, Fehlsprung-Pause 0,08 s</dd>
+        <dt>B-R4 Anzeige</dt><dd>goldener Schimmer, Countdown unten</dd>
+      </dl>
+    </div>
+    <div class="card" id="B-V">
+      <h3><span class="dot" style="background:var(--ice)"></span>Vollgas</h3>
+      <dl>
+        <dt>B-V1 Auslöser</dt><dd>Serie 20, 45, 70 (= ×5, ×10, ×15)</dd>
+        <dt>B-V2 Dauer</dt><dd>4 s</dd>
+        <dt>B-V3 Wirkung</dt><dd>Sprungweite ×1,5 (495), keine Fehlsprung-Pause</dd>
+        <dt>B-V4 Anzeige</dt><dd>eisblaue Spur, pulsierender Ring, Countdown</dd>
+      </dl>
+    </div>
+    <div class="card" id="B-H">
+      <h3><span class="dot" style="background:var(--ice)"></span>Haarscharf</h3>
+      <dl>
+        <dt>B-H1 Bedingung</dt><dd>Gegner kommt bis auf Todesgrenze + 28 heran, du überlebst, er ist wieder draußen</dd>
+        <dt>B-H2 Belohnung</dt><dd>5 × Mult × Rausch Punkte, +0,4 s Serien-Timer</dd>
+        <dt>B-H3 Grenzen</dt><dd>einmal pro Gegner · nicht Gold · nicht Raser in Vorwarnung · nicht während Unverwundbarkeit</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== -->
+<section id="zeit">
+  <h2>Schwierigkeit über Zeit</h2>
+  <p>Alles hängt an der Spielzeit <code>t</code> (Sekunden seit Rundenstart). Werte für typische Zeitpunkte:</p>
+  <div class="tw"><table id="tTable">
+    <thead><tr><th>Kürzel</th><th>Wert</th><th>Formel</th></tr></thead>
+    <tbody></tbody>
+  </table></div>
+  <p class="note">Ab etwa <b>112 s</b> ist alles am Maximum. Danach wird es nicht mehr schwerer – nur noch voller (bis 42 Gegner).</p>
+</section>
+
+<!-- ===================================================== -->
+<section id="rechner">
+  <h2>Punkte-Rechner</h2>
+  <p>Zum Ausprobieren, was ein Treffer wert ist.</p>
+  <form class="calc" id="calc" onsubmit="return false">
+    <label>Gegner<select id="cK"><option value="10">Verfolger (10)</option><option value="25">Igel (25)</option><option value="30">Raser (30)</option><option value="250">Gold (250)</option></select></label>
+    <label>Serie vor dem Sprung<input id="cC" type="number" min="0" max="200" value="19"></label>
+    <label>Gegner im selben Sprung<input id="cN" type="number" min="1" max="8" value="1"></label>
+    <label class="chk"><input id="cKn" type="checkbox"> KNAPP (×2)</label>
+    <label class="chk"><input id="cRa" type="checkbox"> Rausch (×2)</label>
+    <output id="cOut" for="cK cC cN cKn cRa"></output>
+  </form>
+</section>
+
+<!-- ===================================================== -->
+<section id="gefuehl">
+  <h2>Spielgefühl (Juice)</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Kürzel</th><th>Effekt</th><th>Wert</th></tr></thead>
+    <tbody>
+      <tr id="J1"><td class="k"><a href="#J1">J1</a></td><td>Treffer-Stopp (Welt friert ein)</td><td class="num">0,045 s + 0,018 s × Anzahl (max. 4)</td></tr>
+      <tr id="J2"><td class="k"><a href="#J2">J2</a></td><td>Wackeln</td><td class="num">0,3 + 0,14 × Anzahl (max. 1), klingt in 0,25 s ab</td></tr>
+      <tr id="J3"><td class="k"><a href="#J3">J3</a></td><td>Aufblitzen</td><td class="num">0,06 + 0,04 × Anzahl (max. 0,22)</td></tr>
+      <tr id="J4"><td class="k"><a href="#J4">J4</a></td><td>Partikel pro Treffer / Tod</td><td class="num">24 / 90 (max. 700 gleichzeitig)</td></tr>
+      <tr id="J5"><td class="k"><a href="#J5">J5</a></td><td>Sprungspur</td><td class="num">0,22 s, gelb · eisblau bei Vollgas</td></tr>
+      <tr id="J6"><td class="k"><a href="#J6">J6</a></td><td>Punktanzeige</td><td>zählt weich hoch, hüpft bei Treffer</td></tr>
+      <tr id="J7"><td class="k"><a href="#J7">J7</a></td><td>Rekord-Balken</td><td>unter der Punktzahl, wird gelb beim Überholen</td></tr>
+      <tr id="J8"><td class="k"><a href="#J8">J8</a></td><td>Reduzierte Bewegung</td><td>Systemeinstellung schaltet Wackeln, Blitzen und Menü-Animation ab</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ===================================================== -->
+<section id="texte">
+  <h2>Ausrufe &amp; Texte</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Kürzel</th><th>Wann</th><th>Text</th></tr></thead>
+    <tbody>
+      <tr id="T1"><td class="k"><a href="#T1">T1</a></td><td>Serie 5 / 10 / 20 / 35 / 50 / 75 / 100</td><td>Sauber! · Leiwand! · Oida! · Wahnsinn! · Bist du deppert! · Legende! · Gottgleich!</td></tr>
+      <tr id="T2"><td class="k"><a href="#T2">T2</a></td><td>2 / 3 / 4 / 5+ in einem Sprung</td><td>Doppel! · Tripel! · Quadrupel! · Kehraus!</td></tr>
+      <tr id="T3"><td class="k"><a href="#T3">T3</a></td><td>Boni</td><td>Rausch! · Vollgas! · Einkassiert! +X · Haarscharf +X · KNAPP ×2</td></tr>
+      <tr id="T4"><td class="k"><a href="#T4">T4</a></td><td>Rekord geknackt</td><td>Neuer Rekord!</td></tr>
+      <tr id="T5"><td class="k"><a href="#T5">T5</a></td><td>Menü-Sprüche (zufällig)</td><td>Ein Klick, ein Sprung. Wer danebenhaut, steht blöd da. · Zielen, klicken, Zack. Mehr is ned dabei. · Knapp vorbei is a vorbei. Und bringt Punkte. · Heut is a guater Tag für an Rekord.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ===================================================== -->
+<section id="technik">
+  <h2>Technik</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Kürzel</th><th>Was</th><th>Wie</th></tr></thead>
+    <tbody>
+      <tr id="X1"><td class="k"><a href="#X1">X1</a></td><td>Aufbau</td><td>eine Datei <code>index.html</code>, Canvas 2D, keine Bibliotheken, kein Build</td></tr>
+      <tr id="X2"><td class="k"><a href="#X2">X2</a></td><td>Bildrate</td><td>rechnet mit echter Zeit (<code>update(rdt)</code>, max. 0,05 s pro Schritt) – gleich bei 60 und 144 Hz</td></tr>
+      <tr id="X3"><td class="k"><a href="#X3">X3</a></td><td>Glätten</td><td><code>ease(k, dt) = 1 − e<sup>−k·dt</sup></code></td></tr>
+      <tr id="X4"><td class="k"><a href="#X4">X4</a></td><td>Ton</td><td>WebAudio, synthetisch (<code>tone()</code>, <code>hiss()</code>), erst nach erster Eingabe</td></tr>
+      <tr id="X5"><td class="k"><a href="#X5">X5</a></td><td>Schärfe</td><td>Canvas mit Gerätepixeln (max. 2×)</td></tr>
+      <tr id="X6"><td class="k"><a href="#X6">X6</a></td><td>Veröffentlichen</td><td>Push auf <code>main</code> → GitHub Actions → <a href="https://lsprung-lts.github.io/zack/">lsprung-lts.github.io/zack</a> · Tag <code>v*</code> → Release</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ===================================================== -->
+<section id="plan">
+  <h2>Geplant</h2>
+  <ul>
+    <li>Neuer Gegner „Bomber“ mit Kettenreaktion</li>
+    <li>Medaillen / Ränge nach Punkten</li>
+    <li>Online-Bestenliste und Tages-Challenge mit fester Gegnerfolge</li>
+    <li>später evtl. Geister-Duell oder Echtzeit-Multiplayer</li>
+  </ul>
+</section>
+</main>
+</div>
+
+<script>
+(function(){
+'use strict';
+const fmt=n=>Math.round(n).toLocaleString('de-AT');
+const f1=n=>n.toLocaleString('de-AT',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+/* Eigener Rekord – nur sichtbar, wenn Wiki und Spiel unter derselben Adresse laufen */
+try{const b=+localStorage.getItem('zack.best')||0;document.getElementById('myBest').textContent=b?fmt(b):'noch keiner';}
+catch(e){document.getElementById('mine').hidden=true;}
+
+/* Schwierigkeit über Zeit – Formeln 1:1 aus index.html */
+const T=[0,10,22,30,60,90,120];
+const rows=[
+  ['Z1','Serien-Timer (s)','max(1,15; 2,3 − 0,012·t)',t=>f1(Math.max(1.15,2.3-t*.012))],
+  ['Z2','Neuer Gegner alle (s)','max(0,27; 0,95 − 0,009·t)',t=>f1(Math.max(.27,.95-t*.009))],
+  ['Z3','Verfolger-Tempo','75 + min(95; 1,2·t) + 0…30',t=>{const b=75+Math.min(95,t*1.2);return fmt(b)+'–'+fmt(b+30);}],
+  ['Z4','Raser-Tempo','min(820; 540 + 2,5·t)',t=>t<10?'–':fmt(Math.min(820,540+t*2.5))],
+  ['Z5','Igel-Tempo','55 + min(60; 0,7·t)',t=>t<22?'–':fmt(55+Math.min(60,t*.7))],
+];
+const tb=document.querySelector('#tTable');
+const head=tb.tHead.rows[0];
+T.forEach(t=>{const th=document.createElement('th');th.textContent=t+' s';th.style.textAlign='right';head.insertBefore(th,head.lastElementChild);});
+rows.forEach(([k,name,formula,fn])=>{
+  const tr=document.createElement('tr');tr.id=k;
+  tr.innerHTML='<td class="k"><a href="#'+k+'">'+k+'</a></td><td>'+name+'</td>'+T.map(t=>'<td class="num">'+fn(t)+'</td>').join('')+'<td><code>'+formula+'</code></td>';
+  tb.tBodies[0].appendChild(tr);
+});
+
+/* Punkte-Rechner – gleiche Formel wie dash() */
+const $=id=>document.getElementById(id);
+function calc(){
+  const base=+$('cK').value,c0=Math.max(0,+$('cC').value|0),n=Math.max(1,+$('cN').value|0);
+  const kn=$('cKn').checked?2:1,ra=$('cRa').checked?2:1;
+  let total=0,parts=[];
+  for(let i=0;i<n;i++){const m=Math.min(15,1+Math.floor((c0+i+1)/5));const p=base*m*n*kn*ra;total+=p;parts.push(fmt(p));}
+  const m1=Math.min(15,1+Math.floor((c0+1)/5));
+  $('cOut').innerHTML='+'+fmt(total)+'<small>'+(n>1?'pro Gegner: '+parts.join(' + ')+' · ':'')+'Multiplikator beim ersten Treffer ×'+m1+' · Serie danach '+(c0+n)+'</small>';
+}
+['cK','cC','cN','cKn','cRa'].forEach(id=>$(id).addEventListener('input',calc));calc();
+
+/* Inhaltsverzeichnis: aktuellen Abschnitt markieren */
+const links=[...document.querySelectorAll('#toc a')];
+if('IntersectionObserver' in window){
+  const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id));}});},{rootMargin:'-20% 0px -70% 0px'});
+  document.querySelectorAll('main section').forEach(s=>io.observe(s));
+}
+})();
+</script>
+</body>
+</html>

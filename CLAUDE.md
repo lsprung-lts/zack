@@ -37,6 +37,10 @@ dann http://localhost:5173 öffnen.
 
 ## Arbeitsweise
 - Datei erst aufteilen, wenn die Struktur abgesprochen ist.
+- `docs/wiki.html` beschreibt alle Regeln und Spielwerte mit Kürzeln (z. B. `G-R2`).
+  Wer einen Spielwert in `index.html` ändert, pflegt ihn dort mit (inkl. „Stand“ oben).
+- Neue Features über Feature-Branch + Pull Request nach `main` (GitHub Flow);
+  Push auf `main` geht automatisch live, Tags `v*` erzeugen Releases.
 
 ## Geplante Erweiterungen (Kontext, noch nicht umgesetzt)
 - Serie beim Ablaufen als Bonus einzahlen
