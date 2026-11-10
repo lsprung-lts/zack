@@ -23,8 +23,8 @@ const Music=(()=>{
   const ROOTS=[37,33,40,35];                                     // Cis, A, E, H
   const CUT=[650,1000,1500,2300,3600,6000,10000];                // Filter je Intensität
   const REL={menu:.8,play:1,over:.65,pause:0,dead:0};     // Lautstärke je Zustand relativ zum Regler
-  /* Regler 0–100 → Verstärkung; quadratisch, weil das Ohr so empfindet. 75 % ≈ 0,7 */
-  const VOL=m=>REL[m]*Math.pow(vol/100,2)*1.25;
+  /* Regler 0–100 → Verstärkung; quadratisch, weil das Ohr so empfindet. 75 % ≈ 0,84 */
+  const VOL=m=>REL[m]*Math.pow(vol/100,2)*1.5;
   const hz=m=>440*Math.pow(2,(m-69)/12);
 
   let on=true,vol=75,bus=null,filt,pump,padF,bassF,dly,noise,mode='off',next=0,step=0,level=0,running=false;
