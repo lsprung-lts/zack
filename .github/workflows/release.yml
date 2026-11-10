@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Code holen
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Spiel als ZIP verpacken
         run: zip "zack-${GITHUB_REF_NAME}.zip" index.html

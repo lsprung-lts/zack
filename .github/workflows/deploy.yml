@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Code holen
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Prüfen (CI)
         # Liest das <script> aus index.html und lässt Node die Syntax prüfen.
@@ -44,10 +44,10 @@ jobs:
           cp index.html _site/
 
       - name: Pages vorbereiten
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Paket hochladen
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: _site
 
@@ -60,4 +60,4 @@ jobs:
     steps:
       - name: Veröffentlichen (Deploy)
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
