@@ -31,7 +31,10 @@
         <button class="ghost big" id="how" aria-expanded="false">So geht's</button>
       </div>
       <p class="press">oder <kbd>Leertaste</kbd> drücken</p>
-      <div class="skins nostart" id="skins" role="radiogroup" aria-label="Spurfarbe"></div>
+      <div class="prefs">
+        <div class="skins nostart" id="skins" role="radiogroup" aria-label="Spurfarbe"></div>
+        <label class="vol nostart" for="vol"><span>Musik</span><input type="range" id="vol" min="0" max="100" step="1" value="75"><output id="volV" for="vol">75 %</output></label>
+      </div>
       <div class="cast nostart" id="cast">
         <figure><canvas data-k="d"></canvas><figcaption><b>Verfolger</b>rennt dir nach</figcaption></figure>
         <figure><canvas data-k="r"></canvas><figcaption><b>Raser</b>warnt, dann zischt er</figcaption></figure>

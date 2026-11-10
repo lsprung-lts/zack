@@ -16,7 +16,7 @@ function togglePause(){if(st==='play'){st='pause';$('pz').textContent='Weiter';}
 stage.addEventListener('pointermove',toWorld);
 stage.addEventListener('pointerdown',e=>{if(e.target.closest('button,.nostart'))return;e.preventDefault();toWorld(e);act();});
 addEventListener('keydown',e=>{
-  if(e.key===' '||e.key==='Enter'){if(e.target.closest&&e.target.closest('button'))return;e.preventDefault();if(!e.repeat)act();}
+  if(e.key===' '||e.key==='Enter'){if(e.target.closest&&e.target.closest('button,input'))return;e.preventDefault();if(!e.repeat)act();}
   else if(e.key==='Escape'&&st==='over')showMenu();
   else if(e.key==='p'||e.key==='P'||e.key==='Escape')togglePause();});
 addEventListener('blur',()=>{if(st==='play')togglePause();});
@@ -27,8 +27,14 @@ $('toMenu').addEventListener('click',()=>{if(st==='over')showMenu();$('toMenu').
 $('how').addEventListener('click',toggleHow);
 $('pz').addEventListener('click',()=>{togglePause();$('pz').blur();});
 $('snd').addEventListener('click',()=>{muted=!muted;$('snd').textContent=muted?'Ton an':'Ton aus';if(!muted)wake();$('snd').blur();});
-$('mus').textContent=Music.on?'Musik aus':'Musik an';
-$('mus').addEventListener('click',()=>{wake();$('mus').textContent=Music.toggle()?'Musik aus':'Musik an';$('mus').blur();});
+/* Musik: Knopf oben und Regler im Menü halten sich gegenseitig aktuell */
+function syncMusicUi(){const v=Music.vol,on=Music.on&&v>0;
+  $('mus').textContent=Music.on?'Musik aus':'Musik an';
+  $('vol').value=v;$('vol').style.setProperty('--v',v+'%');
+  $('volV').textContent=Music.on?v+' %':'aus';$('vol').closest('.vol').classList.toggle('off',!on);}
+$('mus').addEventListener('click',()=>{wake();Music.toggle();syncMusicUi();$('mus').blur();});
+$('vol').addEventListener('input',e=>{wake();if(!Music.on)Music.toggle();Music.setVol(+e.target.value);syncMusicUi();});
+syncMusicUi();
 
 /* ---------- Start ---------- */
 function boot(data){

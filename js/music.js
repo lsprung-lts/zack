@@ -22,11 +22,13 @@ const Music=(()=>{
   const CHORDS=[[56,61,64],[57,61,64],[56,59,64],[54,59,63]];   // Cis-Moll, A, E, H (enge Lage)
   const ROOTS=[37,33,40,35];                                     // Cis, A, E, H
   const CUT=[650,1000,1500,2300,3600,6000,10000];                // Filter je Intensität
-  const VOL={menu:.3,play:.38,over:.24,pause:0,dead:0};   // bewusst unter den Soundeffekten
+  const REL={menu:.8,play:1,over:.65,pause:0,dead:0};     // Lautstärke je Zustand relativ zum Regler
+  /* Regler 0–100 → Verstärkung; quadratisch, weil das Ohr so empfindet. 75 % ≈ 0,7 */
+  const VOL=m=>REL[m]*Math.pow(vol/100,2)*1.25;
   const hz=m=>440*Math.pow(2,(m-69)/12);
 
-  let on=true,bus=null,filt,pump,padF,bassF,dly,noise,mode='off',next=0,step=0,level=0,running=false;
-  try{on=localStorage.getItem('zack.music')!=='0'}catch(e){}
+  let on=true,vol=75,bus=null,filt,pump,padF,bassF,dly,noise,mode='off',next=0,step=0,level=0,running=false;
+  try{on=localStorage.getItem('zack.music')!=='0';const v=localStorage.getItem('zack.vol');if(v!==null&&!isNaN(+v))vol=Math.max(0,Math.min(100,+v));}catch(e){}
 
   function init(){
     if(bus||!ac)return;
@@ -125,7 +127,7 @@ const Music=(()=>{
       bus.gain.setTargetAtTime(0,now+.25,.3);return;
     }
     filt.frequency.cancelScheduledValues(now);filt.frequency.setValueAtTime(Math.max(60,filt.frequency.value),now);
-    bus.gain.setTargetAtTime(VOL[m],now,m==='pause'?.05:.4);
+    bus.gain.setTargetAtTime(VOL(m),now,m==='pause'?.05:.4);
     if(m==='play'&&prev!=='pause'){                         // neue Runde startet auf der Eins mit Becken
       step=0;next=now+.06;crash(next,.05);
     }
@@ -133,6 +135,10 @@ const Music=(()=>{
 
   return{
     get on(){return on;},
+    get vol(){return vol;},
+    /* Regler: 0–100, wirkt sofort und wird gemerkt */
+    setVol(v){vol=Math.max(0,Math.min(100,Math.round(v)));try{localStorage.setItem('zack.vol',vol)}catch(e){}
+      if(bus&&mode!=='off'&&mode!=='dead')bus.gain.setTargetAtTime(VOL(mode),ac.currentTime,.05);},
     toggle(){on=!on;try{localStorage.setItem('zack.music',on?'1':'0')}catch(e){}
       if(!on&&bus)bus.gain.setTargetAtTime(0,ac.currentTime,.05);mode='off';return on;},
     /* einmal pro Frame */
