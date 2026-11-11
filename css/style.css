@@ -97,6 +97,7 @@ button.skin small{position:absolute;inset:0;display:grid;place-items:center;font
 /* ---------- Ergebnis: Todes-Animation, große Punkte, Bestwert ---------- */
 .killer{width:144px;height:64px;display:block}
 #ovResult h1{font-size:clamp(28px,6vw,72px)}
+#ovResult{gap:clamp(4px,.9vw,8px)!important}
 .cause{margin:-4px 0 0;font-size:clamp(13px,1.6vw,17px);font-weight:600;opacity:.75}
 .cause:empty{display:none}
 .bigscore{margin:2px 0 0;font-family:var(--font-display);font-size:clamp(32px,6vw,72px);line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
@@ -105,6 +106,9 @@ button.skin small{position:absolute;inset:0;display:grid;place-items:center;font
 .overlay.end-on{background:rgba(14,8,32,.93)}
 .bestbar.rec i{background:var(--spark)}
 .bestline{font-size:clamp(12px,1.5vw,16px)!important;opacity:.8}
+.bestline.hs{opacity:1;font-family:var(--font-display);font-weight:400;letter-spacing:.06em;color:var(--night);background:var(--spark);padding:.3em 1em;border-radius:99px;box-shadow:3px 3px 0 var(--foe),0 0 18px rgba(255,210,63,.55);animation:hsPulse 1.2s ease-in-out infinite}
+@keyframes hsPulse{50%{transform:scale(1.06);box-shadow:3px 3px 0 var(--foe),0 0 30px rgba(255,210,63,.8)}}
+@media (prefers-reduced-motion:reduce){.bestline.hs{animation:none}}
 /* ---------- Pause ---------- */
 .ptitle{font-size:clamp(40px,9vw,96px)!important}
 /* ---------- Musik-Regler ---------- */

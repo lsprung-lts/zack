@@ -195,13 +195,13 @@ function die(why){
 function over(){
   st='over';overLock=.35;const old=best,rec=score>old;
   if(rec){best=score;try{localStorage.setItem('zack.best',best)}catch(e){}}
-  const gap=old-score;
   /* Titel = Todesgrund; bei Rekord oder knapp verfehlt steht der Grund klein darunter */
   const cause=CAUSE[reason]||reason;
   const title=rec&&old>0?'New Best!':(!rec&&old>0&&score>=old*.8)?'So close!':cause+'!';
   $('ovTitle').textContent=title;$('ovCause').textContent=title===cause+'!'?'':cause;
-  $('ovSub').textContent=rec?(old>0?'Best beaten by '+fmt(score-old)+' · old best '+fmt(old):'Your first best')
-    :old<=0?'No best yet – go for it':'Best '+fmt(old)+'  ·  '+(gap===0?'tied with your best':score>=old*.8?'only '+fmt(gap)+' short':fmt(gap)+' to go');
+  /* Best-Zeile: nur der Bestwert; ein neuer Highscore wird als goldenes Abzeichen hervorgehoben */
+  $('ovSub').textContent=rec?'★  New highscore  ★':'Best '+fmt(old);
+  $('ovSub').classList.toggle('hs',rec);
   endBest=rec?score:old;$('ovBestBar').parentNode.classList.toggle('rec',rec);
   $('sCombo').textContent=bestCombo;$('sKills').textContent=kills;
   $('sAcc').textContent=(aimDash?Math.round(aimHit/aimDash*100):0)+'%';$('sFlow').textContent=(runT>0?Math.round(flowT/runT*100):0)+'%';
