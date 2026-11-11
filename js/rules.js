@@ -80,6 +80,9 @@ function refillChaser(){
     if(x>60&&x<W-60&&y>60&&y<H-60){e.x=x;e.y=y;e.spawnIn=SPAWN_IN;e.vx=e.vy=0;
       rings.push({x,y,r:6,max:46,life:SPAWN_IN,dur:SPAWN_IN,col:'255,93,115'});tone(880,.08,'sine',.025,440);break;}}
 }
+/* Todesgründe für den Ergebnis-Screen */
+const CAUSE={Caught:'Eaten by a Chaser',Flattened:'Run over by a Dasher',Skewered:'Skewered by a Spiky'};
+let killer='d',endT=0,endBest=0;
 const BOUNTY_CHANCE=.04;                         // Anteil Verfolger mit Krone (ab 5 s)
 const RESCUE_AT=.3;                              // Serien-Timer unter 30 % = „rot“
 function rescue(){
@@ -185,7 +188,7 @@ function popFoe(e){
   checkRecord();
 }
 function die(why){
-  if(st!=='play'||untouch>0)return;reason=why;st='dying';dieT=.75;
+  if(st!=='play'||untouch>0)return;reason=why;killer=why==='Flattened'?'r':why==='Skewered'?'i':'d';endT=0;st='dying';dieT=.75;
   burst(p.x,p.y,C.you,60,700);burst(p.x,p.y,C.ink,30,400);
   tone(300,.6,'sawtooth',.08,40);hiss(.4,.12,300);if(!calm){shake=1;flash=.3;}
 }
@@ -193,9 +196,13 @@ function over(){
   st='over';overLock=.35;const old=best,rec=score>old;
   if(rec){best=score;try{localStorage.setItem('zack.best',best)}catch(e){}}
   const gap=old-score;
-  $('ovTitle').textContent=rec&&old>0?'New Best!':(!rec&&old>0&&score>=old*.8)?'So close!':reason+'!';
-  $('ovSub').textContent=fmt(score)+' points · '+(rec?(old>0?fmt(score-old)+' above your old best':'your first best')
-    :old<=0?'no best yet, go for it':(score>=old*.8?'only '+fmt(gap)+' short of your best':'Best: '+fmt(old)+', you need '+fmt(gap)+' more'));
+  /* Titel = Todesgrund; bei Rekord oder knapp verfehlt steht der Grund klein darunter */
+  const cause=CAUSE[reason]||reason;
+  const title=rec&&old>0?'New Best!':(!rec&&old>0&&score>=old*.8)?'So close!':cause+'!';
+  $('ovTitle').textContent=title;$('ovCause').textContent=title===cause+'!'?'':cause;
+  $('ovSub').textContent=rec?(old>0?'Best beaten by '+fmt(score-old)+' · old best '+fmt(old):'Your first best')
+    :old<=0?'No best yet – go for it':'Best '+fmt(old)+'  ·  '+(gap===0?'tied with your best':score>=old*.8?'only '+fmt(gap)+' short':fmt(gap)+' to go');
+  endBest=rec?score:old;$('ovBestBar').parentNode.classList.toggle('rec',rec);
   $('sCombo').textContent=bestCombo;$('sKills').textContent=kills;
   $('sAcc').textContent=(aimDash?Math.round(aimHit/aimDash*100):0)+'%';$('sFlow').textContent=(runT>0?Math.round(flowT/runT*100):0)+'%';
   $('sTime').textContent=Math.round(runT)+' s';
@@ -205,5 +212,5 @@ function over(){
   $('ovUnlock').innerHTML=fresh.length?'New trail unlocked: <b>'+fresh.map(s=>s.name).join(', ')+'</b>! Pick it in the menu.'
     :next?'<b>'+fmt(next.need-total)+'</b> more points to unlock the <b>'+next.name+'</b> trail':'All trails unlocked. Respect!';
   $('ovUnlock').classList.toggle('new',fresh.length>0);
-  $('ovMenu').hidden=true;$('ovResult').hidden=false;$('ov').classList.remove('menu-on','how');$('ov').hidden=false;
+  $('ovMenu').hidden=true;$('ovResult').hidden=false;$('ov').classList.remove('menu-on','how');$('ov').classList.add('end-on');$('ov').hidden=false;
 }

@@ -6,13 +6,13 @@ function frame(ts){
   const raw=last?(ts-last)/1000:0;last=ts;
   if(raw>0&&raw<.1){hzAcc+=raw;hzN++;if(hzAcc>.6){$('hz').textContent='≈ '+Math.round(hzN/hzAcc)+' Hz';hzAcc=hzN=0;}}
   if(st!=='pause')update(Math.min(raw,.05));
-  render();drawCast();Music.tick();requestAnimationFrame(frame);
+  render();drawCast();drawKiller(Math.min(raw,.05));Music.tick();requestAnimationFrame(frame);
 }
 
 /* ---------- Eingabe ---------- */
 function toWorld(e){const r=cv.getBoundingClientRect();aim.x=(e.clientX-r.left)/r.width*W;aim.y=(e.clientY-r.top)/r.height*H;}
 function act(){if(st==='menu'||(st==='over'&&overLock<=0))start();else if(st==='pause')togglePause();else dash();}
-function togglePause(){if(st==='play'){st='pause';$('pz').textContent='Resume';}else if(st==='pause'){st='play';$('pz').textContent='Pause';last=0;}}
+function togglePause(){if(st==='play'){st='pause';$('pz').textContent='Resume';showPause();}else if(st==='pause'){st='play';$('pz').textContent='Pause';last=0;hidePause();}}
 stage.addEventListener('pointermove',toWorld);
 stage.addEventListener('pointerdown',e=>{if(e.target.closest('button,.nostart'))return;e.preventDefault();toWorld(e);act();});
 addEventListener('keydown',e=>{
@@ -26,6 +26,8 @@ $('again').addEventListener('click',()=>{if(st==='over'&&overLock<=0)start();$('
 $('toMenu').addEventListener('click',()=>{if(st==='over')showMenu();$('toMenu').blur();});
 $('how').addEventListener('click',toggleHow);
 $('pz').addEventListener('click',()=>{togglePause();$('pz').blur();});
+$('resume').addEventListener('click',()=>{if(st==='pause')togglePause();$('resume').blur();});
+$('quit').addEventListener('click',()=>{if(st==='pause'){$('pz').textContent='Pause';quitToMenu();}$('quit').blur();});
 $('snd').addEventListener('click',()=>{muted=!muted;$('snd').textContent=muted?'Sound on':'Sound off';if(!muted)wake();$('snd').blur();});
 /* Musik: Knopf oben und Regler im Menü halten sich gegenseitig aktuell */
 function syncMusicUi(){const v=Music.vol,on=Music.on&&v>0;

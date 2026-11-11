@@ -56,9 +56,22 @@
         <li>Your points add up across all runs and unlock new <b>trail colors</b>.</li>
       </ul>
      </div>
+     <div class="screen nostart" id="ovPause" hidden>
+      <h1 class="ptitle">Paused</h1>
+      <p class="sub" id="pauseInfo">0 points so far</p>
+      <div class="row">
+        <button class="primary" id="resume">Resume</button>
+        <button class="ghost big" id="quit">Menu</button>
+      </div>
+      <p class="press">Quit to menu: your points still count towards trail colors – no best, no records.</p>
+     </div>
      <div class="screen" id="ovResult" hidden>
+      <canvas class="killer" id="ovKiller" aria-hidden="true"></canvas>
       <h1 id="ovTitle">ZACK</h1>
-      <p class="sub" id="ovSub"></p>
+      <p class="cause" id="ovCause"></p>
+      <p class="bigscore" id="ovScore">0</p>
+      <div class="bestbar" aria-hidden="true"><i id="ovBestBar"></i></div>
+      <p class="sub bestline" id="ovSub"></p>
       <dl class="stats" id="ovStats">
         <div><dt>Best combo</dt><dd id="sCombo">0</dd></div>
         <div><dt>Kills</dt><dd id="sKills">0</dd></div>

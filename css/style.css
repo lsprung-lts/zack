@@ -94,6 +94,19 @@ button.skin small{position:absolute;inset:0;display:grid;place-items:center;font
 .unlock{margin:0;font-size:clamp(12px,1.5vw,16px);opacity:.8}
 .unlock b{color:var(--spark)}
 .unlock.new{opacity:1;padding:.35em .9em;border-radius:99px;background:rgba(255,210,63,.14);box-shadow:inset 0 0 0 1px rgba(255,210,63,.5);animation:blink 1.2s ease-in-out 3}
+/* ---------- Ergebnis: Todes-Animation, große Punkte, Bestwert ---------- */
+.killer{width:144px;height:64px;display:block}
+#ovResult h1{font-size:clamp(28px,6vw,72px)}
+.cause{margin:-4px 0 0;font-size:clamp(13px,1.6vw,17px);font-weight:600;opacity:.75}
+.cause:empty{display:none}
+.bigscore{margin:2px 0 0;font-family:var(--font-display);font-size:clamp(32px,6vw,72px);line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+.bestbar{width:min(360px,70%);height:6px;border-radius:3px;background:rgba(246,239,255,.14);overflow:hidden}
+.bestbar i{display:block;height:100%;width:0;background:var(--foe)}
+.overlay.end-on{background:rgba(14,8,32,.93)}
+.bestbar.rec i{background:var(--spark)}
+.bestline{font-size:clamp(12px,1.5vw,16px)!important;opacity:.8}
+/* ---------- Pause ---------- */
+.ptitle{font-size:clamp(40px,9vw,96px)!important}
 /* ---------- Musik-Regler ---------- */
 .prefs{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px clamp(14px,2.5vw,28px)}
 .overlay.how .prefs{display:none}

@@ -126,7 +126,7 @@ function render(){
     g.font='68px '+DISP;g.lineWidth=10;g.strokeStyle='#120a28';g.strokeText(c.text,0,0);g.fillStyle=c.col;g.fillText(c.text,0,0);g.restore();});
   g.globalAlpha=1;
   if(flash>0){g.fillStyle='rgba(255,255,255,'+flash+')';g.fillRect(-20,-20,W+40,H+40);}
-  if(st==='pause'){g.fillStyle='rgba(14,8,32,.7)';g.fillRect(-20,-20,W+40,H+40);g.fillStyle=C.ink;g.font='64px '+DISP;g.fillText('Pause',W/2,H/2);}
+  if(st==='pause'){g.fillStyle='rgba(14,8,32,.45)';g.fillRect(-20,-20,W+40,H+40);}   // Pause-Menü liegt darüber (HTML)
 }
 
 /* ---------- Combo-Element oben links: Multiplikator groß, 5 Punkte bis zum nächsten, Zeitbalken ---------- */
