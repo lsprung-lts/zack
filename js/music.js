@@ -27,6 +27,7 @@ const Music=(()=>{
   const VOL=m=>REL[m]*Math.pow(vol/100,2)*1.5;
   const hz=m=>440*Math.pow(2,(m-69)/12);
 
+  const beats=[];                                          // Zeitpunkte der Viertel – für den pulsierenden Hintergrund
   let on=true,vol=75,bus=null,filt,pump,padF,bassF,dly,noise,mode='off',next=0,step=0,level=0,running=false;
   try{on=localStorage.getItem('zack.music')!=='0';const v=localStorage.getItem('zack.vol');if(v!==null&&!isNaN(+v))vol=Math.max(0,Math.min(100,+v));}catch(e){}
 
@@ -101,6 +102,7 @@ const Music=(()=>{
   }
   function schedule(s,t){
     const b=s%16,ci=Math.floor(s/32)%4,ch=CHORDS[ci],root=ROOTS[ci],L=level;
+    if(b%4===0&&(mode==='play'||mode==='menu')){beats.push(t);if(beats.length>12)beats.shift();}
     if(s%32===0)pad(ch,t,mode==='play'?.011:.009);
     if(mode==='menu'||mode==='over'){
       if(b%8===0)bass(root,t,.6);
@@ -157,6 +159,13 @@ const Music=(()=>{
         filt.frequency.setTargetAtTime(cut,now,.3);
       }
       while(next<now+LOOK){schedule(step,next);next+=STEP;step++;}
+    },
+    /* Puls 0–1 auf jedem hörbaren Viertel, klingt schnell ab (im Menü schwächer); 0 ohne Musik */
+    pulse(){
+      if(!ac||!on||muted||!running||(mode!=='play'&&mode!=='menu'))return 0;
+      const heard=ac.currentTime-(ac.outputLatency||ac.baseLatency||0);
+      for(let i=beats.length-1;i>=0;i--){const d=heard-beats[i];if(d>=0)return Math.exp(-d*7)*(mode==='menu'?.5:1);}
+      return 0;
     },
     /* Akzente aus dem Spiel: Becken auf der nächsten Sechzehntel */
     accent(kind){

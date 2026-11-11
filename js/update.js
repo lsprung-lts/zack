@@ -4,6 +4,7 @@
 function update(rdt){
   clock+=rdt;
   readyFlash=Math.max(0,readyFlash-rdt*5);
+  tutTick(rdt);
   shake=Math.max(0,shake-rdt*4);flash=Math.max(0,flash-rdt*1.6);punch=Math.max(0,punch-rdt*5);
   if(overLock>0)overLock-=rdt;
   /* Große Meldungen nacheinander statt übereinander; wartet eine weitere, läuft die aktuelle schneller ab */

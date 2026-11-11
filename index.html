@@ -29,6 +29,7 @@
       <div class="row">
         <button class="primary" id="go">Play</button>
         <button class="ghost big" id="how" aria-expanded="false">How to play</button>
+        <button class="ghost big" id="set" aria-expanded="false">Settings</button>
       </div>
       <p class="press">or press <kbd>Space</kbd></p>
       <div class="prefs">
@@ -41,6 +42,11 @@
         <figure><canvas data-k="i"></canvas><figcaption><b>Spiky</b>only without spikes</figcaption></figure>
         <figure><canvas data-k="g"></canvas><figcaption><b>Gold</b>starts the Gold Rush</figcaption></figure>
         <figure><canvas data-k="u"></canvas><figcaption><b>Untouchable</b>rare star · 6 s</figcaption></figure>
+      </div>
+      <div class="settings nostart" id="settings" hidden>
+        <label class="vol" for="sfx"><span>Sound effects</span><input type="range" id="sfx" min="0" max="100" step="1" value="100"><output id="sfxV" for="sfx">100%</output></label>
+        <div class="setrow"><span>Screen shake &amp; flash</span><button class="ghost" id="fxBtn" aria-pressed="true">On</button></div>
+        <div class="setrow"><span>Tips for new players</span><button class="ghost" id="tipsBtn">Show tips again</button></div>
       </div>
       <ul class="rules nostart" id="ovRules" hidden>
         <li><b>Aim and click:</b> you dash through everything on the line.</li>
@@ -70,7 +76,7 @@
       <h1 id="ovTitle">ZACK</h1>
       <p class="cause" id="ovCause"></p>
       <p class="bigscore" id="ovScore">0</p>
-      <div class="bestbar" aria-hidden="true"><i id="ovBestBar"></i></div>
+      <canvas class="medals" id="ovMedals" aria-hidden="true"></canvas>
       <p class="sub bestline" id="ovSub"></p>
       <dl class="stats" id="ovStats">
         <div><dt>Best combo</dt><dd id="sCombo">0</dd></div>
@@ -89,7 +95,7 @@
   </div>
 </main>
 <div class="bar">
-  <span class="hint">Mouse aims · <kbd>Click</kbd> or <kbd>Space</kbd> dashes · <kbd>P</kbd> pause · on mobile: tap</span>
+  <span class="hint">Mouse aims · <kbd>Click</kbd> or <kbd>Space</kbd> dashes · <kbd>P</kbd> pause · on mobile: drag to aim, release to dash</span>
 </div>
 
 <script src="js/core.js"></script>

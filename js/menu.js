@@ -9,6 +9,7 @@ function showMenu(){
   $('mBest').hidden=!(best>0);$('mBestV').textContent=fmt(best);
   $('ovResult').hidden=true;$('ovPause').hidden=true;$('ovMenu').hidden=false;$('ov').classList.add('menu-on');$('ov').classList.remove('end-on');$('ov').hidden=false;
   if(!$('ovRules').hidden)toggleHow();
+  if(!$('settings').hidden)toggleSettings();$('tipsBtn').textContent='Show tips again';
   buildSkins();
 }
 /* Spurfarben-Auswahl: freigespielte wählbar, gesperrte zeigen, was fehlt */
@@ -33,7 +34,7 @@ function drawKiller(rdt){
   /* Punkte zählen in ~0,9 s hoch, Balken füllt sich mit */
   const k=Math.min(1,endT/.9),v=score*(1-Math.pow(1-k,3));
   $('ovScore').textContent=fmt(v);
-  $('ovBestBar').style.width=(endBest>0?Math.min(100,v/endBest*100):100)+'%';
+  drawMedals(v);
   const dpr=Math.min(window.devicePixelRatio||1,2),cw=killCv.clientWidth,ch=killCv.clientHeight;if(!cw)return;
   if(killCv.width!==Math.round(cw*dpr)){killCv.width=Math.round(cw*dpr);killCv.height=Math.round(ch*dpr);}
   const x=killCv.getContext('2d');x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,killCv.width,killCv.height);x.setTransform(killCv.width/180,0,0,killCv.height/80,0,0);
@@ -50,6 +51,51 @@ function drawKiller(rdt){
     for(let i=0;i<10;i++){const a=i/10*6.283+.3,r1=6+q*34,r2=r1+6;x.beginPath();x.moveTo(sx+Math.cos(a)*r1,sy+Math.sin(a)*r1);x.lineTo(sx+Math.cos(a)*r2,sy+Math.sin(a)*r2);x.stroke();}}
   x.globalAlpha=1;
 }
+/* ---------- Medaillen: leuchten nacheinander auf, während die Punkte hochzählen ---------- */
+const medCv=$('ovMedals');
+function medalCol(m,a){return m.c?m.c:'hsl('+(clock*160%360)+',90%,65%)';}
+function drawMedal(x,cx,cy,r,m,on,pop){
+  const s=1+pop*.35;x.save();x.translate(cx,cy);x.scale(s,s);
+  if(!on){x.lineWidth=2;x.strokeStyle='rgba(246,239,255,.18)';x.beginPath();x.arc(0,0,r,0,6.3);x.stroke();x.restore();return;}
+  const col=medalCol(m);
+  x.fillStyle=col;x.globalAlpha=.25;x.beginPath();x.arc(0,0,r+6,0,6.3);x.fill();x.globalAlpha=1;
+  x.beginPath();for(let i=0;i<24;i++){const a=i/24*6.283,rr=i%2?r:r*.88;x.lineTo(Math.cos(a)*rr,Math.sin(a)*rr);}x.closePath();x.fill();   // gezackter Rand
+  x.fillStyle='rgba(14,8,32,.35)';x.beginPath();x.arc(0,0,r*.66,0,6.3);x.fill();
+  x.fillStyle='#fff';x.beginPath();for(let i=0;i<10;i++){const a=i/10*6.283-1.571,rr=i%2?r*.2:r*.48;x.lineTo(Math.cos(a)*rr,Math.sin(a)*rr);}x.closePath();x.fill();   // Stern
+  x.restore();
+}
+function drawMedals(v){
+  const dpr=Math.min(window.devicePixelRatio||1,2),cw=medCv.clientWidth,ch=medCv.clientHeight;if(!cw)return;
+  if(medCv.width!==Math.round(cw*dpr)){medCv.width=Math.round(cw*dpr);medCv.height=Math.round(ch*dpr);}
+  const x=medCv.getContext('2d');x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,medCv.width,medCv.height);x.setTransform(medCv.width/420,0,0,medCv.height/58,0,0);
+  const n=MEDALS.length,gap=420/n,cy=24,R=14,reached=MEDALS.filter(m=>v>=m.s).length;
+  if(reached>medalShown){for(let i=medalShown;i<reached;i++)tone(note(6+i*2),.18,'triangle',.06,0,(i-medalShown)*.06);medalShown=reached;medalPop[reached-1]=1;}
+  /* Fortschrittslinie bis zur aktuellen Punktzahl */
+  const px=i=>gap/2+i*gap;let fx=0;
+  if(reached===0)fx=px(0)*Math.min(1,v/MEDALS[0].s);else if(reached>=n)fx=px(n-1);
+  else{const a=MEDALS[reached-1],b=MEDALS[reached];fx=px(reached-1)+(px(reached)-px(reached-1))*Math.min(1,(v-a.s)/(b.s-a.s));}
+  x.lineWidth=3;x.strokeStyle='rgba(246,239,255,.12)';x.beginPath();x.moveTo(px(0),cy);x.lineTo(px(n-1),cy);x.stroke();
+  x.strokeStyle=C.you;x.beginPath();x.moveTo(Math.min(fx,px(0)),cy);x.lineTo(fx,cy);x.stroke();
+  for(let i=0;i<n;i++){medalPop[i]=Math.max(0,(medalPop[i]||0)-.05);const cur=i===reached-1;
+    drawMedal(x,px(i),cy,cur?R+3:R,MEDALS[i],i<reached,medalPop[i]+(cur&&endT>1.2?Math.sin(endT*4)*.04+.04:0));}
+  /* Zeile darunter: erreichte Medaille und was zur nächsten fehlt */
+  const got=MEDALS[reached-1],nx=MEDALS[reached];
+  x.font='600 12px "Outfit",sans-serif';x.textAlign='center';x.textBaseline='middle';
+  x.fillStyle=got?medalCol(got):'rgba(246,239,255,.6)';
+  x.fillText((got?got.n+' medal':'No medal yet')+(nx?'  ·  '+fmt(Math.max(0,nx.s-v))+' to '+nx.n:'  ·  the highest there is!'),210,50);
+}
+const medalPop=[];
+/* ---------- Einstellungen ---------- */
+function toggleSettings(){const open=$('settings').hidden;
+  if(open&&!$('ovRules').hidden)toggleHow();
+  $('settings').hidden=!open;$('cast').hidden=open;$('ov').classList.toggle('how',open);
+  $('set').setAttribute('aria-expanded',open);$('set').textContent=open?'Close':'Settings';syncSettings();}
+function syncSettings(){$('sfx').value=sfxVol;$('sfx').style.setProperty('--v',sfxVol+'%');$('sfxV').textContent=sfxVol+'%';
+  $('fxBtn').textContent=fxOn?'On':'Off';$('fxBtn').setAttribute('aria-pressed',fxOn);}
+$('sfx').addEventListener('input',e=>{wake();setSfx(+e.target.value);syncSettings();});
+$('sfx').addEventListener('change',()=>tone(880,.08,'triangle',.06,1320));
+$('fxBtn').addEventListener('click',()=>{fxOn=!fxOn;try{localStorage.setItem('zack.fx',fxOn?'1':'0')}catch(e){}syncSettings();$('fxBtn').blur();});
+$('tipsBtn').addEventListener('click',()=>{tutOn=true;try{localStorage.removeItem('zack.tut');localStorage.removeItem('zack.tutRuns')}catch(e){}$('tipsBtn').textContent='Tips on ✓';$('tipsBtn').blur();});
 /* ---------- Pause-Menü ---------- */
 function showPause(){$('ov').classList.remove('end-on');$('pauseInfo').textContent=fmt(score)+' points so far';
   $('ovMenu').hidden=true;$('ovResult').hidden=true;$('ovPause').hidden=false;$('ov').classList.remove('menu-on','how');$('ov').hidden=false;}

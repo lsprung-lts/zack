@@ -13,8 +13,13 @@ function frame(ts){
 function toWorld(e){const r=cv.getBoundingClientRect();aim.x=(e.clientX-r.left)/r.width*W;aim.y=(e.clientY-r.top)/r.height*H;}
 function act(){if(st==='menu'||(st==='over'&&overLock<=0))start();else if(st==='pause')togglePause();else dash();}
 function togglePause(){if(st==='play'){st='pause';$('pz').textContent='Resume';showPause();}else if(st==='pause'){st='play';$('pz').textContent='Pause';last=0;hidePause();}}
-stage.addEventListener('pointermove',toWorld);
-stage.addEventListener('pointerdown',e=>{if(e.target.closest('button,.nostart'))return;e.preventDefault();toWorld(e);act();});
+stage.addEventListener('pointermove',e=>{if(e.pointerType==='mouse')touchMode=false;toWorld(e);});
+/* Maus: Klick springt sofort. Finger/Stift: im Spiel erst zielen (Linie + Vorschau), beim Loslassen springen */
+stage.addEventListener('pointerdown',e=>{if(e.target.closest('button,.nostart'))return;e.preventDefault();toWorld(e);
+  if(e.pointerType!=='mouse'){touchMode=true;if(st==='play'){touchHold=true;try{stage.setPointerCapture(e.pointerId)}catch(err){}return;}}
+  act();});
+stage.addEventListener('pointerup',e=>{if(!touchHold)return;touchHold=false;toWorld(e);if(st==='play')act();});
+stage.addEventListener('pointercancel',()=>{touchHold=false;});
 addEventListener('keydown',e=>{
   if(e.key===' '||e.key==='Enter'){if(e.target.closest&&e.target.closest('button,input'))return;e.preventDefault();if(!e.repeat)act();}
   else if(e.key==='Escape'&&st==='over')showMenu();
@@ -25,6 +30,7 @@ $('go').addEventListener('click',()=>{if(st==='menu')start();$('go').blur();});
 $('again').addEventListener('click',()=>{if(st==='over'&&overLock<=0)start();$('again').blur();});
 $('toMenu').addEventListener('click',()=>{if(st==='over')showMenu();$('toMenu').blur();});
 $('how').addEventListener('click',toggleHow);
+$('set').addEventListener('click',()=>{toggleSettings();$('set').blur();});
 $('pz').addEventListener('click',()=>{togglePause();$('pz').blur();});
 $('resume').addEventListener('click',()=>{if(st==='pause')togglePause();$('resume').blur();});
 $('quit').addEventListener('click',()=>{if(st==='pause'){$('pz').textContent='Pause';quitToMenu();}$('quit').blur();});

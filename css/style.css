@@ -95,12 +95,12 @@ button.skin small{position:absolute;inset:0;display:grid;place-items:center;font
 .unlock b{color:var(--spark)}
 .unlock.new{opacity:1;padding:.35em .9em;border-radius:99px;background:rgba(255,210,63,.14);box-shadow:inset 0 0 0 1px rgba(255,210,63,.5);animation:blink 1.2s ease-in-out 3}
 /* ---------- Ergebnis: Todes-Animation, große Punkte, Bestwert ---------- */
-.killer{width:144px;height:64px;display:block}
+.killer{width:108px;height:48px;display:block}
 #ovResult h1{font-size:clamp(28px,6vw,72px)}
 #ovResult{gap:clamp(4px,.9vw,8px)!important}
 .cause{margin:-4px 0 0;font-size:clamp(13px,1.6vw,17px);font-weight:600;opacity:.75}
 .cause:empty{display:none}
-.bigscore{margin:2px 0 0;font-family:var(--font-display);font-size:clamp(32px,6vw,72px);line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+.bigscore{margin:2px 0 0;font-family:var(--font-display);font-size:clamp(30px,5.5vw,64px);line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
 .bestbar{width:min(360px,70%);height:6px;border-radius:3px;background:rgba(246,239,255,.14);overflow:hidden}
 .bestbar i{display:block;height:100%;width:0;background:var(--foe)}
 .overlay.end-on{background:rgba(14,8,32,.93)}
@@ -109,6 +109,16 @@ button.skin small{position:absolute;inset:0;display:grid;place-items:center;font
 .bestline.hs{opacity:1;font-family:var(--font-display);font-weight:400;letter-spacing:.06em;color:var(--night);background:var(--spark);padding:.3em 1em;border-radius:99px;box-shadow:3px 3px 0 var(--foe),0 0 18px rgba(255,210,63,.55);animation:hsPulse 1.2s ease-in-out infinite}
 @keyframes hsPulse{50%{transform:scale(1.06);box-shadow:3px 3px 0 var(--foe),0 0 30px rgba(255,210,63,.8)}}
 @media (prefers-reduced-motion:reduce){.bestline.hs{animation:none}}
+/* ---------- Medaillen ---------- */
+.medals{width:min(380px,92%);aspect-ratio:420/58;height:auto;display:block}
+/* ---------- Einstellungen ---------- */
+.settings{display:grid;gap:12px;padding:14px 20px;border-radius:12px;background:rgba(27,16,54,.75);min-width:min(420px,90%)}
+.settings[hidden]{display:none}
+.overlay.how .settings .vol{display:flex}
+.settings .vol span{opacity:.75;min-width:12ch}
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:clamp(11px,1.3vw,14px)}
+.setrow span{opacity:.75}
+#fxBtn[aria-pressed="false"]{opacity:.6}
 /* ---------- Pause ---------- */
 .ptitle{font-size:clamp(40px,9vw,96px)!important}
 /* ---------- Musik-Regler ---------- */

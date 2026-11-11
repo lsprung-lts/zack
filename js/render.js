@@ -47,6 +47,9 @@ function drawFoe(e,c){c=c||g;
 function render(){
   g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';
   if(bg)g.drawImage(bg,0,0);
+  /* Hintergrund-Raster leuchtet auf jedem Beat der Musik (dezent, nicht bei reduzierter Bewegung) */
+  if(!calm){const pu=Music.pulse();if(pu>.03){g.setTransform(scale,0,0,scale,0,0);g.fillStyle='rgba(246,239,255,'+(.16*pu)+')';
+    for(let y=40;y<H;y+=40)for(let x=40;x<W;x+=40)g.fillRect(x-1.5,y-1.5,3,3);}}
   const sx=Math.sin(clock*91)*14*shake*shake,sy=Math.cos(clock*77)*14*shake*shake;
   g.setTransform(scale,0,0,scale,sx*scale,sy*scale);
   if(tint[3]>.003){g.fillStyle='rgba('+(tint[0]|0)+','+(tint[1]|0)+','+(tint[2]|0)+','+tint[3]+')';g.fillRect(-20,-20,W+40,H+40);}
@@ -56,7 +59,7 @@ function render(){
   for(const e of foes)if(e.k==='r'&&e.warn>0){g.strokeStyle='rgba(255,154,60,'+(.25+(1-e.warn/.85)*.5)+')';g.lineWidth=2+(1-e.warn/.85)*5;
     g.beginPath();g.moveTo(e.x,e.y);g.lineTo(e.x+e.dx*1700,e.y+e.dy*1700);g.stroke();}
   /* Ziellinie */
-  if(st==='play'||st==='menu'){const dx=aim.x-p.x,dy=aim.y-p.y,d=Math.hypot(dx,dy)||1,L=Math.min(d,reach()),ex=p.x+dx/d*L,ey=p.y+dy/d*L;
+  if((st==='play'&&(!touchMode||touchHold))||st==='menu'){const dx=aim.x-p.x,dy=aim.y-p.y,d=Math.hypot(dx,dy)||1,L=Math.min(d,reach()),ex=p.x+dx/d*L,ey=p.y+dy/d*L;
     g.strokeStyle='rgba(246,239,255,'+(cd>0?.12:.38)+')';g.lineWidth=2;g.setLineDash([3,11]);g.lineDashOffset=-clock*60;
     g.beginPath();g.moveTo(p.x,p.y);g.lineTo(ex,ey);g.stroke();g.setLineDash([]);
     g.beginPath();g.arc(ex,ey,9,0,6.3);g.stroke();}
@@ -70,7 +73,7 @@ function render(){
   g.globalCompositeOperation='source-over';
   for(const e of foes)drawFoe(e);
   /* Treffer-Vorschau: Gegner auf der Ziellinie leuchten weiß, Spikies mit Stacheln rot (= tödlich) */
-  if(st==='play'&&cd<=0){const dx=aim.x-p.x,dy=aim.y-p.y,d=Math.hypot(dx,dy);
+  if(st==='play'&&cd<=0&&(!touchMode||touchHold)){const dx=aim.x-p.x,dy=aim.y-p.y,d=Math.hypot(dx,dy);
     if(d>=6){const L=Math.min(d,reach()),ex=Math.max(18,Math.min(W-18,p.x+dx/d*L)),ey=Math.max(18,Math.min(H-18,p.y+dy/d*L));let n=0,danger=false;
       for(const e of foes){if(segDist(e.x,e.y,p.x,p.y,ex,ey).d>=e.r+15)continue;
         const bad=spiky(e)&&untouch<=0;if(bad)danger=true;else if(e.k!=='u')n++;
@@ -121,6 +124,7 @@ function render(){
     drawEffects(g);
     g.textAlign='center';
   }
+  drawTut(g);
   calls.slice(0,1).forEach(c=>{const t=c.t,s=t<.12?.5+t/.12*.7:1.2-Math.min(.2,(t-.12)*1.5),a=t>.8?1-(t-.8)/.3:1;   // nur die aktuelle große Meldung
     g.save();g.translate(W/2,230);g.scale(s,s);g.transform(1,0,-.14,1,0,0);g.globalAlpha=Math.max(0,a);
     g.font='68px '+DISP;g.lineWidth=10;g.strokeStyle='#120a28';g.strokeText(c.text,0,0);g.fillStyle=c.col;g.fillText(c.text,0,0);g.restore();});

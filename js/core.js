@@ -5,6 +5,12 @@ const cv=document.getElementById('cv'),g=cv.getContext('2d');
 const stage=document.getElementById('stage'),mainEl=document.getElementById('main');
 const $=id=>document.getElementById(id);
 const calm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* Einstellungen: Wackeln/Blitz an/aus, Lautstärke der Soundeffekte (0–100) */
+let fxOn=true,sfxVol=100,sfxOut=null;
+try{fxOn=localStorage.getItem('zack.fx')!=='0';const v=localStorage.getItem('zack.sfx');if(v!==null&&!isNaN(+v))sfxVol=Math.max(0,Math.min(100,+v));}catch(e){}
+const juicy=()=>!calm&&fxOn;                       // Wackeln und Blitz nur, wenn erlaubt
+const sfxGain=()=>Math.pow(sfxVol/100,2);
+function setSfx(v){sfxVol=Math.max(0,Math.min(100,Math.round(v)));try{localStorage.setItem('zack.sfx',sfxVol)}catch(e){}if(sfxOut)sfxOut.gain.value=sfxGain();}
 const rnd=(a,b)=>a+Math.random()*(b-a);
 const ease=(k,dt)=>1-Math.exp(-k*dt);          // bildratenunabhängiges Glätten
 const fmt=n=>Math.round(n).toLocaleString('en-US');
@@ -23,17 +29,18 @@ try{best=+localStorage.getItem('zack.best')||0}catch(e){}
 
 /* ---------- Ton ---------- */
 let ac=null,muted=false;
-function wake(){if(muted)return;try{if(!ac)ac=new(window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume().catch(()=>{})}catch(e){ac=null}}
+function wake(){if(muted)return;try{if(!ac)ac=new(window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume().catch(()=>{});
+  if(!sfxOut){sfxOut=ac.createGain();sfxOut.gain.value=sfxGain();sfxOut.connect(ac.destination);}}catch(e){ac=null}}
 function tone(f,d,type,vol,to,delay){if(!ac||muted)return;try{
   const o=ac.createOscillator(),v=ac.createGain(),t=ac.currentTime+(delay||0);
   o.type=type||'triangle';o.frequency.setValueAtTime(f,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+d);
   v.gain.setValueAtTime(vol||.07,t);v.gain.exponentialRampToValueAtTime(.0001,t+d);
-  o.connect(v).connect(ac.destination);o.start(t);o.stop(t+d+.02);}catch(e){}}
+  o.connect(v).connect(sfxOut||ac.destination);o.start(t);o.stop(t+d+.02);}catch(e){}}
 function hiss(d,vol,hp){if(!ac||muted)return;try{
   const b=ac.createBuffer(1,ac.sampleRate*d|0,ac.sampleRate),a=b.getChannelData(0);
   for(let i=0;i<a.length;i++)a[i]=(Math.random()*2-1)*Math.pow(1-i/a.length,2);
   const s=ac.createBufferSource(),v=ac.createGain(),f=ac.createBiquadFilter();
-  f.type='highpass';f.frequency.value=hp;v.gain.value=vol;s.buffer=b;s.connect(f).connect(v).connect(ac.destination);s.start();}catch(e){}}
+  f.type='highpass';f.frequency.value=hp;v.gain.value=vol;s.buffer=b;s.connect(f).connect(v).connect(sfxOut||ac.destination);s.start();}catch(e){}}
 const PENTA=[0,2,4,7,9];
 const note=i=>330*Math.pow(2,(PENTA[i%5]+12*Math.floor(i/5))/12);   // jede Serie klingt höher
 
@@ -44,6 +51,14 @@ const NEAR_SPAWN=[300,360];                        // Nachschub-Chaser erscheine
 const SPAWN_IN=.5;                                 // … und materialisieren 0,5 s lang (harmlos, aber schon treffbar)
 let comboHold=false,refillT=0;
 let lastMult=1,multPop=0;
+/* Medaillen nach Punkten (Legend = Regenbogen) */
+const MEDALS=[{n:'Bronze',s:1000,c:'#cd7f32'},{n:'Silver',s:3000,c:'#c9d1e0'},{n:'Gold',s:7500,c:'#ffd23f'},{n:'Platinum',s:15000,c:'#9fe3e0'},
+  {n:'Diamond',s:30000,c:'#7aa2ff'},{n:'Master',s:60000,c:'#ff5d73'},{n:'Legend',s:120000,c:null}];
+/* Hinweise beim ersten Start (höchstens in den ersten 2 Runden) */
+let tutOn=true,tutStep=0,tutT=0;
+try{tutOn=localStorage.getItem('zack.tut')!=='1';}catch(e){}
+/* Handy: ziehen zum Zielen, loslassen zum Springen */
+let touchMode=false,touchHold=false;
 /* Spielgefühl: Klicks während der Pause werden gemerkt (Puffer), Aufladen sichtbar, „bereit“ als Ping */
 const BUFFER_T=.25;                                // ein Klick während der Pause wird bis „bereit“ (+0,25 s Spielraum) gemerkt
 let dashBuf=0,cdMax=.38,readyFlash=0;

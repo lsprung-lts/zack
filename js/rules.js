@@ -82,7 +82,7 @@ function refillChaser(){
 }
 /* Todesgründe für den Ergebnis-Screen */
 const CAUSE={Caught:'Eaten by a Chaser',Flattened:'Run over by a Dasher',Skewered:'Skewered by a Spiky'};
-let killer='d',endT=0,endBest=0;
+let killer='d',endT=0,medalShown=0;
 const BOUNTY_CHANCE=.04;                         // Anteil Verfolger mit Krone (ab 5 s)
 const RESCUE_AT=.3;                              // Serien-Timer unter 30 % = „rot“
 function rescue(){
@@ -100,7 +100,7 @@ function fieldClear(){
   call('Clean Sweep!',C.you);
   floats.push({x:W/2,y:H/2+60,text:'Field cleared +'+fmt(pts),life:1.3,col:C.you,big:true});
   rings.push({x:p.x,y:p.y,r:30,max:1500,life:.9,dur:.9,col:'255,210,63'});
-  if(!calm)flash=Math.max(flash,.25);
+  if(juicy())flash=Math.max(flash,.25);
   [0,4,7,12].forEach((s,j)=>tone(330*Math.pow(2,(s+12)/12),.4,'triangle',.05,0,j*.06));
   Music.accent('clear');
 }
@@ -111,7 +111,7 @@ function lvlUp(){
   [0,7,12].forEach((s,j)=>tone(440*Math.pow(2,s/12),.35,'square',.035,0,j*.1));
   Music.accent('lvl');
 }
-function start(){wake();reset();attempt++;st='play';$('ov').hidden=true;
+function start(){wake();reset();attempt++;st='play';$('ov').hidden=true;tutStep=0;tutT=0;
   for(let i=0;i<4;i++)spawn('d');tone(440,.1,'triangle',.07,880);}
 
 function segDist(px,py,x1,y1,x2,y2){const dx=x2-x1,dy=y2-y1,l=dx*dx+dy*dy||1;
@@ -160,7 +160,7 @@ function dash(){
   if(n>=2)call(MULTI[Math.min(n,5)],C.ink,n<4);    // Double/Triple klein, Quad/Rampage groß
   hiss(.08,.07,2500);
   hitStop=.045+.018*Math.min(n,4);
-  if(!calm&&(n>=2||special)){shake=Math.min(1,.3+.14*n);flash=Math.min(.22,.06+.04*n);}   // Einzeltreffer: nur Partikel und Ton
+  if(juicy()&&(n>=2||special)){shake=Math.min(1,.3+.14*n);flash=Math.min(.22,.06+.04*n);}   // Einzeltreffer: nur Partikel und Ton
   if(saved)rescue();
   if(wasOnField&&clearCd<=0&&runT>3&&!foes.some(e=>e.k!=='g'&&onField(e)))fieldClear();
   checkRecord();
@@ -169,7 +169,7 @@ function dash(){
 function startUntouch(e){
   untouch=UNTOUCH_T;call('Untouchable!','#ffffff');
   burst(e.x,e.y,'#ffffff',40,650);rings.push({x:p.x,y:p.y,r:20,max:260,life:.6,dur:.6,col:'246,239,255'});
-  if(!calm)flash=Math.max(flash,.3);
+  if(juicy())flash=Math.max(flash,.3);
   [0,4,7,12,16].forEach((s,j)=>tone(523*Math.pow(2,s/12),.25,'triangle',.05,0,j*.05));
   Music.accent('gold');
 }
@@ -187,10 +187,30 @@ function popFoe(e){
   if(BOOST_AT[combo]){boost=Math.max(boost,4);call('Overdrive!',C.igel);for(let j=0;j<6;j++)tone(note(5+j*2),.16,'sawtooth',.035,0,.15+j*.04);}
   checkRecord();
 }
+/* ---------- Hinweise beim ersten Start ---------- */
+const TUT=[
+  ()=>touchMode?'Drag to aim, release to dash – you slice through everything on the line':'Aim and click – you dash through everything on the line',
+  ()=>'Hits recharge your dash instantly – chain them!',
+  ()=>'Keep the combo going – the ring around you is the timer',
+  ()=>'Every 5 hits: multiplier up. Grab Gold and the star when they show up!'];
+function tutDone(){tutOn=false;try{localStorage.setItem('zack.tut','1')}catch(e){}}
+function tutTick(rdt){
+  if(!tutOn||st!=='play')return;tutT+=rdt;
+  const next=tutStep===0?kills>=1:tutStep===1?(tutT>3.5||kills>=4):tutStep===2?(combo>=5||tutT>5):tutT>4;
+  if(next){tutStep++;tutT=0;if(tutStep>=TUT.length)tutDone();}
+}
+function drawTut(g){
+  if(!tutOn||st!=='play'||tutStep>=TUT.length)return;
+  const txt=TUT[tutStep](),a=Math.min(1,tutT*4)*(tutStep===0?1:Math.min(1,(4-tutT)*3));
+  g.save();g.globalAlpha=Math.max(0,a);g.font='600 19px "Outfit",sans-serif';g.textAlign='center';g.textBaseline='middle';
+  const w=g.measureText(txt).width+44,x=W/2-w/2,y=H-118;
+  g.fillStyle='rgba(14,8,32,.85)';g.beginPath();if(g.roundRect)g.roundRect(x,y,w,40,20);else g.rect(x,y,w,40);g.fill();
+  g.lineWidth=2;g.strokeStyle=C.you;g.stroke();g.fillStyle=C.ink;g.fillText(txt,W/2,y+20);g.restore();
+}
 function die(why){
   if(st!=='play'||untouch>0)return;reason=why;killer=why==='Flattened'?'r':why==='Skewered'?'i':'d';endT=0;st='dying';dieT=.75;
   burst(p.x,p.y,C.you,60,700);burst(p.x,p.y,C.ink,30,400);
-  tone(300,.6,'sawtooth',.08,40);hiss(.4,.12,300);if(!calm){shake=1;flash=.3;}
+  tone(300,.6,'sawtooth',.08,40);hiss(.4,.12,300);if(juicy()){shake=1;flash=.3;}
 }
 function over(){
   st='over';overLock=.35;const old=best,rec=score>old;
@@ -198,14 +218,15 @@ function over(){
   /* Titel = Todesgrund; bei Rekord oder knapp verfehlt steht der Grund klein darunter */
   const cause=CAUSE[reason]||reason;
   const title=rec&&old>0?'New Best!':(!rec&&old>0&&score>=old*.8)?'So close!':cause+'!';
-  $('ovTitle').textContent=title;$('ovCause').textContent=title===cause+'!'?'':cause;
+  $('ovTitle').textContent=title;$('ovCause').textContent=title===cause+'!'||rec?'':cause;   // bei Rekord: Abzeichen statt Grund-Zeile
   /* Best-Zeile: nur der Bestwert; ein neuer Highscore wird als goldenes Abzeichen hervorgehoben */
   $('ovSub').textContent=rec?'★  New highscore  ★':'Best '+fmt(old);
   $('ovSub').classList.toggle('hs',rec);
-  endBest=rec?score:old;$('ovBestBar').parentNode.classList.toggle('rec',rec);
+  medalShown=0;
   $('sCombo').textContent=bestCombo;$('sKills').textContent=kills;
   $('sAcc').textContent=(aimDash?Math.round(aimHit/aimDash*100):0)+'%';$('sFlow').textContent=(runT>0?Math.round(flowT/runT*100):0)+'%';
   $('sTime').textContent=Math.round(runT)+' s';
+  if(tutOn){let n=0;try{n=+(localStorage.getItem('zack.tutRuns')||0)+1;localStorage.setItem('zack.tutRuns',n);}catch(e){}if(n>=2)tutDone();}
   /* Gesamtpunkte für Spurfarben */
   const before=total;total+=score;try{localStorage.setItem('zack.total',total)}catch(e){}
   const fresh=SKINS.filter(s=>s.need>before&&s.need<=total),next=SKINS.find(s=>s.need>total);
