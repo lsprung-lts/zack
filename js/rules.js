@@ -10,6 +10,7 @@ const GRAZE=28;                                  // Abstand über der Todesgrenz
 const reach=()=>RANGE*(boost>0?1.5:1);
 const bonusMul=()=>frenzy>0?2:1;
 function checkRecord(){
+  if(gm!=='arena')return;                        // Runaway misst den Rekord in Metern (runaway.js)
   if(best>0&&!recordHit&&score>best){recordHit=true;call('New Best!',C.you);for(let j=0;j<4;j++)tone(note(10+j),.25,'square',.05,0,j*.07);}}
 /* Serie läuft aus: ab 5 Treffern wird sie gutgeschrieben statt zu verfallen */
 function bank(){
@@ -56,6 +57,7 @@ function reset(){
   p.x=W/2;p.y=H/2;runT=0;score=0;shown=0;combo=0;comboT=0;bestCombo=0;kills=0;dashes=0;hits=0;
   cd=0;inv=.6;frenzy=0;boost=0;hitStop=0;spawnT=.2;goldT=rnd(11,17);recordHit=false;
   slow=0;clearCd=0;lvl=1;rings=[];
+  runReset();                                    // setzt auch camX=0 (Arena bleibt so)
 }
 
 /* ---------- Gerettet!, Feld leergeräumt, Stufen ---------- */
@@ -70,12 +72,12 @@ function rescue(){
   Music.accent('rescue');
 }
 /* Kein feindlicher Gegner mehr im Bild */
-const onField=e=>e.x>-e.r&&e.x<W+e.r&&e.y>-e.r&&e.y<H+e.r;
+const onField=e=>e.x-camX>-e.r&&e.x-camX<W+e.r&&e.y>-e.r&&e.y<H+e.r;
 function fieldClear(){
   clearCd=4;slow=.8;spawnT=Math.max(spawnT,1.2);punch=1;
   const pts=100*mult()*bonusMul();score+=pts;
   call('Clean Sweep!',C.you);
-  floats.push({x:W/2,y:H/2+60,text:'Field cleared +'+fmt(pts),life:1.3,col:C.you,big:true});
+  floats.push({x:camX+W/2,y:H/2+60,text:'Field cleared +'+fmt(pts),life:1.3,col:C.you,big:true});
   rings.push({x:p.x,y:p.y,r:30,max:1500,life:.9,dur:.9,col:'255,210,63'});
   if(!calm)flash=Math.max(flash,.25);
   [0,4,7,12].forEach((s,j)=>tone(330*Math.pow(2,(s+12)/12),.4,'triangle',.05,0,j*.06));
@@ -89,7 +91,8 @@ function lvlUp(){
   Music.accent('lvl');
 }
 function start(){wake();reset();attempt++;st='play';$('ov').hidden=true;
-  for(let i=0;i<4;i++)spawn('d');tone(440,.1,'triangle',.07,880);}
+  if(gm==='run')runStart();else for(let i=0;i<4;i++)spawn('d');
+  tone(440,.1,'triangle',.07,880);}
 
 function segDist(px,py,x1,y1,x2,y2){const dx=x2-x1,dy=y2-y1,l=dx*dx+dy*dy||1;
   let t=((px-x1)*dx+(py-y1)*dy)/l;t=Math.max(0,Math.min(1,t));
@@ -99,8 +102,10 @@ function dash(){
   if(st!=='play'||cd>0)return;
   let dx=aim.x-p.x,dy=aim.y-p.y;const d=Math.hypot(dx,dy);if(d<6)return;
   const L=Math.min(d,reach()),sx=p.x,sy=p.y;
-  const ex=Math.max(18,Math.min(W-18,sx+dx/d*L)),ey=Math.max(18,Math.min(H-18,sy+dy/d*L));
+  let ex=Math.max(camX+18,Math.min(camX+W-18,sx+dx/d*L)),ey=Math.max(18,Math.min(H-18,sy+dy/d*L));
   dashes++;
+  const perf=gm==='run'&&runPerfect();           // Runaway: Dash auf dem Beat = Perfect, Treffer ×2
+  if(gm==='run'){const c=laserClip(sx,sy,ex,ey);if(c.blocked){ex=c.x;ey=c.y;burst(ex,ey,C.foe,14,300);hiss(.1,.06,3000);}}
   const hit=[];let fatal=null;
   for(const e of foes){const q=segDist(e.x,e.y,sx,sy,ex,ey);
     if(q.d<e.r+15){if(spiky(e)){if(!fatal||q.t<fatal.t)fatal={e,t:q.t};}else hit.push({e,t:q.t});}}
@@ -113,7 +118,7 @@ function dash(){
   const wasOnField=hit.some(h=>h.e.k!=='g'&&onField(h.e));
   hit.forEach((h,i)=>{const e=h.e,close=Math.hypot(e.x-sx,e.y-sy)<e.r+72;
     combo++;kills++;bestCombo=Math.max(bestCombo,combo);
-    const pts=e.pts*mult()*n*(close?2:1)*(frenzy>0?2:1);score+=pts;
+    const pts=e.pts*mult()*n*(close?2:1)*(frenzy>0?2:1)*(perf?2:1);score+=pts;
     floats.push({x:e.x,y:e.y-18,text:'+'+fmt(pts),life:.9,col:close?C.you:C.ink,big:close||n>1});
     if(close)floats.push({x:e.x,y:e.y-44,text:'POINT BLANK ×2',life:.8,col:C.you});
     burst(e.x,e.y,e.k==='g'?C.gold:e.k==='i'?C.igel:e.k==='r'?C.run:C.foe,24,520);
@@ -139,14 +144,18 @@ function die(why){
   tone(300,.6,'sawtooth',.08,40);hiss(.4,.12,300);if(!calm){shake=1;flash=.3;}
 }
 function over(){
-  st='over';overLock=.35;const old=best,rec=score>old;
+  st='over';overLock=.35;
+  if(gm==='run')runOver();else{
+  const old=best,rec=score>old;
   if(rec){best=score;try{localStorage.setItem('zack.best',best)}catch(e){}}
   const gap=old-score;
   $('ovTitle').textContent=rec&&old>0?'New Best!':(!rec&&old>0&&score>=old*.8)?'So close!':reason+'!';
   $('ovSub').textContent=fmt(score)+' points · '+(rec?(old>0?fmt(score-old)+' above your old best':'your first best')
     :old<=0?'no best yet, go for it':(score>=old*.8?'only '+fmt(gap)+' short of your best':'Best: '+fmt(old)+', you need '+fmt(gap)+' more'));
-  $('sCombo').textContent=bestCombo;$('sKills').textContent=kills;
-  $('sAcc').textContent=(dashes?Math.round(hits/dashes*100):0)+'%';$('sTime').textContent=Math.round(runT)+' s';
+  $('dA').textContent='Best combo';$('sCombo').textContent=bestCombo;
+  $('dB').textContent='Kills';$('sKills').textContent=kills;
+  $('dC').textContent='Accuracy';$('sAcc').textContent=(dashes?Math.round(hits/dashes*100):0)+'%';
+  $('dD').textContent='Time';$('sTime').textContent=Math.round(runT)+' s';}
   /* Gesamtpunkte für Spurfarben */
   const before=total;total+=score;try{localStorage.setItem('zack.total',total)}catch(e){}
   const fresh=SKINS.filter(s=>s.need>before&&s.need<=total),next=SKINS.find(s=>s.need>total);

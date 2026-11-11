@@ -46,6 +46,10 @@ function render(){
   if(tint[3]>.003){g.fillStyle='rgba('+(tint[0]|0)+','+(tint[1]|0)+','+(tint[2]|0)+','+tint[3]+')';g.fillRect(-20,-20,W+40,H+40);}
   if(frenzy>0){g.fillStyle='rgba(255,210,63,'+(.07+Math.sin(clock*10)*.03)*Math.min(1,frenzy)+')';g.fillRect(-20,-20,W+40,H+40);}
   g.lineCap='round';
+  /* Welt-Ebene: in Runaway um die Kamera verschoben (Arena: camX = 0) */
+  const runView=gm==='run'&&st!=='menu';
+  g.save();g.translate(-camX,0);
+  if(runView)runDrawBack(g);
   /* Raser-Warnung */
   for(const e of foes)if(e.k==='r'&&e.warn>0){g.strokeStyle='rgba(255,154,60,'+(.25+(1-e.warn/.85)*.5)+')';g.lineWidth=2+(1-e.warn/.85)*5;
     g.beginPath();g.moveTo(e.x,e.y);g.lineTo(e.x+e.dx*1700,e.y+e.dy*1700);g.stroke();}
@@ -80,10 +84,13 @@ function render(){
   g.globalCompositeOperation='source-over';g.globalAlpha=1;
   g.textAlign='center';g.textBaseline='middle';g.lineJoin='round';
   for(const f of floats){g.globalAlpha=Math.min(1,f.life*3);g.font=(f.big?26:19)+'px '+DISP;
-    const fx=Math.max(70,Math.min(W-70,f.x));g.lineWidth=5;g.strokeStyle='#120a28';g.strokeText(f.text,fx,f.y);g.fillStyle=f.col;g.fillText(f.text,fx,f.y);}
+    const fx=Math.max(camX+70,Math.min(camX+W-70,f.x));g.lineWidth=5;g.strokeStyle='#120a28';g.strokeText(f.text,fx,f.y);g.fillStyle=f.col;g.fillText(f.text,fx,f.y);}
   g.globalAlpha=1;
+  g.restore();                                       // Ende der Welt-Ebene
+  if(runView)runDrawWall(g);
   /* Anzeige */
-  if(st!=='menu'){
+  if(st!=='menu'&&gm==='run')runHud(g);
+  else if(st!=='menu'){
     g.save();g.translate(W/2,52);const s=1+punch*.22;g.scale(s,s);g.font='60px '+DISP;g.fillStyle=frenzy>0?C.gold:C.ink;
     g.fillText(fmt(shown+.4),0,0);g.restore();
     if(best>0){const bw=360,bx=W/2-bw/2,by=92,fr=Math.min(1,shown/best);
@@ -94,6 +101,9 @@ function render(){
     /* Stufe mit Fortschrittsbalken bis zur nächsten */
     const lf=(runT%LVL_T)/LVL_T;g.fillStyle='rgba(246,239,255,.55)';g.fillText('Level '+lvl,W-26,60);
     g.fillStyle='rgba(246,239,255,.12)';g.fillRect(W-126,74,100,3);g.fillStyle='rgba(246,239,255,.5)';g.fillRect(W-126,74,100*lf,3);
+  }
+  if(st!=='menu'){
+    g.font='18px '+DISP;
     if(frenzy>0){g.textAlign='center';g.fillStyle=C.gold;g.fillText('Gold Rush  '+frenzy.toFixed(1)+' s  ·  everything ×2',W/2,H-30);}
     if(boost>0){g.textAlign='center';g.fillStyle=C.igel;g.fillText('Overdrive  '+boost.toFixed(1)+' s  ·  longer dashes, no cooldown',W/2,frenzy>0?H-58:H-30);}
     g.textAlign='center';

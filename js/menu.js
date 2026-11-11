@@ -6,11 +6,21 @@ const TAGS=['One click, one dash. Miss and you\'re a sitting duck.','Aim, click,
 function showMenu(){
   reset();st='menu';
   $('tag').textContent=TAGS[Math.random()*TAGS.length|0];
-  $('mBest').hidden=!(best>0);$('mBestV').textContent=fmt(best);
+  syncMode();
   $('ovResult').hidden=true;$('ovMenu').hidden=false;$('ov').classList.add('menu-on');$('ov').hidden=false;
   if(!$('ovRules').hidden)toggleHow();
   buildSkins();
 }
+/* Moduswahl Arena / Runaway: Rekord und Regeln passend zum Modus */
+function syncMode(){
+  for(const b of document.querySelectorAll('#modes .mode'))b.setAttribute('aria-checked',b.dataset.m===gm);
+  const rb=gm==='run'?bestRun:best;
+  $('mBest').hidden=!(rb>0);$('mBestV').textContent=gm==='run'?fmt(rb)+' m':fmt(rb);
+  $('ov').classList.toggle('m-run',gm==='run');
+}
+$('modes').addEventListener('click',e=>{const b=e.target.closest('.mode');if(!b||st!=='menu')return;
+  gm=b.dataset.m;try{localStorage.setItem('zack.mode',gm)}catch(err){}
+  syncMode();tone(gm==='run'?660:440,.08,'triangle',.05,gm==='run'?990:660);});
 /* Spurfarben-Auswahl: freigespielte wählbar, gesperrte zeigen, was fehlt */
 function buildSkins(){
   const el=$('skins'),cur=skin().id;

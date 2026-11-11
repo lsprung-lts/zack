@@ -14,19 +14,24 @@ function update(rdt){
   if(slow>0){slow-=rdt;if(st==='play')dt*=.35;}  // kurze Zeitlupe nach „Feld leer“
   if(st==='play'&&dt>0){
     runT+=dt;if(cd>0)cd-=dt;if(inv>0)inv-=dt;if(frenzy>0)frenzy-=dt;if(boost>0)boost-=dt;if(clearCd>0)clearCd-=dt;
-    const nl=1+Math.floor(runT/LVL_T);if(nl>lvl){lvl=nl;lvlUp();}
     if(combo>0){comboT-=dt;if(comboT<=0){bank();combo=0;}}
-    spawnT-=dt;
-    if(spawnT<=0&&foes.length<42){spawnT=Math.max(.27,.95-runT*.009);
-      const r=Math.random();spawn(runT>10&&r<.17?'r':runT>22&&r<.38?'i':'d');}
-    goldT-=dt;if(goldT<=0){goldT=rnd(13,24);spawn('g');tone(1320,.25,'sine',.05,1760);}
+    if(gm==='run')runTick(dt,rdt);              // Runaway: Kamera, Formationen, Wand, Zonen
+    else{
+      const nl=1+Math.floor(runT/LVL_T);if(nl>lvl){lvl=nl;lvlUp();}
+      spawnT-=dt;
+      if(spawnT<=0&&foes.length<42){spawnT=Math.max(.27,.95-runT*.009);
+        const r=Math.random();spawn(runT>10&&r<.17?'r':runT>22&&r<.38?'i':'d');}
+      goldT-=dt;if(goldT<=0){goldT=rnd(13,24);spawn('g');tone(1320,.25,'sine',.05,1760);}
+    }
   }
+  aim.x=aimS.x+camX;aim.y=aimS.y;                 // Ziel folgt der Kamera, auch wenn die Maus still steht
   const edt=dt*(frenzy>0?.5:1);
   for(let i=foes.length-1;i>=0;i--){const e=foes[i];e.age+=edt;
     if(e.k==='r'){if(e.warn>0){e.warn-=edt;if(e.warn<=0)hiss(.15,.04,1500);}
-      else{e.x+=e.dx*e.spd*edt;e.y+=e.dy*e.spd*edt;if(e.x<-120||e.x>W+120||e.y<-120||e.y>H+120){foes.splice(i,1);continue;}}}
-    else if(e.k==='g'){e.x+=e.vx*edt;e.y+=e.vy*edt;if(e.x<60||e.x>W-60)e.vx*=-1;if(e.y<60||e.y>H-60)e.vy*=-1;
+      else{e.x+=e.dx*e.spd*edt;e.y+=e.dy*e.spd*edt;if(e.x<camX-120||e.x>camX+W+120||e.y<-120||e.y>H+120){foes.splice(i,1);continue;}}}
+    else if(e.k==='g'){e.x+=e.vx*edt;e.y+=e.vy*edt;if(gm==='arena'&&(e.x<60||e.x>W-60))e.vx*=-1;if(e.y<60||e.y>H-60)e.vy*=-1;
       e.life-=edt;if(e.life<=0){foes.splice(i,1);continue;}}
+    else if(e.still){if(e.k==='i')e.ph+=edt;}     // Runaway: steht in der Formation
     else{let tx=p.x,ty=p.y;
       if(st==='menu'){tx=W/2+Math.cos(e.age*.5+e.seed)*460;ty=H/2+Math.sin(e.age*.7+e.seed)*250;}
       const a=Math.atan2(ty-e.y,tx-e.x),k=ease(2.6,edt);

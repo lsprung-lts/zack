@@ -18,7 +18,7 @@
    Zeitplanung läuft auf der Audio-Uhr (ac.currentTime) mit 0,15 s Vorlauf,
    unabhängig von der Bildrate. tick() wird einmal pro Frame aufgerufen. */
 const Music=(()=>{
-  const BPM=124,STEP=60/BPM/4,LOOK=.15;
+  const BPM=124,LOOK=.15;
   const CHORDS=[[56,61,64],[57,61,64],[56,59,64],[54,59,63]];   // Cis-Moll, A, E, H (enge Lage)
   const ROOTS=[37,33,40,35];                                     // Cis, A, E, H
   const CUT=[650,1000,1500,2300,3600,6000,10000];                // Filter je Intensität
@@ -26,8 +26,13 @@ const Music=(()=>{
   /* Regler 0–100 → Verstärkung; quadratisch, weil das Ohr so empfindet. 75 % ≈ 0,84 */
   const VOL=m=>REL[m]*Math.pow(vol/100,2)*1.5;
   const hz=m=>440*Math.pow(2,(m-69)/12);
+  const wrap=(n,lo)=>lo+(((n-lo)%12)+12)%12;               // Ton in eine Oktave ab lo falten (für die Tonart-Wanderung)
 
   let on=true,vol=75,bus=null,filt,pump,padF,bassF,dly,noise,mode='off',next=0,step=0,level=0,running=false;
+  /* Runaway: Tempo wächst mit dem Multiplikator (Tempo Ramp), Tonart steigt pro Zone (Endless Key Climb) */
+  let bpm=BPM,key=0,pendKey=0,lastAt=0;
+  const SD=()=>60/bpm/4;                                   // Dauer einer Sechzehntel beim aktuellen Tempo
+  const beats=[];                                          // Zeitpunkte der Viertel – für „Perfect“ auf dem Beat
   try{on=localStorage.getItem('zack.music')!=='0';const v=localStorage.getItem('zack.vol');if(v!==null&&!isNaN(+v))vol=Math.max(0,Math.min(100,+v));}catch(e){}
 
   function init(){
@@ -38,7 +43,7 @@ const Music=(()=>{
     pump=ac.createGain();                                   // „Sidechain“: Pad und Bass ducken unter der Bassdrum
     padF=ac.createBiquadFilter();padF.type='lowpass';padF.frequency.value=2200;
     bassF=ac.createBiquadFilter();bassF.type='lowpass';bassF.frequency.value=650;bassF.Q.value=4;
-    dly=ac.createDelay(1);dly.delayTime.value=STEP*3;      // punktiertes Achtel-Echo für Arpeggio und Glocken
+    dly=ac.createDelay(1);dly.delayTime.value=SD()*3;      // punktiertes Achtel-Echo für Arpeggio und Glocken
     const fb=ac.createGain();fb.gain.value=.33;const wet=ac.createGain();wet.gain.value=.28;
     dly.connect(fb).connect(dly);dly.connect(wet).connect(filt);
     padF.connect(pump);bassF.connect(pump);pump.connect(filt);
@@ -55,7 +60,7 @@ const Music=(()=>{
     o.connect(v).connect(dest);o.start(t);o.stop(t+dur+.05);
   }
   function pad(ch,t,vol){                                  // zwei verstimmte Sägezähne pro Ton, langsamer Einsatz
-    const dur=32*STEP;
+    const dur=32*SD();
     for(const n of ch)for(const det of[-8,8]){
       const o=ac.createOscillator(),v=ac.createGain();o.type='sawtooth';o.frequency.value=hz(n);o.detune.value=det;
       v.gain.setValueAtTime(0,t);v.gain.linearRampToValueAtTime(vol,t+.6);
@@ -63,16 +68,26 @@ const Music=(()=>{
       o.connect(v).connect(padF);o.start(t);o.stop(t+dur+.15);
     }
   }
+  /* Shepard-Pad: jeder Akkordton in mehreren Oktaven, Mitte laut, Ränder leise → die Tonart kann ewig steigen */
+  function shepPad(ch,t,vol){
+    const dur=32*SD();
+    for(const n of ch){const pc=((n+key)%12+12)%12;
+      for(let oc=3;oc<=7;oc++){const m=12*oc+pc,w=Math.exp(-Math.pow((m-62)/11,2));if(w<.05)continue;
+        for(const det of[-8,8]){const o=ac.createOscillator(),v=ac.createGain();o.type='sawtooth';o.frequency.value=hz(m);o.detune.value=det;
+          v.gain.setValueAtTime(0,t);v.gain.linearRampToValueAtTime(vol*w,t+.6);v.gain.setValueAtTime(vol*w,t+dur-.5);v.gain.linearRampToValueAtTime(0,t+dur+.1);
+          o.connect(v).connect(padF);o.start(t);o.stop(t+dur+.15);}}}
+  }
   function bass(root,t,vol){
-    osc('sawtooth',hz(root+12),t,STEP*1.7,.05*vol,bassF);
-    osc('sine',hz(root),t,STEP*1.9,.09*vol,pump);
+    const r=wrap(root+key,33);
+    osc('sawtooth',hz(r+12),t,SD()*1.7,.05*vol,bassF);
+    osc('sine',hz(r),t,SD()*1.9,.09*vol,pump);
   }
   function kick(t,vol){
     const o=ac.createOscillator(),v=ac.createGain();
     o.frequency.setValueAtTime(155,t);o.frequency.exponentialRampToValueAtTime(42,t+.12);
     v.gain.setValueAtTime(vol,t);v.gain.exponentialRampToValueAtTime(.0001,t+.3);
     o.connect(v).connect(filt);o.start(t);o.stop(t+.32);
-    pump.gain.cancelScheduledValues(t);pump.gain.setValueAtTime(.28,t);pump.gain.linearRampToValueAtTime(1,t+STEP*3.2);
+    pump.gain.cancelScheduledValues(t);pump.gain.setValueAtTime(.28,t);pump.gain.linearRampToValueAtTime(1,t+SD()*3.2);
   }
   function nz(t,dur,vol,type,f,dest,q){
     const s=ac.createBufferSource(),fl=ac.createBiquadFilter(),v=ac.createGain();
@@ -84,13 +99,13 @@ const Music=(()=>{
   const clap=t=>{for(const o of[0,.011,.023])nz(t+o,o<.02?.03:.2,.07,'bandpass',1400,filt,1.2);};
   const crash=(t,vol)=>nz(t,1.6,vol||.07,'highpass',4500,bus);
   function arp(ch,s,t,hi){                                 // auf und ab durch Akkord + Oktave
-    const notes=[ch[0],ch[1],ch[2],ch[0]+12,ch[1]+12,ch[2]+12];
+    const b=ch.map(n=>wrap(n+key,54)).sort((x,y)=>x-y),notes=[b[0],b[1],b[2],b[0]+12,b[1]+12,b[2]+12];
     const seq=[0,1,2,3,4,5,4,3,2,3,4,5,4,3,2,1],n=notes[seq[s%16]]+12;
-    osc('square',hz(n),t,STEP*.85,.016,filt);osc('square',hz(n),t,STEP*.85,.01,dly);
-    if(hi&&s%2===0)osc('triangle',hz(n+12),t,STEP*1.5,.014,dly);
+    osc('square',hz(n),t,SD()*.85,.016,filt);osc('square',hz(n),t,SD()*.85,.01,dly);
+    if(hi&&s%2===0)osc('triangle',hz(n+12),t,SD()*1.5,.014,dly);
   }
   function bell(ch,s,t){
-    const n=ch[(s/2|0)%3]+24;
+    const n=wrap(ch[(s/2|0)%3]+key,66)+12;
     osc('sine',hz(n),t,.5,.03,filt);osc('sine',hz(n)*2.01,t,.25,.01,dly);
   }
 
@@ -101,10 +116,13 @@ const Music=(()=>{
   }
   function schedule(s,t){
     const b=s%16,ci=Math.floor(s/32)%4,ch=CHORDS[ci],root=ROOTS[ci],L=level;
-    if(s%32===0)pad(ch,t,mode==='play'?.011:.009);
+    const run=gm==='run'&&mode==='play';
+    if(s%32===0&&pendKey){key=(key+pendKey)%12;pendKey=0;}           // Tonart wechselt nur auf einem Akkordwechsel
+    if(b%4===0&&mode==='play'){beats.push(t);if(beats.length>12)beats.shift();}
+    if(s%32===0)run?shepPad(ch,t,.0075):pad(ch,t,mode==='play'?.011:.009);
     if(mode==='menu'||mode==='over'){
       if(b%8===0)bass(root,t,.6);
-      if(mode==='menu'&&s%2===0)osc('triangle',hz(ch[(s/2|0)%3]+12),t,STEP*3,.012,dly);
+      if(mode==='menu'&&s%2===0)osc('triangle',hz(ch[(s/2|0)%3]+12),t,SD()*3,.012,dly);
       return;
     }
     if(b%4===0)bass(root,t,1);
@@ -116,7 +134,7 @@ const Music=(()=>{
     if(L>=4)arp(ch,s,t,L>=6);
     if(L>=6&&b%4===2)nz(t,.35,.018,'highpass',9000);
     if(L>=4&&s%32>=28)nz(t,.07,.025+.012*(s%32-28),'bandpass',1800,filt,.9);   // Wirbel vor dem Akkordwechsel
-    if(frenzy>0&&s%2===0)bell(ch,s,t);
+    if((frenzy>0||(run&&L>=3))&&s%2===0)bell(ch,s,t);                 // Runaway: Glocken schon ab ×4
   }
   function setMode(m){
     const now=ac.currentTime,prev=mode;mode=m;
@@ -129,7 +147,7 @@ const Music=(()=>{
     filt.frequency.cancelScheduledValues(now);filt.frequency.setValueAtTime(Math.max(60,filt.frequency.value),now);
     bus.gain.setTargetAtTime(VOL(m),now,m==='pause'?.05:.4);
     if(m==='play'&&prev!=='pause'){                         // neue Runde startet auf der Eins mit Becken
-      step=0;next=now+.06;crash(next,.05);
+      step=0;next=now+.06;bpm=BPM;key=0;pendKey=0;beats.length=0;crash(next,.05);
     }
   }
 
@@ -152,11 +170,36 @@ const Music=(()=>{
       const now=ac.currentTime;
       if(!running||next<now-.1){next=now+.06;running=true;}  // nach Pause oder Hänger sauber neu einrasten
       level=intensity();
+      /* Tempo: Arena fest 124, Runaway 124 → 148 mit dem Multiplikator (+4 bei Overdrive), gleitet weich */
+      const dt=Math.min(.1,Math.max(0,now-lastAt));lastAt=now;
+      const tb=gm==='run'&&mode==='play'?BPM+(combo>0?(mult()-1)/14*24:0)+(boost>0?4:0):BPM;
+      bpm+=(tb-bpm)*(1-Math.exp(-1.5*dt));
+      dly.delayTime.setTargetAtTime(SD()*3,now,.2);
       if(mode!=='dead'){
         const cut=mode==='play'?(frenzy>0?14000:CUT[level]):mode==='menu'?900:700;
         filt.frequency.setTargetAtTime(cut,now,.3);
       }
-      while(next<now+LOOK){schedule(step,next);next+=STEP;step++;}
+      while(next<now+LOOK){schedule(step,next);next+=SD();step++;}
+    },
+    /* Aktuelles Tempo (für die Scroll-Geschwindigkeit in Runaway) */
+    bpm(){return mode==='play'?bpm:BPM;},
+    /* Neue Zone: Tonart einen Halbton rauf, wirksam ab dem nächsten Akkord */
+    zoneUp(){pendKey++;},
+    /* Transposition für die Treffertöne, in −5…+6 gefaltet, damit sie in der Lage bleiben */
+    tr(){return gm==='run'&&mode==='play'?(key>6?key-12:key):0;},
+    /* Puls 0–1: springt auf jedem hörbaren Viertel hoch und klingt schnell ab (für pulsierende Linien) */
+    pulse(){
+      if(!ac||!on||muted||mode!=='play'||!running)return 0;
+      const heard=ac.currentTime-(ac.outputLatency||ac.baseLatency||0);
+      for(let i=beats.length-1;i>=0;i--){const d=heard-beats[i];if(d>=0)return Math.exp(-d*7);}
+      return 0;
+    },
+    /* Abstand in Sekunden zum nächsten hörbaren Viertel (negativ = Schlag kommt noch), null ohne Musik */
+    beatOffset(){
+      if(!ac||!on||muted||mode!=='play'||!running||!beats.length)return null;
+      const heard=ac.currentTime-(ac.outputLatency||ac.baseLatency||0);
+      let bestD=null;for(const t of beats){const d=heard-t;if(bestD===null||Math.abs(d)<Math.abs(bestD))bestD=d;}
+      return bestD;
     },
     /* Akzente aus dem Spiel: Becken auf der nächsten Sechzehntel */
     accent(kind){
@@ -164,7 +207,7 @@ const Music=(()=>{
       const t=Math.max(next,ac.currentTime+.01);
       if(kind==='rescue'){nz(t,.25,.05,'bandpass',2500,filt,.7);return;}
       crash(t,kind==='clear'||kind==='lvl'?.08:.05);
-      if(kind==='clear'||kind==='lvl')osc('sine',hz(ROOTS[Math.floor(step/32)%4]),t,1.2,.12,bus);   // tiefer Bass-Drop
+      if(kind==='clear'||kind==='lvl')osc('sine',hz(wrap(ROOTS[Math.floor(step/32)%4]+key,33)),t,1.2,.12,bus);   // tiefer Bass-Drop
     }
   };
 })();

@@ -8,7 +8,7 @@ Keine Bibliotheken, kein Build-Schritt.
 - `css/style.css` – alle Styles
 - `js/*.js` – klassische Skripte (kein ES-Modul), in dieser Reihenfolge geladen:
   `core` (Konstanten, Zustand, Soundeffekte, Spurfarben) → `music` (mitwachsende
-  Musik, WebAudio-Sequencer) → `rules` (Regeln, Spawn, Sprung,
+  Musik, WebAudio-Sequencer) → `rules` → `runaway` (zweiter Modus) (Regeln, Spawn, Sprung,
   Tod, Ergebnis) → `menu` → `update` (Simulation) → `render` (Zeichnen, Größe)
   → `main` (Schleife, Eingabe, Start). Alle teilen sich den globalen Gültigkeitsbereich,
   Reihenfolge beachten. Läuft auch ohne Server per Doppelklick.
@@ -16,7 +16,15 @@ Keine Bibliotheken, kein Build-Schritt.
 Lokal testen: `npx serve -l 5173 .` (oder `python -m http.server 5173`),
 dann http://localhost:5173 öffnen.
 
-## Spielprinzip
+## Modi
+- **Arena** (`gm=='arena'`): das Original, Gegner von allen Seiten, `camX` bleibt 0.
+- **Runaway** (`gm=='run'`): Endlos-Runner in `js/runaway.js`. Welt in Weltkoordinaten,
+  Kamera `camX` fährt nach rechts, linker Bildrand = Wand „The Static“. Rekord in Metern
+  (`zack.best.run`). Musik: Tempo Ramp mit dem Multiplikator, Tonart +1 pro Zone,
+  Gold-Rush-Glocken schon ab ×4. Maus zielt in Bildschirm-Koordinaten (`aimS`),
+  `aim` ist die Weltposition.
+
+## Spielprinzip (Arena)
 - Der Spieler ist ein Funke und bewegt sich nur per Sprung: Maus zielt,
   Klick/Leertaste springt bis zu `RANGE` (330) Einheiten und trifft alles
   auf der Linie. Der Sprung ist sofort (kein Flug), siehe `dash()`.

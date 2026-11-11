@@ -10,7 +10,8 @@ function frame(ts){
 }
 
 /* ---------- Eingabe ---------- */
-function toWorld(e){const r=cv.getBoundingClientRect();aim.x=(e.clientX-r.left)/r.width*W;aim.y=(e.clientY-r.top)/r.height*H;}
+function toWorld(e){const r=cv.getBoundingClientRect();aimS.x=(e.clientX-r.left)/r.width*W;aimS.y=(e.clientY-r.top)/r.height*H;
+  aim.x=aimS.x+camX;aim.y=aimS.y;}
 function act(){if(st==='menu'||(st==='over'&&overLock<=0))start();else if(st==='pause')togglePause();else dash();}
 function togglePause(){if(st==='play'){st='pause';$('pz').textContent='Resume';}else if(st==='pause'){st='play';$('pz').textContent='Pause';last=0;}}
 stage.addEventListener('pointermove',toWorld);

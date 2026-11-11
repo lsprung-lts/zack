@@ -82,9 +82,10 @@ tbody tr:target{background:rgba(255,210,63,.12)}
 <div class="wrap">
 <nav aria-label="Contents">
   <p class="brand">ZACK<small>WIKI</small></p>
-  <p class="meta">Version: after v1.0.1 (English) · Nov 11, 2026<br>Source: <code>js/*.js</code></p>
+  <p class="meta">Version: after v1.0.1 (Arena + Runaway) · Nov 11, 2026<br>Source: <code>js/*.js</code></p>
   <ol id="toc">
     <li><a href="#overview">Overview</a></li>
+    <li><a href="#runaway">Runaway mode</a></li>
     <li><a href="#controls">Controls &amp; dash</a></li>
     <li><a href="#flow">Flow &amp; states</a></li>
     <li><a href="#points">Points</a></li>
@@ -107,13 +108,36 @@ tbody tr:target{background:rgba(255,210,63,.12)}
 <!-- ===================================================== -->
 <section id="overview">
   <h2>Overview</h2>
-  <p class="lead">You are a spark. You only move by dashing – and everything on the dash line is gone. Hit something and you can dash again right away. Miss and you're briefly defenseless. Get touched by an enemy: game over.</p>
+  <p class="lead">Two modes: <b>Arena</b> (survive the swarm – everything below unless noted) and <b>Runaway</b> (outrun the Static, see its own section). You are a spark. You only move by dashing – and everything on the dash line is gone. Hit something and you can dash again right away. Miss and you're briefly defenseless. Get touched by an enemy: game over.</p>
   <div class="flow"><span>Aim</span><i>→</i><span>Dash</span><i>→</i><span>Hit</span><i>→</i><span>Combo grows</span><i>→</i><span>Multiplier</span><i>→</i><span>Best</span></div>
   <div class="mine" id="mine">
     <div><span>Your best (this device)</span><b id="myBest">–</b></div>
   </div>
   <a class="play" href="../">Play</a>
   <p class="note">Every row in the tables has a code (e.g. <code>E-D2</code>). If something feels off, just name the code: “<code>E-D2</code> is too fast”. Clicking a code gives you a direct link.</p>
+</section>
+
+<!-- ===================================================== -->
+<section id="runaway">
+  <h2>Runaway mode</h2>
+  <p>The world scrolls to the right. From the left, <b>the Static</b> (a flickering noise wall at the screen edge) follows. Touch it and you're out. You still only move by dashing – hits recharge, so chains push you forward. Round length depends purely on skill.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Code</th><th>What</th><th>Value</th><th>Code ref</th></tr></thead>
+    <tbody>
+      <tr id="R1"><td class="k"><a href="#R1">R1</a></td><td>Distance</td><td>10 world units = 1 m; 1 point per meter; best stored in meters (<code>zack.best.run</code>)</td><td><code>UNIT</code></td></tr>
+      <tr id="R2"><td class="k"><a href="#R2">R2</a></td><td>Camera speed</td><td><code>(110 + 14 × (zone − 1, max 10)) × BPM / 124</code> units/s; pulls ahead faster when you're right of 60 % of the screen</td><td><code>camSpeed()</code>, <code>CAM_LEAD</code></td></tr>
+      <tr id="R3"><td class="k"><a href="#R3">R3</a></td><td>The Static</td><td>46 units wide at the left edge; touching it = “The Static got you!”; red warning glow within 220 units</td><td><code>WALL_X</code></td></tr>
+      <tr id="R4"><td class="k"><a href="#R4">R4</a></td><td>Zones</td><td>every 400 m: “Zone N!”, new tint, crash + bass drop, music key +1 half step, denser formations</td><td><code>ZONE_M</code>, <code>zoneUp()</code></td></tr>
+      <tr id="R5"><td class="k"><a href="#R5">R5</a></td><td>Formations</td><td>zone 1: line, diagonal, column, snake, hunters · zone 2+: + Spiky gates, lasers, Dashers · zone 3+: + V shape, more lasers and Dashers; gap 230–360 units (shrinks per zone)</td><td><code>formation()</code></td></tr>
+      <tr id="R6"><td class="k"><a href="#R6">R6</a></td><td>Lasers</td><td>vertical beam with a gap (240 − 12 × zone, min 150); a dash that crosses the beam outside the gap stops just before it</td><td><code>laserClip()</code></td></tr>
+      <tr id="R7"><td class="k"><a href="#R7">R7</a></td><td>Perfect</td><td>dash within ±80 ms of a beat: hits ×2; streak callouts at 4 / 8 / 12 / 16: In the Groove! · On Fire! · Unstoppable! · Metronome!; needs music on</td><td><code>runPerfect()</code>, <code>PERFECT_WIN</code></td></tr>
+      <tr id="R8"><td class="k"><a href="#R8">R8</a></td><td>Escape!</td><td>get within 70 units of the Static, then back beyond 170: <code>30 × multiplier × Gold Rush</code></td><td><code>escape()</code></td></tr>
+      <tr id="R9"><td class="k"><a href="#R9">R9</a></td><td>Gold</td><td>every 8–13 s (Arena: 13–24 s), spawns close to the Static and bobs up and down – risk vs. reward</td><td><code>runTick()</code></td></tr>
+      <tr id="R10"><td class="k"><a href="#R10">R10</a></td><td>Best flag</td><td>dashed yellow line at your best distance; passing it: “New Best!”</td><td><code>runDrawBack()</code></td></tr>
+      <tr id="R11"><td class="k"><a href="#R11">R11</a></td><td>Music</td><td>Tempo Ramp: 124 BPM at combo 0 → 148 at ×15 (+4 in Overdrive); Gold Rush bells already from ×4; Shepard-voiced pads so the key can climb forever; hit sounds transposed with the key</td><td><code>js/music.js</code></td></tr>
+      <tr id="R12"><td class="k"><a href="#R12">R12</a></td><td>Results</td><td>meters, points, zone, best combo, perfects (best streak), time</td><td><code>runOver()</code></td></tr>
+    </tbody>
+  </table></div>
 </section>
 
 <!-- ===================================================== -->

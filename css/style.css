@@ -94,6 +94,16 @@ button.skin small{position:absolute;inset:0;display:grid;place-items:center;font
 .unlock{margin:0;font-size:clamp(12px,1.5vw,16px);opacity:.8}
 .unlock b{color:var(--spark)}
 .unlock.new{opacity:1;padding:.35em .9em;border-radius:99px;background:rgba(255,210,63,.14);box-shadow:inset 0 0 0 1px rgba(255,210,63,.5);animation:blink 1.2s ease-in-out 3}
+/* ---------- Moduswahl ---------- */
+.modes{display:flex;gap:8px;padding:5px;border-radius:14px;background:rgba(27,16,54,.8);box-shadow:inset 0 0 0 1px rgba(246,239,255,.1)}
+button.mode{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:clamp(110px,15vw,170px);padding:.45em 1em;font-size:clamp(14px,1.8vw,19px);
+  color:var(--ink);background:transparent;border-radius:10px;opacity:.6;transition:opacity .15s,background .15s}
+button.mode small{font-family:var(--font-body);font-weight:600;font-size:clamp(10px,1.1vw,12px);opacity:.75}
+button.mode:hover{opacity:.9}
+button.mode[aria-checked="true"]{opacity:1;color:var(--night);background:var(--spark);box-shadow:3px 3px 0 var(--foe)}
+.overlay.how .modes{display:none}
+#ovRules li.r{display:none}
+.overlay.m-run #ovRules li.r{display:list-item}
 /* ---------- Musik-Regler ---------- */
 .prefs{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px clamp(14px,2.5vw,28px)}
 .overlay.how .prefs{display:none}

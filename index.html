@@ -27,6 +27,10 @@
       <p class="sub" id="tag">One click, one dash. Miss and you're a sitting duck.</p>
       <p class="best" id="mBest" hidden>Best <b id="mBestV">0</b></p>
       <div class="row">
+        <div class="modes nostart" id="modes" role="radiogroup" aria-label="Mode">
+          <button class="mode" role="radio" data-m="arena">Arena<small>Survive the swarm</small></button>
+          <button class="mode" role="radio" data-m="run">Runaway<small>Outrun the Static</small></button>
+        </div>
         <button class="primary" id="go">Play</button>
         <button class="ghost big" id="how" aria-expanded="false">How to play</button>
       </div>
@@ -52,16 +56,20 @@
         <li>A hit while the ring is <b>red</b>: <b>Clutch!</b> Enemies wearing a <b>crown</b> are worth ×5.</li>
         <li>Wipe the field for a <b>Clean Sweep</b> bonus. Every 30 s brings a new <b>level</b>.</li>
         <li>Your points add up across all runs and unlock new <b>trail colors</b>.</li>
+        <li class="r"><b>Runaway:</b> the world scrolls – keep dashing right or <b>the Static</b> swallows you.</li>
+        <li class="r"><b>Lasers</b> stop your dash – aim for the gap.</li>
+        <li class="r">Dash <b>on the beat</b> for <b>Perfect</b> (hits ×2). Slip away from the Static at the last second: <b>Escape!</b></li>
+        <li class="r">Every 400 m a new <b>zone</b>: faster, denser – and the music climbs with you.</li>
       </ul>
      </div>
      <div class="screen" id="ovResult" hidden>
       <h1 id="ovTitle">ZACK</h1>
       <p class="sub" id="ovSub"></p>
       <dl class="stats" id="ovStats">
-        <div><dt>Best combo</dt><dd id="sCombo">0</dd></div>
-        <div><dt>Kills</dt><dd id="sKills">0</dd></div>
-        <div><dt>Accuracy</dt><dd id="sAcc">0%</dd></div>
-        <div><dt>Time</dt><dd id="sTime">0 s</dd></div>
+        <div><dt id="dA">Best combo</dt><dd id="sCombo">0</dd></div>
+        <div><dt id="dB">Kills</dt><dd id="sKills">0</dd></div>
+        <div><dt id="dC">Accuracy</dt><dd id="sAcc">0%</dd></div>
+        <div><dt id="dD">Time</dt><dd id="sTime">0 s</dd></div>
       </dl>
       <p class="unlock" id="ovUnlock"></p>
       <div class="row">
@@ -79,6 +87,7 @@
 <script src="js/core.js"></script>
 <script src="js/music.js"></script>
 <script src="js/rules.js"></script>
+<script src="js/runaway.js"></script>
 <script src="js/menu.js"></script>
 <script src="js/update.js"></script>
 <script src="js/render.js"></script>

@@ -16,6 +16,11 @@ let st='menu',clock=0,runT=0,score=0,shown=0,punch=0,combo=0,comboT=0,bestCombo=
 let cd=0,inv=0,frenzy=0,boost=0,hitStop=0,shake=0,flash=0,dieT=0,overLock=0,attempt=0,reason='',recordHit=false;
 let best=0,spawnT=0,goldT=14;
 const p={x:W/2,y:H/2},aim={x:W/2+200,y:H/2};
+/* Spielmodus: 'arena' (Original) oder 'run' (Runaway). camX = Kamera-Versatz in der Welt (Arena immer 0).
+   Die Maus zielt in Bildschirm-Koordinaten (aimS); aim ist daraus die Weltposition. */
+let gm='arena',camX=0;
+const aimS={x:W/2+200,y:H/2};
+try{gm=localStorage.getItem('zack.mode')==='run'?'run':'arena';}catch(e){}
 let foes=[],parts=[],floats=[],trails=[],calls=[];
 try{best=+localStorage.getItem('zack.best')||0}catch(e){}
 
@@ -33,7 +38,7 @@ function hiss(d,vol,hp){if(!ac||muted)return;try{
   const s=ac.createBufferSource(),v=ac.createGain(),f=ac.createBiquadFilter();
   f.type='highpass';f.frequency.value=hp;v.gain.value=vol;s.buffer=b;s.connect(f).connect(v).connect(ac.destination);s.start();}catch(e){}}
 const PENTA=[0,2,4,7,9];
-const note=i=>330*Math.pow(2,(PENTA[i%5]+12*Math.floor(i/5))/12);   // jede Serie klingt höher
+const note=i=>330*Math.pow(2,(PENTA[i%5]+12*Math.floor(i/5)+Music.tr())/12);   // jede Serie klingt höher; in Runaway mit der Tonart verschoben
 
 /* ---------- Stufen, Feld leer, Ringe ---------- */
 let slow=0,clearCd=0,lvl=1,rings=[];
