@@ -14,15 +14,22 @@ function update(rdt){
   if(slow>0){slow-=rdt;if(st==='play')dt*=.35;}  // kurze Zeitlupe nach „Feld leer“
   if(st==='play'&&dt>0){
     runT+=dt;if(cd>0)cd-=dt;if(inv>0)inv-=dt;if(frenzy>0)frenzy-=dt;if(boost>0)boost-=dt;if(clearCd>0)clearCd-=dt;
+    /* A: Der Combo-Timer wartet, solange nichts in Reichweite ist.
+       D: Im Gold Rush läuft er halb so schnell – wie die Gegner. */
+    comboHold=combo>0&&!targetNear();
+    if(combo>0&&!comboHold){comboT-=dt*(frenzy>0?.5:1);if(comboT<=0){bank();combo=0;}}
     const nl=1+Math.floor(runT/LVL_T);if(nl>lvl){lvl=nl;lvlUp();}
-    if(combo>0){comboT-=dt;if(comboT<=0){bank();combo=0;}}
     spawnT-=dt;
     if(spawnT<=0&&foes.length<42){spawnT=Math.max(.27,.95-runT*.009);
       const r=Math.random();spawn(runT>10&&r<.17?'r':runT>22&&r<.38?'i':'d');}
     goldT-=dt;if(goldT<=0){goldT=rnd(13,24);spawn('g');tone(1320,.25,'sine',.05,1760);}
+    /* B: Mindestbestand an roten Chasern, Nachschub höchstens alle 0,25 s */
+    refillT-=dt;
+    if(refillT<=0&&foes.length<42&&foes.filter(e=>e.k==='d').length<MIN_CHASERS){refillT=.25;refillChaser();}
   }
   const edt=dt*(frenzy>0?.5:1);
   for(let i=foes.length-1;i>=0;i--){const e=foes[i];e.age+=edt;
+    if(e.spawnIn>0){e.spawnIn-=edt;continue;}       // materialisiert gerade: steht still, harmlos (treffbar ist er schon)
     if(e.k==='r'){if(e.warn>0){e.warn-=edt;if(e.warn<=0)hiss(.15,.04,1500);}
       else{e.x+=e.dx*e.spd*edt;e.y+=e.dy*e.spd*edt;if(e.x<-120||e.x>W+120||e.y<-120||e.y>H+120){foes.splice(i,1);continue;}}}
     else if(e.k==='g'){e.x+=e.vx*edt;e.y+=e.vy*edt;if(e.x<60||e.x>W-60)e.vx*=-1;if(e.y<60||e.y>H-60)e.vy*=-1;

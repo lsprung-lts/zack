@@ -35,6 +35,13 @@ function hiss(d,vol,hp){if(!ac||muted)return;try{
 const PENTA=[0,2,4,7,9];
 const note=i=>330*Math.pow(2,(PENTA[i%5]+12*Math.floor(i/5))/12);   // jede Serie klingt höher
 
+/* ---------- Arena-Fluss: Combo geht nicht mehr durch ein leeres Feld verloren ---------- */
+const HOLD_RANGE=120;                              // Combo-Timer steht, wenn kein Gegner näher als Sprungweite + 120 ist
+const MIN_CHASERS=3;                               // so viele rote Chaser sind mindestens auf dem Feld
+const NEAR_SPAWN=[300,360];                        // Nachschub-Chaser erscheinen teils in diesem Abstand …
+const SPAWN_IN=.5;                                 // … und materialisieren 0,5 s lang (harmlos, aber schon treffbar)
+let comboHold=false,refillT=0;
+
 /* ---------- Stufen, Feld leer, Ringe ---------- */
 let slow=0,clearCd=0,lvl=1,rings=[];
 const tint=[0,0,0,0];                              // aktueller Farbton des Feldes (r,g,b,a), weich überblendet
