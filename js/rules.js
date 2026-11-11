@@ -111,8 +111,10 @@ function dash(){
     if(q.d<e.r+15){if(spiky(e)){if(!fatal||q.t<fatal.t)fatal={e,t:q.t};}else hit.push({e,t:q.t});}}
   if(fatal){const fx=sx+(ex-sx)*fatal.t,fy=sy+(ey-sy)*fatal.t;
     trails.push({x1:sx,y1:sy,x2:fx,y2:fy,life:.22,b:boost>0});p.x=fx;p.y=fy;die('Skewered');return;}
+  /* Runaway: ohne Treffer nur ein kurzer Stolper-Schritt */
+  if(gm==='run'&&!hit.length){ex=sx+(ex-sx)*STUMBLE_RANGE;ey=sy+(ey-sy)*STUMBLE_RANGE;}
   trails.push({x1:sx,y1:sy,x2:ex,y2:ey,life:.22,b:boost>0});p.x=ex;p.y=ey;
-  if(!hit.length){cd=boost>0?0:frenzy>0?.08:.38;inv=.08;hiss(.12,.05,900);return;}
+  if(!hit.length){cd=boost>0?0:frenzy>0?(gm==='run'?.15:.08):(gm==='run'?STUMBLE_CD:.38);inv=.08;hiss(.12,.05,900);return;}
   hit.sort((a,b)=>a.t-b.t);hits++;cd=0;inv=.24;
   const n=hit.length,saved=combo>=5&&comboT<comboMax()*RESCUE_AT;
   const wasOnField=hit.some(h=>h.e.k!=='g'&&onField(h.e));
@@ -134,6 +136,7 @@ function dash(){
   hiss(.08,.07,2500);
   hitStop=.045+.018*Math.min(n,4);
   if(!calm){shake=Math.min(1,.3+.14*n);flash=Math.min(.22,.06+.04*n);}
+  if(gm==='run')runPush(n,perf);                 // Treffer stoßen die Wand zurück
   if(saved)rescue();
   if(wasOnField&&clearCd<=0&&runT>3&&!foes.some(e=>e.k!=='g'&&onField(e)))fieldClear();
   checkRecord();

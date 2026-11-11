@@ -14,7 +14,7 @@ function update(rdt){
   if(slow>0){slow-=rdt;if(st==='play')dt*=.35;}  // kurze Zeitlupe nach „Feld leer“
   if(st==='play'&&dt>0){
     runT+=dt;if(cd>0)cd-=dt;if(inv>0)inv-=dt;if(frenzy>0)frenzy-=dt;if(boost>0)boost-=dt;if(clearCd>0)clearCd-=dt;
-    if(combo>0){comboT-=dt;if(comboT<=0){bank();combo=0;}}
+    if(combo>0){comboT-=dt;if(comboT<=0){bank();combo=0;if(gm==='run')runSurge();}}
     if(gm==='run')runTick(dt,rdt);              // Runaway: Kamera, Formationen, Wand, Zonen
     else{
       const nl=1+Math.floor(runT/LVL_T);if(nl>lvl){lvl=nl;lvlUp();}
@@ -31,7 +31,7 @@ function update(rdt){
       else{e.x+=e.dx*e.spd*edt;e.y+=e.dy*e.spd*edt;if(e.x<camX-120||e.x>camX+W+120||e.y<-120||e.y>H+120){foes.splice(i,1);continue;}}}
     else if(e.k==='g'){e.x+=e.vx*edt;e.y+=e.vy*edt;if(gm==='arena'&&(e.x<60||e.x>W-60))e.vx*=-1;if(e.y<60||e.y>H-60)e.vy*=-1;
       e.life-=edt;if(e.life<=0){foes.splice(i,1);continue;}}
-    else if(e.still){if(e.k==='i')e.ph+=edt;}     // Runaway: steht in der Formation
+    else if(e.still){if(e.mv)runMove(e);if(e.k==='i')e.ph+=edt;}   // Runaway: bewegt sich mit seiner Formation
     else{let tx=p.x,ty=p.y;
       if(st==='menu'){tx=W/2+Math.cos(e.age*.5+e.seed)*460;ty=H/2+Math.sin(e.age*.7+e.seed)*250;}
       const a=Math.atan2(ty-e.y,tx-e.x),k=ease(2.6,edt);

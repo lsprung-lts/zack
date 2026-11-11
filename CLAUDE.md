@@ -19,7 +19,9 @@ dann http://localhost:5173 öffnen.
 ## Modi
 - **Arena** (`gm=='arena'`): das Original, Gegner von allen Seiten, `camX` bleibt 0.
 - **Runaway** (`gm=='run'`): Endlos-Runner in `js/runaway.js`. Welt in Weltkoordinaten,
-  Kamera `camX` fährt nach rechts, linker Bildrand = Wand „The Static“. Rekord in Metern
+  Kamera `camX` folgt dem Spieler, die Wand „The Static“ (`wallX`) jagt ihn,
+  wird schneller und wird durch Treffer zurückgestoßen; Fehlsprünge sind kurze Stolperer.
+  Werte per Bot-Simulation abgestimmt (Kommentar in runaway.js). Rekord in Metern
   (`zack.best.run`). Musik: Tempo Ramp mit dem Multiplikator, Tonart +1 pro Zone,
   Gold-Rush-Glocken schon ab ×4. Maus zielt in Bildschirm-Koordinaten (`aimS`),
   `aim` ist die Weltposition.
