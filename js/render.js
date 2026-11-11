@@ -62,11 +62,22 @@ function render(){
     g.beginPath();g.arc(ex,ey,9,0,6.3);g.stroke();}
   g.globalCompositeOperation='lighter';
   for(const t of trails){const a=t.life/.22;g.strokeStyle=t.b?'rgba(92,225,230,'+a*.9+')':skinCol(a*.9);g.lineWidth=4+18*a;g.beginPath();g.moveTo(t.x1,t.y1);g.lineTo(t.x2,t.y2);g.stroke();
-    g.strokeStyle='rgba(255,255,255,'+a+')';g.lineWidth=2+5*a;g.stroke();}
+    g.strokeStyle='rgba(255,255,255,'+a+')';g.lineWidth=2+5*a;g.stroke();
+    for(const fr of[.3,.55,.8]){const gx=t.x1+(t.x2-t.x1)*fr,gy=t.y1+(t.y2-t.y1)*fr;   /* Nachbilder des Funkens */
+      g.fillStyle=t.b?'rgba(92,225,230,'+a*fr*.7+')':skinCol(a*fr*.7);g.beginPath();g.arc(gx,gy,5+6*fr,0,6.3);g.fill();}}
   for(const o of rings){const a=Math.max(0,o.life/o.dur);g.strokeStyle='rgba('+o.col+','+a*.8+')';g.lineWidth=2+10*a;
     g.beginPath();g.arc(o.x,o.y,o.r,0,6.3);g.stroke();}
   g.globalCompositeOperation='source-over';
   for(const e of foes)drawFoe(e);
+  /* Treffer-Vorschau: Gegner auf der Ziellinie leuchten weiß, Spikies mit Stacheln rot (= tödlich) */
+  if(st==='play'&&cd<=0){const dx=aim.x-p.x,dy=aim.y-p.y,d=Math.hypot(dx,dy);
+    if(d>=6){const L=Math.min(d,reach()),ex=Math.max(18,Math.min(W-18,p.x+dx/d*L)),ey=Math.max(18,Math.min(H-18,p.y+dy/d*L));let n=0,danger=false;
+      for(const e of foes){if(segDist(e.x,e.y,p.x,p.y,ex,ey).d>=e.r+15)continue;
+        const bad=spiky(e)&&untouch<=0;if(bad)danger=true;else if(e.k!=='u')n++;
+        g.lineWidth=3;g.strokeStyle=bad?C.foe:'rgba(255,255,255,'+(.55+Math.sin(clock*12)*.25)+')';
+        g.beginPath();g.arc(e.x,e.y,e.r+9,0,6.3);g.stroke();}
+      if(danger||n>=2){const lab=danger?'!':'×'+n;g.font='16px '+DISP;g.textAlign='center';g.textBaseline='middle';g.lineWidth=4;g.strokeStyle='#120a28';
+        g.strokeText(lab,ex,ey-22);g.fillStyle=danger?C.foe:C.ink;g.fillText(lab,ex,ey-22);}}}   // tödlicher Spiky auf der Linie: rotes ! statt Zahl
   /* Spieler mit Serien-Ring */
   if(st!=='dying'&&st!=='over'){
     const ready=cd<=0;
@@ -82,7 +93,10 @@ function render(){
     g.fillStyle='rgba(255,210,63,'+(ready?.25:.08)+')';g.beginPath();g.arc(p.x,p.y,17+Math.sin(clock*7)*2,0,6.3);g.fill();
     g.fillStyle=ready?C.you:'#8d7fae';g.beginPath();g.arc(p.x,p.y,10,0,6.3);g.fill();
     g.fillStyle='#fff';g.beginPath();g.arc(p.x,p.y,4.5,0,6.3);g.fill();
-    if(!ready){g.strokeStyle=C.foe;g.lineWidth=3;g.beginPath();g.arc(p.x,p.y,16,-1.571,-1.571+(cd/.38)*6.283);g.stroke();}
+    if(!ready){const f=1-cd/Math.max(.01,cdMax);g.lineWidth=3;                       /* Aufladen: Ring füllt sich */
+      g.strokeStyle='rgba(246,239,255,.15)';g.beginPath();g.arc(p.x,p.y,21,0,6.3);g.stroke();
+      g.strokeStyle='rgba(246,239,255,.85)';g.beginPath();g.arc(p.x,p.y,21,-1.571,-1.571+f*6.283);g.stroke();}
+    if(readyFlash>0){g.fillStyle='rgba(255,255,255,'+(readyFlash*.55)+')';g.beginPath();g.arc(p.x,p.y,12+10*(1-readyFlash),0,6.3);g.fill();}
   }
   g.globalCompositeOperation='lighter';
   for(const q of parts){g.globalAlpha=Math.min(1,q.life/q.max*1.6);g.strokeStyle=q.col;g.lineWidth=q.size;

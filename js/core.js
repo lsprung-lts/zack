@@ -44,6 +44,9 @@ const NEAR_SPAWN=[300,360];                        // Nachschub-Chaser erscheine
 const SPAWN_IN=.5;                                 // … und materialisieren 0,5 s lang (harmlos, aber schon treffbar)
 let comboHold=false,refillT=0;
 let lastMult=1,multPop=0;
+/* Spielgefühl: Klicks während der Pause werden gemerkt (Puffer), Aufladen sichtbar, „bereit“ als Ping */
+const BUFFER_T=.25;                                // ein Klick während der Pause wird bis „bereit“ (+0,25 s Spielraum) gemerkt
+let dashBuf=0,cdMax=.38,readyFlash=0;
 /* Untouchable: seltenes Power-up – 6 s unverwundbar, Gegner zerplatzen bei Berührung und zählen als Treffer */
 let untouch=0,untT=30;
 const UNTOUCH_T=6,UNTOUCH_EVERY=[40,60],UNTOUCH_FIRST=[22,32],UNTOUCH_LIFE=5,UNTOUCH_REACH=16;                          // Multiplikator-Sprung: kurzes Aufploppen im Combo-Element

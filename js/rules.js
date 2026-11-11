@@ -62,7 +62,7 @@ function reset(){
   foes=[];parts=[];floats=[];trails=[];calls=[];
   p.x=W/2;p.y=H/2;runT=0;score=0;shown=0;combo=0;comboT=0;bestCombo=0;kills=0;dashes=0;hits=0;aimDash=0;aimHit=0;flowT=0;
   cd=0;inv=.6;frenzy=0;boost=0;hitStop=0;spawnT=.2;goldT=rnd(11,17);recordHit=false;
-  slow=0;clearCd=0;lvl=1;rings=[];untouch=0;untT=rnd(UNTOUCH_FIRST[0],UNTOUCH_FIRST[1]);
+  slow=0;clearCd=0;lvl=1;rings=[];dashBuf=0;readyFlash=0;untouch=0;untT=rnd(UNTOUCH_FIRST[0],UNTOUCH_FIRST[1]);
 }
 
 /* ---------- Gerettet!, Feld leergeräumt, Stufen ---------- */
@@ -116,7 +116,8 @@ function segDist(px,py,x1,y1,x2,y2){const dx=x2-x1,dy=y2-y1,l=dx*dx+dy*dy||1;
   return{d:Math.hypot(px-(x1+dx*t),py-(y1+dy*t)),t};}
 
 function dash(){
-  if(st!=='play'||cd>0)return;
+  if(st!=='play')return;
+  if(cd>0){dashBuf=cd+BUFFER_T;return;}          // während der Pause geklickt: merken, springt sobald bereit
   let dx=aim.x-p.x,dy=aim.y-p.y;const d=Math.hypot(dx,dy);if(d<6)return;
   const L=Math.min(d,reach()),sx=p.x,sy=p.y;
   const ex=Math.max(18,Math.min(W-18,sx+dx/d*L)),ey=Math.max(18,Math.min(H-18,sy+dy/d*L));
@@ -130,7 +131,7 @@ function dash(){
   if(fatal){const fx=sx+(ex-sx)*fatal.t,fy=sy+(ey-sy)*fatal.t;
     trails.push({x1:sx,y1:sy,x2:fx,y2:fy,life:.22,b:boost>0});p.x=fx;p.y=fy;die('Skewered');return;}
   trails.push({x1:sx,y1:sy,x2:ex,y2:ey,life:.22,b:boost>0});p.x=ex;p.y=ey;
-  if(!hit.length){cd=boost>0?0:frenzy>0?.08:.38;inv=.08;hiss(.12,.05,900);return;}
+  if(!hit.length){cd=boost>0?0:frenzy>0?.08:.38;cdMax=cd;inv=.08;hiss(.12,.05,900);return;}
   hit.sort((a,b)=>a.t-b.t);hits++;if(aimed)aimHit++;cd=0;inv=.24;
   const n=hit.length,saved=combo>=5&&comboT<comboMax()*RESCUE_AT;
   const wasOnField=hit.some(h=>h.e.k!=='g'&&onField(h.e));

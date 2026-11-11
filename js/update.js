@@ -3,6 +3,7 @@
 /* ---------- Simulation ---------- */
 function update(rdt){
   clock+=rdt;
+  readyFlash=Math.max(0,readyFlash-rdt*5);
   shake=Math.max(0,shake-rdt*4);flash=Math.max(0,flash-rdt*1.6);punch=Math.max(0,punch-rdt*5);
   if(overLock>0)overLock-=rdt;
   /* Große Meldungen nacheinander statt übereinander; wartet eine weitere, läuft die aktuelle schneller ab */
@@ -15,7 +16,10 @@ function update(rdt){
   else if(st==='dying')dt=rdt*.12;              // Zeitlupe beim Tod
   if(slow>0){slow-=rdt;if(st==='play')dt*=.35;}  // kurze Zeitlupe nach „Feld leer“
   if(st==='play'&&dt>0){
-    runT+=dt;if(cd>0)cd-=dt;if(inv>0)inv-=dt;if(frenzy>0)frenzy-=dt;if(boost>0)boost-=dt;if(clearCd>0)clearCd-=dt;if(untouch>0)untouch-=dt;
+    runT+=dt;
+    if(cd>0){cd-=dt;if(cd<=0&&cdMax>=.2){readyFlash=1;tone(1760,.05,'sine',.03);}}   // wieder bereit: kurzes Ping
+    if(dashBuf>0){dashBuf-=dt;if(cd<=0){dashBuf=0;dash();}}                          // gemerkter Klick springt jetzt
+    if(inv>0)inv-=dt;if(frenzy>0)frenzy-=dt;if(boost>0)boost-=dt;if(clearCd>0)clearCd-=dt;if(untouch>0)untouch-=dt;
     /* A: Der Combo-Timer wartet, solange nichts in Reichweite ist.
        D: Im Gold Rush läuft er halb so schnell – wie die Gegner. */
     if(combo>0)flowT+=dt;                          // Flow: Zeit mit laufender Combo
