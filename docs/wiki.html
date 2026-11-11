@@ -216,7 +216,9 @@ tbody tr:target{background:rgba(255,210,63,.12)}
       <tr id="M1"><td class="k"><a href="#M1">M1</a></td><td>Combo</td><td>+1 per enemy hit</td><td><code>combo</code></td></tr>
       <tr id="M2"><td class="k"><a href="#M2">M2</a></td><td>Multiplier</td><td><code>1 + ⌊combo / 5⌋</code>, max ×15 (from combo 70)</td><td><code>mult()</code></td></tr>
       <tr id="M3"><td class="k"><a href="#M3">M3</a></td><td>Combo timer (full)</td><td><code>max(1.15 s; 2.3 s − 0.012 × run time)</code> → minimum from about 96 s</td><td><code>comboMax()</code></td></tr>
-      <tr id="M4"><td class="k"><a href="#M4">M4</a></td><td>Refilling the timer</td><td>every hit: full · Close Call: +0.4 s (up to full)</td><td><code>comboT</code></td></tr>
+      <tr id="M4"><td class="k"><a href="#M4">M4</a></td><td>Refilling the timer</td><td>every hit: full · Close Call: +0.4 s (up to full) · <b>Arena: waits</b> (ring turns icy blue) while no enemy is within dash range + 120 · runs at half speed during Gold Rush</td><td><code>comboT</code></td></tr>
+      <tr id="M7"><td class="k"><a href="#M7">M7</a></td><td>Chaser refill (Arena)</td><td>fewer than 3 red Chasers on the field → a new one every 0.25 s; every second one appears close (300–360 away) and materializes for 0.5 s (harmless, already hittable) with a red ring</td><td><code>refillChaser()</code>, <code>MIN_CHASERS</code></td></tr>
+      <tr id="M8"><td class="k"><a href="#M8">M8</a></td><td>Bot test (14 runs each)</td><td>before: 38 s, 4.3 combo losses, ×1.85 avg, 3,803 pts · after: 35 s, 0.2 losses, ×4.35 avg, 13,325 pts</td><td>–</td></tr>
       <tr id="M5"><td class="k"><a href="#M5">M5</a></td><td>Display</td><td>ring around the spark, red below 30 %, “×N” above it</td><td><code>render()</code></td></tr>
       <tr id="M6"><td class="k"><a href="#M6">M6</a></td><td>Sound per hit</td><td>pentatonic scale from 330 Hz, rises with the combo (up to step 22)</td><td><code>note()</code></td></tr>
     </tbody>

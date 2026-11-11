@@ -61,6 +61,20 @@ function reset(){
 }
 
 /* ---------- Gerettet!, Feld leergeräumt, Stufen ---------- */
+/* ---------- Arena-Fluss ---------- */
+/* Gibt es etwas, das du gleich treffen kannst? (Dasher in der Vorwarnung zählt nicht) */
+function targetNear(){
+  const r=reach()+HOLD_RANGE;
+  for(const e of foes){if(e.k==='r'&&e.warn>0)continue;if(Math.hypot(e.x-p.x,e.y-p.y)<r)return true;}
+  return false;
+}
+/* Nachschub-Chaser: jeder zweite erscheint nah (300–360) und materialisiert kurz, sonst normal am Rand */
+function refillChaser(){
+  spawn('d');const e=foes[foes.length-1];
+  if(Math.random()<.5)for(let i=0;i<12;i++){const a=rnd(0,6.283),d=rnd(NEAR_SPAWN[0],NEAR_SPAWN[1]),x=p.x+Math.cos(a)*d,y=p.y+Math.sin(a)*d;
+    if(x>60&&x<W-60&&y>60&&y<H-60){e.x=x;e.y=y;e.spawnIn=SPAWN_IN;e.vx=e.vy=0;
+      rings.push({x,y,r:6,max:46,life:SPAWN_IN,dur:SPAWN_IN,col:'255,93,115'});tone(880,.08,'sine',.025,440);break;}}
+}
 const BOUNTY_CHANCE=.04;                         // Anteil Verfolger mit Krone (ab 5 s)
 const RESCUE_AT=.3;                              // Serien-Timer unter 30 % = „rot“
 function rescue(){
