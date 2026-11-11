@@ -18,6 +18,7 @@ function update(rdt){
     runT+=dt;if(cd>0)cd-=dt;if(inv>0)inv-=dt;if(frenzy>0)frenzy-=dt;if(boost>0)boost-=dt;if(clearCd>0)clearCd-=dt;if(untouch>0)untouch-=dt;
     /* A: Der Combo-Timer wartet, solange nichts in Reichweite ist.
        D: Im Gold Rush läuft er halb so schnell – wie die Gegner. */
+    if(combo>0)flowT+=dt;                          // Flow: Zeit mit laufender Combo
     comboHold=combo>0&&!targetNear();
     if(combo>0&&!comboHold){comboT-=dt*(frenzy>0?.5:1);if(comboT<=0){bank();combo=0;}}
     const nl=1+Math.floor(runT/LVL_T);if(nl>lvl){lvl=nl;lvlUp();}

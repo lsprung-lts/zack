@@ -13,6 +13,8 @@ const C={you:'#ffd23f',foe:'#ff5d73',run:'#ff9a3c',igel:'#5ce1e6',gold:'#fff3b0'
 
 /* ---------- Zustand ---------- */
 let st='menu',clock=0,runT=0,score=0,shown=0,punch=0,combo=0,comboT=0,bestCombo=0,kills=0,dashes=0,hits=0;
+/* Aim: Trefferquote nur bei Sprüngen mit Gegner in Reichweite · Flow: Anteil der Zeit mit laufender Combo */
+let aimDash=0,aimHit=0,flowT=0;
 let cd=0,inv=0,frenzy=0,boost=0,hitStop=0,shake=0,flash=0,dieT=0,overLock=0,attempt=0,reason='',recordHit=false;
 let best=0,spawnT=0,goldT=14;
 const p={x:W/2,y:H/2},aim={x:W/2+200,y:H/2};
