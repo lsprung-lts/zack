@@ -4,6 +4,7 @@
 function update(rdt){
   clock+=rdt;
   readyFlash=Math.max(0,readyFlash-rdt*5);
+  if(st==='play')boomTick(rdt);                    // Kettenreaktion läuft in Echtzeit weiter
   tutTick(rdt);
   shake=Math.max(0,shake-rdt*4);flash=Math.max(0,flash-rdt*1.6);punch=Math.max(0,punch-rdt*5);
   if(overLock>0)overLock-=rdt;
@@ -29,7 +30,11 @@ function update(rdt){
     const nl=1+Math.floor(runT/LVL_T);if(nl>lvl){lvl=nl;lvlUp();}
     spawnT-=dt;
     if(spawnT<=0&&foes.length<42){spawnT=Math.max(.27,.95-runT*.009);
-      const r=Math.random();spawn(runT>10&&r<.17?'r':runT>22&&r<.38?'i':'d');}
+      const r=Math.random(),sw=evt&&evt.k==='swarm';
+      spawn(sw?'d':runT>15&&r>.92?'b':runT>10&&r<.17?'r':runT>22&&r<.38?'i':'d');
+      if(sw){spawnT*=.45;foes[foes.length-1].spd*=.75;}}               // Swarm: viele, aber langsamere Chaser
+    /* Level-Ereignis läuft ab; Dasher Rain bringt zusätzliche Dasher */
+    if(evt){evt.t-=dt;if(evt.k==='rain'){evt.rT-=dt;if(evt.rT<=0){evt.rT=1.1;spawn('r');}}if(evt.t<=0)evt=null;}
     goldT-=dt;if(goldT<=0){goldT=rnd(13,24);spawn('g');tone(1320,.25,'sine',.05,1760);}
     /* Untouchable-Stern: selten (alle 40–60 s), nicht während er aktiv ist */
     untT-=dt;if(untT<=0){untT=rnd(UNTOUCH_EVERY[0],UNTOUCH_EVERY[1]);if(untouch<=0&&!foes.some(e=>e.k==='u')){spawn('u');tone(1568,.3,'sine',.05,2093);tone(2093,.3,'sine',.04,0,.1);}}
@@ -52,7 +57,7 @@ function update(rdt){
     if(st!=='play'||e.k==='g'||e.k==='u'||(e.k==='r'&&e.warn>0))continue;
     const dd=Math.hypot(e.x-p.x,e.y-p.y);
     if(untouch>0){if(dd<e.r+7+UNTOUCH_REACH){popFoe(e);foes.splice(i,1);}continue;}   // Untouchable: Berührung lässt Gegner zerplatzen
-    if(inv<=0&&dd<e.r+7){die(e.k==='r'?'Flattened':e.k==='i'?'Skewered':'Caught');continue;}
+    if(inv<=0&&dd<e.r+7){die(e.k==='r'?'Flattened':e.k==='i'?'Skewered':e.k==='b'?'Bombed':'Caught');continue;}
     if(dd<e.r+7+GRAZE){if(!e.gz&&inv<=0)e.gz=1;}     // drin im knappen Bereich
     else if(e.gz===1){e.gz=2;graze(e);}            // wieder draußen und noch am Leben
   }

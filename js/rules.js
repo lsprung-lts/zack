@@ -46,6 +46,7 @@ function spawn(kind){
     if(st==='play'&&runT>5&&Math.random()<BOUNTY_CHANCE){e.crown=1;e.pts=50;}}   // Kopfgeld: ×5 wert
   else if(kind==='r'){e.r=14;e.pts=30;e.warn=.85;e.spd=Math.min(820,540+runT*2.5);
     const a=Math.atan2(p.y-y,p.x-x)+rnd(-.08,.08);e.dx=Math.cos(a);e.dy=Math.sin(a);}
+  else if(kind==='b'){e.r=18;e.pts=20;e.spd=60+Math.min(50,runT*.6);}
   else if(kind==='i'){e.r=21;e.pts=25;e.spd=55+Math.min(60,runT*.7);e.ph=rnd(0,1);}
   else if(kind==='u'){e.r=16;e.pts=0;e.life=UNTOUCH_LIFE;
     do{e.x=rnd(120,W-120);e.y=rnd(110,H-110);}while(Math.hypot(e.x-p.x,e.y-p.y)<240);
@@ -53,6 +54,7 @@ function spawn(kind){
   else if(kind==='g'){e.r=15;e.pts=250;e.life=6.5;
     do{e.x=rnd(120,W-120);e.y=rnd(110,H-110);}while(Math.hypot(e.x-p.x,e.y-p.y)<260);
     const a=rnd(0,6.283);e.vx=Math.cos(a)*90;e.vy=Math.sin(a)*90;}
+  if(kind==='d'&&evt&&evt.k==='bounty'){e.crown=1;e.pts=50;}   // Bounty Hunt: alle Chaser mit Krone
   foes.push(e);
 }
 const spiky=e=>e.k==='i'&&(e.ph%2.7)>1.55;
@@ -62,7 +64,7 @@ function reset(){
   foes=[];parts=[];floats=[];trails=[];calls=[];
   p.x=W/2;p.y=H/2;runT=0;score=0;shown=0;combo=0;comboT=0;bestCombo=0;kills=0;dashes=0;hits=0;aimDash=0;aimHit=0;flowT=0;
   cd=0;inv=.6;frenzy=0;boost=0;hitStop=0;spawnT=.2;goldT=rnd(11,17);recordHit=false;
-  slow=0;clearCd=0;lvl=1;rings=[];dashBuf=0;readyFlash=0;untouch=0;untT=rnd(UNTOUCH_FIRST[0],UNTOUCH_FIRST[1]);
+  slow=0;clearCd=0;lvl=1;rings=[];dashBuf=0;readyFlash=0;evt=null;booms=[];chainN=0;flawN=0;untouch=0;untT=rnd(UNTOUCH_FIRST[0],UNTOUCH_FIRST[1]);
 }
 
 /* ---------- Gerettet!, Feld leergeräumt, Stufen ---------- */
@@ -81,7 +83,7 @@ function refillChaser(){
       rings.push({x,y,r:6,max:46,life:SPAWN_IN,dur:SPAWN_IN,col:'255,93,115'});tone(880,.08,'sine',.025,440);break;}}
 }
 /* Todesgründe für den Ergebnis-Screen */
-const CAUSE={Caught:'Eaten by a Chaser',Flattened:'Run over by a Dasher',Skewered:'Skewered by a Spiky'};
+const CAUSE={Bombed:'Tackled by a Bomber',Caught:'Eaten by a Chaser',Flattened:'Run over by a Dasher',Skewered:'Skewered by a Spiky'};
 let killer='d',endT=0,medalShown=0;
 const BOUNTY_CHANCE=.04;                         // Anteil Verfolger mit Krone (ab 5 s)
 const RESCUE_AT=.3;                              // Serien-Timer unter 30 % = „rot“
@@ -110,6 +112,11 @@ function lvlUp(){
   rings.push({x:W/2,y:H/2,r:40,max:900,life:1,dur:1,col:'246,239,255'});
   [0,7,12].forEach((s,j)=>tone(440*Math.pow(2,s/12),.35,'square',.035,0,j*.1));
   Music.accent('lvl');
+  if(lvl%2===0)startEvent();                     // jedes 2. Level ein Ereignis
+}
+function startEvent(){
+  const ks=Object.keys(EVENTS).filter(k=>k!==lastEvt),k=ks[Math.random()*ks.length|0];lastEvt=k;
+  evt={k,t:EVENT_T,d:EVENT_T,rT:.6};call(EVENTS[k],C.run);
 }
 function start(){wake();reset();attempt++;st='play';$('ov').hidden=true;tutStep=0;tutT=0;
   for(let i=0;i<4;i++)spawn('d');tone(440,.1,'triangle',.07,880);}
@@ -134,18 +141,20 @@ function dash(){
   if(fatal){const fx=sx+(ex-sx)*fatal.t,fy=sy+(ey-sy)*fatal.t;
     trails.push({x1:sx,y1:sy,x2:fx,y2:fy,life:.22,b:boost>0});p.x=fx;p.y=fy;die('Skewered');return;}
   trails.push({x1:sx,y1:sy,x2:ex,y2:ey,life:.22,b:boost>0});p.x=ex;p.y=ey;
-  if(!hit.length){cd=boost>0?0:frenzy>0?.08:.38;cdMax=cd;inv=.08;hiss(.12,.05,900);return;}
-  hit.sort((a,b)=>a.t-b.t);hits++;if(aimed)aimHit++;cd=0;inv=.24;
+  if(!hit.length){if(aimed)flawN=0;              // gezielter Fehlsprung beendet die Makellos-Serie
+    cd=boost>0?0:frenzy>0?.08:.38;cdMax=cd;inv=.08;hiss(.12,.05,900);return;}
+  hit.sort((a,b)=>a.t-b.t);hits++;if(aimed){aimHit++;flawN++;if(flawN%5===0)flawless();}cd=0;inv=.24;
   const n=hit.length,saved=combo>=5&&comboT<comboMax()*RESCUE_AT;
   const wasOnField=hit.some(h=>h.e.k!=='g'&&onField(h.e));
   let sum=0,closeN=0,special=false;
   hit.forEach((h,i)=>{const e=h.e;
     if(e.k==='u'){startUntouch(e);foes.splice(foes.indexOf(e),1);return;}
+    if(e.k==='b')queueBoom(e.x,e.y);
     const close=Math.hypot(e.x-sx,e.y-sy)<e.r+72;
     combo++;kills++;bestCombo=Math.max(bestCombo,combo);
     const pts=e.pts*mult()*n*(close?2:1)*(frenzy>0?2:1);score+=pts;sum+=pts;if(close)closeN++;
     if(e.k==='g'||e.crown)special=true;
-    burst(e.x,e.y,e.k==='g'?C.gold:e.k==='i'?C.igel:e.k==='r'?C.run:C.foe,24,520);
+    burst(e.x,e.y,e.k==='g'?C.gold:e.k==='i'?C.igel:e.k==='r'||e.k==='b'?C.run:C.foe,24,520);
     tone(note(Math.min(combo,22)),.14,'triangle',.08,0,i*.045);
     if(e.k==='g'){frenzy=5;call('Gold Rush!',C.gold);for(let j=0;j<5;j++)tone(note(8+j*2),.2,'sine',.06,0,j*.06);Music.accent('gold');}
     if(e.crown){call('Bounty ×5',C.gold,1);burst(e.x,e.y,C.gold,30,600);
@@ -178,7 +187,8 @@ function popFoe(e){
   combo++;kills++;bestCombo=Math.max(bestCombo,combo);
   const pts=e.pts*mult()*(frenzy>0?2:1);score+=pts;
   floats.push({x:e.x,y:e.y-18,text:'+'+fmt(pts),life:.7,col:'#ffffff',small:true});
-  burst(e.x,e.y,e.k==='i'?C.igel:e.k==='r'?C.run:C.foe,22,520);burst(e.x,e.y,'#ffffff',8,300);
+  burst(e.x,e.y,e.k==='i'?C.igel:e.k==='r'||e.k==='b'?C.run:C.foe,22,520);
+  if(e.k==='b')queueBoom(e.x,e.y);burst(e.x,e.y,'#ffffff',8,300);
   tone(note(Math.min(combo,22)),.12,'triangle',.07);
   comboT=comboMax();punch=1;
   if(boost>0)boost=Math.min(BOOST_MAX,boost+BOOST_EXT);
@@ -207,8 +217,30 @@ function drawTut(g){
   g.fillStyle='rgba(14,8,32,.85)';g.beginPath();if(g.roundRect)g.roundRect(x,y,w,40,20);else g.rect(x,y,w,40);g.fill();
   g.lineWidth=2;g.strokeStyle=C.you;g.stroke();g.fillStyle=C.ink;g.fillText(txt,W/2,y+20);g.restore();
 }
+/* ---------- Bomber-Explosion und Kettenreaktion ---------- */
+function queueBoom(x,y){booms.push({x,y,t:BOOM_DELAY});}
+function boom(b){
+  rings.push({x:b.x,y:b.y,r:20,max:BOOM_R*1.25,life:.45,dur:.45,col:'255,154,60'},{x:b.x,y:b.y,r:10,max:BOOM_R*.8,life:.3,dur:.3,col:'255,243,176'});
+  burst(b.x,b.y,C.run,46,720);burst(b.x,b.y,C.gold,18,420);
+  tone(90,.45,'sawtooth',.09,35);hiss(.45,.12,250);
+  if(juicy()){shake=Math.max(shake,.8);flash=Math.max(flash,.18);}
+  for(let i=foes.length-1;i>=0;i--){const e=foes[i];
+    if(e.k==='g'||e.k==='u'||e.spawnIn>0)continue;
+    if(Math.hypot(e.x-b.x,e.y-b.y)<BOOM_R+e.r){foes.splice(i,1);chainN++;popFoe(e);}}
+}
+function boomTick(rdt){
+  for(let i=booms.length-1;i>=0;i--){booms[i].t-=rdt;if(booms[i].t<=0){const b=booms.splice(i,1)[0];boom(b);}}
+  if(!booms.length&&chainN){if(chainN>=3)call('Chain Reaction ×'+chainN,C.run);chainN=0;}
+}
+/* ---------- Makellos-Serie ---------- */
+function flawless(){
+  const pts=10*flawN*mult()*bonusMul();score+=pts;
+  call('Flawless ×'+flawN+' +'+fmt(pts),C.igel,1);
+  tone(1568,.12,'triangle',.05);tone(2093,.16,'triangle',.04,0,.07);
+  checkRecord();
+}
 function die(why){
-  if(st!=='play'||untouch>0)return;reason=why;killer=why==='Flattened'?'r':why==='Skewered'?'i':'d';endT=0;st='dying';dieT=.75;
+  if(st!=='play'||untouch>0)return;reason=why;killer=why==='Flattened'?'r':why==='Skewered'?'i':why==='Bombed'?'b':'d';endT=0;st='dying';dieT=.75;
   burst(p.x,p.y,C.you,60,700);burst(p.x,p.y,C.ink,30,400);
   tone(300,.6,'sawtooth',.08,40);hiss(.4,.12,300);if(juicy()){shake=1;flash=.3;}
 }

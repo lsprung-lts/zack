@@ -31,6 +31,13 @@ function drawFoe(e,c){c=c||g;
     if(am>0){c.beginPath();for(let i=0;i<20;i++){const a=i/20*6.283,rr=i%2?e.r-2:e.r+3+am*15;c.lineTo(Math.cos(a)*rr,Math.sin(a)*rr);}c.closePath();c.fill();}
     c.fillStyle=C.igel;c.beginPath();c.arc(0,0,e.r,0,6.3);c.fill();
     c.fillStyle='#1b1036';c.beginPath();c.arc(0,0,e.r*.42*(hot?1:.6+am*.4),0,6.3);c.fill();
+  }else if(e.k==='b'){                              /* Bomber: dunkle Kugel mit Lunte */
+    c.fillStyle='rgba(255,154,60,.18)';c.beginPath();c.arc(0,0,e.r+8,0,6.3);c.fill();
+    c.fillStyle='#2e2048';c.beginPath();c.arc(0,0,e.r,0,6.3);c.fill();
+    c.lineWidth=3;c.strokeStyle=C.run;c.stroke();
+    c.fillStyle='rgba(255,255,255,.25)';c.beginPath();c.arc(-e.r*.35,-e.r*.35,e.r*.28,0,6.3);c.fill();
+    c.strokeStyle='#d9c7a8';c.lineWidth=3;c.beginPath();c.moveTo(0,-e.r);c.quadraticCurveTo(4,-e.r-8,10,-e.r-10);c.stroke();
+    const sp=Math.sin(clock*22+e.seed)>0;c.fillStyle=sp?C.you:C.run;c.beginPath();c.arc(10,-e.r-10,sp?4:3,0,6.3);c.fill();
   }else if(e.k==='u'){                              /* Untouchable-Stern: weiß mit Regenbogen-Schein */
     const blink=e.life<1.5&&Math.sin(clock*24)>0?.35:1,s=1+Math.sin(clock*7)*.12;c.globalAlpha=blink;
     c.fillStyle='hsla('+(clock*200%360)+',95%,70%,.35)';c.beginPath();c.arc(0,0,(e.r+16)*s,0,6.3);c.fill();
@@ -158,6 +165,7 @@ function drawEffects(g){
   const fx=[];
   if(frenzy>0)fx.push({t:'GOLD RUSH ×2',c:C.gold,f:frenzy/5});
   if(boost>0)fx.push({t:'OVERDRIVE',c:C.igel,f:boost/4});
+  if(evt)fx.push({t:EVENTS[evt.k].replace('!','').toUpperCase(),c:C.run,f:evt.t/evt.d});
   if(untouch>0)fx.push({t:'UNTOUCHABLE',c:'hsl('+(clock*300%360)+',95%,75%)',f:untouch/UNTOUCH_T});
   const w=190,h=30,gap=12,x0=W/2-(fx.length*w+(fx.length-1)*gap)/2;
   fx.forEach((e,i)=>{const x=x0+i*(w+gap),y=H-48;

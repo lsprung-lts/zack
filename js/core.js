@@ -51,6 +51,14 @@ const NEAR_SPAWN=[300,360];                        // Nachschub-Chaser erscheine
 const SPAWN_IN=.5;                                 // … und materialisieren 0,5 s lang (harmlos, aber schon treffbar)
 let comboHold=false,refillT=0;
 let lastMult=1,multPop=0;
+/* Level-Ereignisse: jedes 2. Level für 10 s (Swarm, Dasher Rain, Bounty Hunt) */
+const EVENTS={swarm:'Swarm!',rain:'Dasher Rain!',bounty:'Bounty Hunt!'},EVENT_T=10;
+let evt=null,lastEvt='';
+/* Bomber: Explosion reißt alles im Umkreis mit, andere Bomber explodieren weiter (Kettenreaktion) */
+const BOOM_R=150,BOOM_DELAY=.14;
+let booms=[],chainN=0;
+/* Makellos-Serie: gezielte Sprünge in Folge ohne Fehlsprung */
+let flawN=0;
 /* Medaillen nach Punkten (Legend = Regenbogen) */
 const MEDALS=[{n:'Bronze',s:1000,c:'#cd7f32'},{n:'Silver',s:3000,c:'#c9d1e0'},{n:'Gold',s:7500,c:'#ffd23f'},{n:'Platinum',s:15000,c:'#9fe3e0'},
   {n:'Diamond',s:30000,c:'#7aa2ff'},{n:'Master',s:60000,c:'#ff5d73'},{n:'Legend',s:120000,c:null}];

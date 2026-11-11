@@ -236,6 +236,16 @@ tbody tr:target{background:rgba(255,210,63,.12)}
         <dt>E-S6 From</dt><dd>22 s</dd>
       </dl>
     </div>
+    <div class="card" id="E-B">
+      <h3><span class="dot" style="background:#2e2048;box-shadow:inset 0 0 0 3px var(--run)"></span>Bomber <span class="pill">k = 'b'</span></h3>
+      <p>Chases you slowly. Hit it and it explodes after 0.14 s: everything within 150 bursts and counts as a hit – other Bombers explode too (chain reaction, “Chain Reaction ×N” from 3 kills). The explosion never hurts you.</p>
+      <dl>
+        <dt><a href="#E-B">E-B1</a> Radius</dt><dd>18</dd>
+        <dt>E-B2 Speed</dt><dd>60 + min(50; 0.6 × t)</dd>
+        <dt>E-B3 Points</dt><dd>20 (+ everything it takes with it)</dd>
+        <dt>E-B4 From</dt><dd>15 s, ~8 % of spawns</dd>
+      </dl>
+    </div>
     <div class="card" id="E-G">
       <h3><span class="dot" style="background:var(--gold)"></span>Gold <span class="pill">k = 'g'</span></h3>
       <p>Bounces around the field, harmless. A hit starts the Gold Rush.</p>
@@ -279,6 +289,22 @@ tbody tr:target{background:rgba(255,210,63,.12)}
         <dt>B-V2 Duration</dt><dd>4 s; every hit during Overdrive adds 0.3 s (max 8 s)</dd>
         <dt>B-V3 Effect</dt><dd>dash range ×1.5 (495), no cooldown after misses</dd>
         <dt>B-V4 Display</dt><dd>icy-blue trail, pulsing ring, countdown</dd>
+      </dl>
+    </div>
+    <div class="card" id="B-E">
+      <h3><span class="dot" style="background:var(--run)"></span>Level events</h3>
+      <dl>
+        <dt>B-E1 When</dt><dd>every 2nd level (level 2, 4, 6 …), 10 s, never the same twice in a row</dd>
+        <dt>B-E2 Swarm</dt><dd>only Chasers, 2× as many, 25 % slower</dd>
+        <dt>B-E3 Dasher Rain</dt><dd>an extra Dasher every 1.1 s</dd>
+        <dt>B-E4 Bounty Hunt</dt><dd>every new Chaser wears a crown (×5)</dd>
+      </dl>
+    </div>
+    <div class="card" id="B-F">
+      <h3><span class="dot" style="background:var(--ice)"></span>Flawless</h3>
+      <dl>
+        <dt>B-F1 Condition</dt><dd>every 5 aimed hits in a row (a dash with an enemy in reach that misses resets it; repositioning dashes don't)</dd>
+        <dt>B-F2 Reward</dt><dd><code>10 × streak × mult × Gold Rush</code>, “Flawless ×N”</dd>
       </dl>
     </div>
     <div class="card" id="B-U">

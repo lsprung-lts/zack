@@ -112,7 +112,7 @@ function drawCast(){
     const x=c.getContext('2d');x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,px,px);
     x.setTransform(px/72,0,0,px/72,0,0);
     const k=c.dataset.k,e={k,x:36,y:36,vx:Math.cos(clock*.8),vy:Math.sin(clock*.8),age:clock,seed:0,r:16,warn:0,ph:0,life:9,dx:1,dy:0};
-    if(k==='i'){e.r=19;e.ph=clock%2.7;}else if(k==='g'||k==='u'){e.r=13;}else if(k==='r'){e.dx=Math.cos(-.5);e.dy=Math.sin(-.5);}
+    if(k==='i'){e.r=19;e.ph=clock%2.7;}else if(k==='b'){e.r=15;}else if(k==='g'||k==='u'){e.r=13;}else if(k==='r'){e.dx=Math.cos(-.5);e.dy=Math.sin(-.5);}
     drawFoe(e,x);
   }
 }
