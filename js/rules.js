@@ -6,6 +6,7 @@ const comboMax=()=>Math.max(1.15,2.3-runT*.012);
 const MILE={5:'Nice!',10:'Sweet!',20:'Whoa!',35:'Insane!',50:'Are you kidding?!',75:'Legendary!',100:'Godlike!'};
 const MULTI=['','','Double!','Triple!','Quad!','Rampage!'];
 const BOOST_AT={20:1,45:1,70:1};                 // ×5, ×10, ×15 zünden Vollgas
+const BOOST_EXT=.3,BOOST_MAX=8;                  // jeder Treffer im Overdrive verlängert um 0,3 s, höchstens auf 8 s
 const GRAZE=28;                                  // Abstand über der Todesgrenze, der als "haarscharf" gilt
 const reach=()=>RANGE*(boost>0?1.5:1);
 const bonusMul=()=>frenzy>0?2:1;
@@ -138,7 +139,8 @@ function dash(){
     if(e.crown){call('Bounty ×5',C.gold,1);burst(e.x,e.y,C.gold,30,600);
       tone(1319,.08,'square',.04,0,.02);tone(1760,.3,'square',.04,0,.09);}
     if(MILE[combo]){call(MILE[combo]+'  ×'+mult());tone(note(5),.3,'square',.04,0,.05);tone(note(9),.3,'square',.04,0,.12);}
-    if(BOOST_AT[combo]){boost=4;call('Overdrive!',C.igel);for(let j=0;j<6;j++)tone(note(5+j*2),.16,'sawtooth',.035,0,.15+j*.04);}
+    if(boost>0)boost=Math.min(BOOST_MAX,boost+BOOST_EXT);   // Treffer im Overdrive verlängern ihn
+    if(BOOST_AT[combo]){boost=Math.max(boost,4);call('Overdrive!',C.igel);for(let j=0;j<6;j++)tone(note(5+j*2),.16,'sawtooth',.035,0,.15+j*.04);}
     foes.splice(foes.indexOf(e),1);});
   comboT=comboMax();punch=1;
   /* eine Zahl für den ganzen Sprung; Boni hängen als Marke dran */
