@@ -47,6 +47,9 @@ function spawn(kind){
   else if(kind==='r'){e.r=14;e.pts=30;e.warn=.85;e.spd=Math.min(820,540+runT*2.5);
     const a=Math.atan2(p.y-y,p.x-x)+rnd(-.08,.08);e.dx=Math.cos(a);e.dy=Math.sin(a);}
   else if(kind==='i'){e.r=21;e.pts=25;e.spd=55+Math.min(60,runT*.7);e.ph=rnd(0,1);}
+  else if(kind==='u'){e.r=16;e.pts=0;e.life=UNTOUCH_LIFE;
+    do{e.x=rnd(120,W-120);e.y=rnd(110,H-110);}while(Math.hypot(e.x-p.x,e.y-p.y)<240);
+    const a=rnd(0,6.283);e.vx=Math.cos(a)*60;e.vy=Math.sin(a)*60;}
   else if(kind==='g'){e.r=15;e.pts=250;e.life=6.5;
     do{e.x=rnd(120,W-120);e.y=rnd(110,H-110);}while(Math.hypot(e.x-p.x,e.y-p.y)<260);
     const a=rnd(0,6.283);e.vx=Math.cos(a)*90;e.vy=Math.sin(a)*90;}
@@ -59,7 +62,7 @@ function reset(){
   foes=[];parts=[];floats=[];trails=[];calls=[];
   p.x=W/2;p.y=H/2;runT=0;score=0;shown=0;combo=0;comboT=0;bestCombo=0;kills=0;dashes=0;hits=0;
   cd=0;inv=.6;frenzy=0;boost=0;hitStop=0;spawnT=.2;goldT=rnd(11,17);recordHit=false;
-  slow=0;clearCd=0;lvl=1;rings=[];
+  slow=0;clearCd=0;lvl=1;rings=[];untouch=0;untT=rnd(UNTOUCH_FIRST[0],UNTOUCH_FIRST[1]);
 }
 
 /* ---------- Gerettet!, Feld leergeräumt, Stufen ---------- */
@@ -120,7 +123,7 @@ function dash(){
   dashes++;
   const hit=[];let fatal=null;
   for(const e of foes){const q=segDist(e.x,e.y,sx,sy,ex,ey);
-    if(q.d<e.r+15){if(spiky(e)){if(!fatal||q.t<fatal.t)fatal={e,t:q.t};}else hit.push({e,t:q.t});}}
+    if(q.d<e.r+15){if(spiky(e)&&untouch<=0){if(!fatal||q.t<fatal.t)fatal={e,t:q.t};}else hit.push({e,t:q.t});}}
   if(fatal){const fx=sx+(ex-sx)*fatal.t,fy=sy+(ey-sy)*fatal.t;
     trails.push({x1:sx,y1:sy,x2:fx,y2:fy,life:.22,b:boost>0});p.x=fx;p.y=fy;die('Skewered');return;}
   trails.push({x1:sx,y1:sy,x2:ex,y2:ey,life:.22,b:boost>0});p.x=ex;p.y=ey;
@@ -129,7 +132,9 @@ function dash(){
   const n=hit.length,saved=combo>=5&&comboT<comboMax()*RESCUE_AT;
   const wasOnField=hit.some(h=>h.e.k!=='g'&&onField(h.e));
   let sum=0,closeN=0,special=false;
-  hit.forEach((h,i)=>{const e=h.e,close=Math.hypot(e.x-sx,e.y-sy)<e.r+72;
+  hit.forEach((h,i)=>{const e=h.e;
+    if(e.k==='u'){startUntouch(e);foes.splice(foes.indexOf(e),1);return;}
+    const close=Math.hypot(e.x-sx,e.y-sy)<e.r+72;
     combo++;kills++;bestCombo=Math.max(bestCombo,combo);
     const pts=e.pts*mult()*n*(close?2:1)*(frenzy>0?2:1);score+=pts;sum+=pts;if(close)closeN++;
     if(e.k==='g'||e.crown)special=true;
@@ -153,8 +158,30 @@ function dash(){
   if(wasOnField&&clearCd<=0&&runT>3&&!foes.some(e=>e.k!=='g'&&onField(e)))fieldClear();
   checkRecord();
 }
+/* ---------- Untouchable ---------- */
+function startUntouch(e){
+  untouch=UNTOUCH_T;call('Untouchable!','#ffffff');
+  burst(e.x,e.y,'#ffffff',40,650);rings.push({x:p.x,y:p.y,r:20,max:260,life:.6,dur:.6,col:'246,239,255'});
+  if(!calm)flash=Math.max(flash,.3);
+  [0,4,7,12,16].forEach((s,j)=>tone(523*Math.pow(2,s/12),.25,'triangle',.05,0,j*.05));
+  Music.accent('gold');
+}
+/* Gegner berührt dich, während du unverwundbar bist: er zerplatzt und zählt als Treffer */
+function popFoe(e){
+  combo++;kills++;bestCombo=Math.max(bestCombo,combo);
+  const pts=e.pts*mult()*(frenzy>0?2:1);score+=pts;
+  floats.push({x:e.x,y:e.y-18,text:'+'+fmt(pts),life:.7,col:'#ffffff',small:true});
+  burst(e.x,e.y,e.k==='i'?C.igel:e.k==='r'?C.run:C.foe,22,520);burst(e.x,e.y,'#ffffff',8,300);
+  tone(note(Math.min(combo,22)),.12,'triangle',.07);
+  comboT=comboMax();punch=1;
+  if(boost>0)boost=Math.min(BOOST_MAX,boost+BOOST_EXT);
+  if(e.crown){call('Bounty ×5',C.gold,1);}
+  if(MILE[combo]){call(MILE[combo]+'  ×'+mult());tone(note(5),.3,'square',.04,0,.05);tone(note(9),.3,'square',.04,0,.12);}
+  if(BOOST_AT[combo]){boost=Math.max(boost,4);call('Overdrive!',C.igel);for(let j=0;j<6;j++)tone(note(5+j*2),.16,'sawtooth',.035,0,.15+j*.04);}
+  checkRecord();
+}
 function die(why){
-  if(st!=='play')return;reason=why;st='dying';dieT=.75;
+  if(st!=='play'||untouch>0)return;reason=why;st='dying';dieT=.75;
   burst(p.x,p.y,C.you,60,700);burst(p.x,p.y,C.ink,30,400);
   tone(300,.6,'sawtooth',.08,40);hiss(.4,.12,300);if(!calm){shake=1;flash=.3;}
 }

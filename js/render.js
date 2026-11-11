@@ -31,6 +31,11 @@ function drawFoe(e,c){c=c||g;
     if(am>0){c.beginPath();for(let i=0;i<20;i++){const a=i/20*6.283,rr=i%2?e.r-2:e.r+3+am*15;c.lineTo(Math.cos(a)*rr,Math.sin(a)*rr);}c.closePath();c.fill();}
     c.fillStyle=C.igel;c.beginPath();c.arc(0,0,e.r,0,6.3);c.fill();
     c.fillStyle='#1b1036';c.beginPath();c.arc(0,0,e.r*.42*(hot?1:.6+am*.4),0,6.3);c.fill();
+  }else if(e.k==='u'){                              /* Untouchable-Stern: weiß mit Regenbogen-Schein */
+    const blink=e.life<1.5&&Math.sin(clock*24)>0?.35:1,s=1+Math.sin(clock*7)*.12;c.globalAlpha=blink;
+    c.fillStyle='hsla('+(clock*200%360)+',95%,70%,.35)';c.beginPath();c.arc(0,0,(e.r+16)*s,0,6.3);c.fill();
+    c.rotate(clock*1.8);c.fillStyle='#ffffff';c.beginPath();
+    for(let i=0;i<10;i++){const a=i/10*6.283-1.571,rr=i%2?e.r*.45*s:e.r*1.15*s;c.lineTo(Math.cos(a)*rr,Math.sin(a)*rr);}c.closePath();c.fill();
   }else{
     const blink=e.life<2&&Math.sin(clock*24)>0?.35:1,s=1+Math.sin(clock*8)*.12;
     c.globalAlpha=blink;c.fillStyle='rgba(255,243,176,.2)';c.beginPath();c.arc(0,0,(e.r+14)*s,0,6.3);c.fill();
@@ -65,6 +70,9 @@ function render(){
   /* Spieler mit Serien-Ring */
   if(st!=='dying'&&st!=='over'){
     const ready=cd<=0;
+    if(untouch>0){const a=(untouch<1.5&&!calm&&Math.sin(clock*18)<0)?.35:1;   /* Untouchable: leuchtender Regenbogen-Ring */
+      g.globalAlpha=a;g.fillStyle='rgba(255,255,255,.18)';g.beginPath();g.arc(p.x,p.y,40,0,6.3);g.fill();
+      g.lineWidth=5;g.strokeStyle='hsl('+(clock*300%360)+',95%,70%)';g.beginPath();g.arc(p.x,p.y,40+Math.sin(clock*10)*3,0,6.3);g.stroke();g.globalAlpha=1;}
     if(boost>0){g.strokeStyle='rgba(92,225,230,'+(.35+Math.sin(clock*14)*.2)*Math.min(1,boost)+')';g.lineWidth=3;
       g.beginPath();g.arc(p.x,p.y,36+Math.sin(clock*9)*3,0,6.3);g.stroke();}
     if(combo>0){g.lineWidth=5;g.strokeStyle='rgba(246,239,255,.14)';g.beginPath();g.arc(p.x,p.y,28,0,6.3);g.stroke();
@@ -132,6 +140,7 @@ function drawEffects(g){
   const fx=[];
   if(frenzy>0)fx.push({t:'GOLD RUSH ×2',c:C.gold,f:frenzy/5});
   if(boost>0)fx.push({t:'OVERDRIVE',c:C.igel,f:boost/4});
+  if(untouch>0)fx.push({t:'UNTOUCHABLE',c:'hsl('+(clock*300%360)+',95%,75%)',f:untouch/UNTOUCH_T});
   const w=190,h=30,gap=12,x0=W/2-(fx.length*w+(fx.length-1)*gap)/2;
   fx.forEach((e,i)=>{const x=x0+i*(w+gap),y=H-48;
     g.fillStyle='rgba(14,8,32,.75)';g.beginPath();if(g.roundRect)g.roundRect(x,y,w,h,10);else g.rect(x,y,w,h);g.fill();

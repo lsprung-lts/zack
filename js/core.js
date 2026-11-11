@@ -41,7 +41,10 @@ const MIN_CHASERS=3;                               // so viele rote Chaser sind 
 const NEAR_SPAWN=[300,360];                        // Nachschub-Chaser erscheinen teils in diesem Abstand …
 const SPAWN_IN=.5;                                 // … und materialisieren 0,5 s lang (harmlos, aber schon treffbar)
 let comboHold=false,refillT=0;
-let lastMult=1,multPop=0;                          // Multiplikator-Sprung: kurzes Aufploppen im Combo-Element
+let lastMult=1,multPop=0;
+/* Untouchable: seltenes Power-up – 6 s unverwundbar, Gegner zerplatzen bei Berührung und zählen als Treffer */
+let untouch=0,untT=30;
+const UNTOUCH_T=6,UNTOUCH_EVERY=[40,60],UNTOUCH_FIRST=[22,32],UNTOUCH_LIFE=5,UNTOUCH_REACH=16;                          // Multiplikator-Sprung: kurzes Aufploppen im Combo-Element
 
 /* ---------- Stufen, Feld leer, Ringe ---------- */
 let slow=0,clearCd=0,lvl=1,rings=[];
