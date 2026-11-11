@@ -37,15 +37,12 @@ const note=i=>330*Math.pow(2,(PENTA[i%5]+12*Math.floor(i/5))/12);   // jede Seri
 
 /* ---------- Arena-Fluss: Combo geht nicht mehr durch ein leeres Feld verloren ---------- */
 const HOLD_RANGE=120;                              // Combo-Timer steht, wenn kein Gegner näher als Sprungweite + 120 ist
-const MIN_CHASERS=3;                               // so viele rote Chaser sind mindestens auf dem Feld
-const NEAR_SPAWN=[300,360];                        // Nachschub-Chaser erscheinen teils in diesem Abstand …
 const SPAWN_IN=.5;                                 // … und materialisieren 0,5 s lang (harmlos, aber schon treffbar)
-let comboHold=false,refillT=0;
+let comboHold=false,refillT=0;   // refillT: nicht mehr genutzt (Wellen), bleibt für Kompatibilität
 
 /* ---------- Stufen, Feld leer, Ringe ---------- */
 let slow=0,clearCd=0,lvl=1,rings=[];
 const tint=[0,0,0,0];                              // aktueller Farbton des Feldes (r,g,b,a), weich überblendet
-const LVL_T=30;                                    // alle 30 s eine neue Stufe
 const LVL_TINT=[[0,0,0,0],[92,225,230,.07],[255,93,115,.07],[255,154,60,.07],[122,162,255,.08],[255,210,63,.07]];
 
 /* ---------- Spurfarben (über alle Runden freigespielt) ---------- */

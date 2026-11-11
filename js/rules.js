@@ -2,7 +2,7 @@
 /* Zack: Regeln, Gegner-Spawn, Sprung, Tod, Ergebnis */
 /* ---------- Regeln ---------- */
 const mult=()=>Math.min(15,1+Math.floor(combo/5));
-const comboMax=()=>Math.max(1.15,2.3-runT*.012);
+const comboMax=()=>Math.max(1.15,2.3-heat()*.012);
 const MILE={5:'Nice!',10:'Sweet!',20:'Whoa!',35:'Insane!',50:'Are you kidding?!',75:'Legendary!',100:'Godlike!'};
 const MULTI=['','','Double!','Triple!','Quad!','Rampage!'];
 const BOOST_AT={20:1,45:1,70:1};                 // ×5, ×10, ×15 zünden Vollgas
@@ -38,11 +38,10 @@ function spawn(kind){
     x=side===0?-30:side===1?W+30:rnd(0,W);y=side===2?-30:side===3?H+30:rnd(0,H);
   }while(Math.hypot(x-p.x,y-p.y)<380&&++tries<8);
   const e={k:kind,x,y,vx:0,vy:0,age:0,seed:rnd(0,99),r:16,pts:10,spd:0,warn:0,ph:0};
-  if(kind==='d'){e.spd=75+Math.min(95,runT*1.2)+rnd(0,30);
-    if(st==='play'&&runT>5&&Math.random()<BOUNTY_CHANCE){e.crown=1;e.pts=50;}}   // Kopfgeld: ×5 wert
-  else if(kind==='r'){e.r=14;e.pts=30;e.warn=.85;e.spd=Math.min(820,540+runT*2.5);
+  if(kind==='d'){e.spd=75+Math.min(95,heat()*1.2)+rnd(0,30);}   // Tempo wächst mit der Welle (heat)
+  else if(kind==='r'){e.r=14;e.pts=30;e.warn=.85;e.spd=Math.min(820,540+heat()*2.5);
     const a=Math.atan2(p.y-y,p.x-x)+rnd(-.08,.08);e.dx=Math.cos(a);e.dy=Math.sin(a);}
-  else if(kind==='i'){e.r=21;e.pts=25;e.spd=55+Math.min(60,runT*.7);e.ph=rnd(0,1);}
+  else if(kind==='i'){e.r=21;e.pts=25;e.spd=55+Math.min(60,heat()*.7);e.ph=rnd(0,1);}
   else if(kind==='g'){e.r=15;e.pts=250;e.life=6.5;
     do{e.x=rnd(120,W-120);e.y=rnd(110,H-110);}while(Math.hypot(e.x-p.x,e.y-p.y)<260);
     const a=rnd(0,6.283);e.vx=Math.cos(a)*90;e.vy=Math.sin(a)*90;}
@@ -55,7 +54,8 @@ function reset(){
   foes=[];parts=[];floats=[];trails=[];calls=[];
   p.x=W/2;p.y=H/2;runT=0;score=0;shown=0;combo=0;comboT=0;bestCombo=0;kills=0;dashes=0;hits=0;
   cd=0;inv=.6;frenzy=0;boost=0;hitStop=0;spawnT=.2;goldT=rnd(11,17);recordHit=false;
-  slow=0;clearCd=0;lvl=1;rings=[];
+  slow=0;clearCd=0;lvl=1;rings=[];refillT=0;
+  wavesReset();
 }
 
 /* ---------- Gerettet!, Feld leergeräumt, Stufen ---------- */
@@ -66,14 +66,6 @@ function targetNear(){
   for(const e of foes){if(e.k==='r'&&e.warn>0)continue;if(Math.hypot(e.x-p.x,e.y-p.y)<r)return true;}
   return false;
 }
-/* Nachschub-Chaser: jeder zweite erscheint nah (300–360) und materialisiert kurz, sonst normal am Rand */
-function refillChaser(){
-  spawn('d');const e=foes[foes.length-1];
-  if(Math.random()<.5)for(let i=0;i<12;i++){const a=rnd(0,6.283),d=rnd(NEAR_SPAWN[0],NEAR_SPAWN[1]),x=p.x+Math.cos(a)*d,y=p.y+Math.sin(a)*d;
-    if(x>60&&x<W-60&&y>60&&y<H-60){e.x=x;e.y=y;e.spawnIn=SPAWN_IN;e.vx=e.vy=0;
-      rings.push({x,y,r:6,max:46,life:SPAWN_IN,dur:SPAWN_IN,col:'255,93,115'});tone(880,.08,'sine',.025,440);break;}}
-}
-const BOUNTY_CHANCE=.04;                         // Anteil Verfolger mit Krone (ab 5 s)
 const RESCUE_AT=.3;                              // Serien-Timer unter 30 % = „rot“
 function rescue(){
   const pts=20*mult()*bonusMul();score+=pts;
@@ -83,27 +75,8 @@ function rescue(){
   tone(392,.24,'triangle',.07,1568);tone(1175,.2,'sine',.05,0,.09);
   Music.accent('rescue');
 }
-/* Kein feindlicher Gegner mehr im Bild */
-const onField=e=>e.x>-e.r&&e.x<W+e.r&&e.y>-e.r&&e.y<H+e.r;
-function fieldClear(){
-  clearCd=4;slow=.8;spawnT=Math.max(spawnT,1.2);punch=1;
-  const pts=100*mult()*bonusMul();score+=pts;
-  call('Clean Sweep!',C.you);
-  floats.push({x:W/2,y:H/2+60,text:'Field cleared +'+fmt(pts),life:1.3,col:C.you,big:true});
-  rings.push({x:p.x,y:p.y,r:30,max:1500,life:.9,dur:.9,col:'255,210,63'});
-  if(!calm)flash=Math.max(flash,.25);
-  [0,4,7,12].forEach((s,j)=>tone(330*Math.pow(2,(s+12)/12),.4,'triangle',.05,0,j*.06));
-  Music.accent('clear');
-}
-function lvlUp(){
-  call('Level '+lvl+'!',C.ink);
-  spawnT=Math.max(spawnT,2);                     // 2 s Atempause
-  rings.push({x:W/2,y:H/2,r:40,max:900,life:1,dur:1,col:'246,239,255'});
-  [0,7,12].forEach((s,j)=>tone(440*Math.pow(2,s/12),.35,'square',.035,0,j*.1));
-  Music.accent('lvl');
-}
 function start(){wake();reset();attempt++;st='play';$('ov').hidden=true;
-  for(let i=0;i<4;i++)spawn('d');tone(440,.1,'triangle',.07,880);}
+  tone(440,.1,'triangle',.07,880);}                  // Welle 1 startet nach kurzer Pause (waves.js)
 
 function segDist(px,py,x1,y1,x2,y2){const dx=x2-x1,dy=y2-y1,l=dx*dx+dy*dy||1;
   let t=((px-x1)*dx+(py-y1)*dy)/l;t=Math.max(0,Math.min(1,t));
@@ -121,11 +94,16 @@ function dash(){
   if(fatal){const fx=sx+(ex-sx)*fatal.t,fy=sy+(ey-sy)*fatal.t;
     trails.push({x1:sx,y1:sy,x2:fx,y2:fy,life:.22,b:boost>0});p.x=fx;p.y=fy;die('Skewered');return;}
   trails.push({x1:sx,y1:sy,x2:ex,y2:ey,life:.22,b:boost>0});p.x=ex;p.y=ey;
+  /* Shockwave: Explosion am Landepunkt – wird nur verbraucht, wenn sie etwas erwischt */
+  let shock=false;
+  if(shockReady){const extra=shockTargets(ex,ey,hit);if(extra.length){shockReady=false;shock=true;hit.push(...extra);}}
   if(!hit.length){cd=boost>0?0:frenzy>0?.08:.38;inv=.08;hiss(.12,.05,900);return;}
   hit.sort((a,b)=>a.t-b.t);hits++;cd=0;inv=.24;
-  const n=hit.length,saved=combo>=5&&comboT<comboMax()*RESCUE_AT;
-  const wasOnField=hit.some(h=>h.e.k!=='g'&&onField(h.e));
-  hit.forEach((h,i)=>{const e=h.e,close=Math.hypot(e.x-sx,e.y-sy)<e.r+72;
+  const n=Math.min(hit.length,8),saved=combo>=5&&comboT<comboMax()*RESCUE_AT;
+  if(shock)shockFx(ex,ey,hit.filter(h=>h.e.k!=='s').length);
+  hit.forEach((h,i)=>{const e=h.e;
+    if(e.k==='s'){shockReady=true;call('Shockwave ready!',C.igel);burst(e.x,e.y,C.igel,30,500);tone(988,.25,'sine',.06,1976);foes.splice(foes.indexOf(e),1);return;}
+    const close=Math.hypot(e.x-sx,e.y-sy)<e.r+72;
     combo++;kills++;bestCombo=Math.max(bestCombo,combo);
     const pts=e.pts*mult()*n*(close?2:1)*(frenzy>0?2:1);score+=pts;
     floats.push({x:e.x,y:e.y-18,text:'+'+fmt(pts),life:.9,col:close?C.you:C.ink,big:close||n>1});
@@ -139,12 +117,11 @@ function dash(){
     if(BOOST_AT[combo]){boost=4;call('Overdrive!',C.igel);for(let j=0;j<6;j++)tone(note(5+j*2),.16,'sawtooth',.035,0,.15+j*.04);}
     foes.splice(foes.indexOf(e),1);});
   comboT=comboMax();punch=1;
-  if(n>=2)call(MULTI[Math.min(n,5)],C.ink);
+  if(n>=2&&!shock)call(MULTI[Math.min(n,5)],C.ink);
   hiss(.08,.07,2500);
   hitStop=.045+.018*Math.min(n,4);
   if(!calm){shake=Math.min(1,.3+.14*n);flash=Math.min(.22,.06+.04*n);}
   if(saved)rescue();
-  if(wasOnField&&clearCd<=0&&runT>3&&!foes.some(e=>e.k!=='g'&&onField(e)))fieldClear();
   checkRecord();
 }
 function die(why){
@@ -159,8 +136,11 @@ function over(){
   $('ovTitle').textContent=rec&&old>0?'New Best!':(!rec&&old>0&&score>=old*.8)?'So close!':reason+'!';
   $('ovSub').textContent=fmt(score)+' points · '+(rec?(old>0?fmt(score-old)+' above your old best':'your first best')
     :old<=0?'no best yet, go for it':(score>=old*.8?'only '+fmt(gap)+' short of your best':'Best: '+fmt(old)+', you need '+fmt(gap)+' more'));
-  $('sCombo').textContent=bestCombo;$('sKills').textContent=kills;
+  $('sWave').textContent=Math.max(1,wave);$('sCombo').textContent=bestCombo;$('sKills').textContent=kills;
   $('sAcc').textContent=(dashes?Math.round(hits/dashes*100):0)+'%';$('sTime').textContent=Math.round(runT)+' s';
+  /* Records: neue persönliche Bestwerte als Abzeichen */
+  const news=recordRun();
+  $('ovNews').innerHTML=news.slice(0,4).map(t=>'<span>'+t+'</span>').join('');$('ovNews').hidden=!news.length;
   /* Gesamtpunkte für Spurfarben */
   const before=total;total+=score;try{localStorage.setItem('zack.total',total)}catch(e){}
   const fresh=SKINS.filter(s=>s.need>before&&s.need<=total),next=SKINS.find(s=>s.need>total);

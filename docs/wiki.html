@@ -91,7 +91,9 @@ tbody tr:target{background:rgba(255,210,63,.12)}
     <li><a href="#combo">Combo &amp; multiplier</a></li>
     <li><a href="#enemies">Enemies</a></li>
     <li><a href="#bonus">Gold Rush, Overdrive, Close Call</a></li>
-    <li><a href="#extras">Clutch, Bounty, Clean Sweep, Levels</a></li>
+    <li><a href="#waves">Waves &amp; Shockwave</a></li>
+    <li><a href="#records">Records</a></li>
+    <li><a href="#extras">Clutch, Bounty</a></li>
     <li><a href="#time">Difficulty over time</a></li>
     <li><a href="#calc">Points calculator</a></li>
     <li><a href="#feel">Game feel (juice)</a></li>
@@ -173,7 +175,6 @@ tbody tr:target{background:rgba(255,210,63,.12)}
       <tr id="P8"><td class="k"><a href="#P8">P8</a></td><td>Close Call</td><td><code>5 × multiplier × Gold Rush</code></td><td><code>graze()</code></td></tr>
       <tr id="P11"><td class="k"><a href="#P11">P11</a></td><td>Clutch!</td><td><code>20 × multiplier × Gold Rush</code></td><td><code>rescue()</code></td></tr>
       <tr id="P12"><td class="k"><a href="#P12">P12</a></td><td>Bounty (Chaser with crown)</td><td class="num">50 instead of 10 (×5)</td><td><code>spawn('d')</code></td></tr>
-      <tr id="P13"><td class="k"><a href="#P13">P13</a></td><td>Clean Sweep</td><td><code>100 × multiplier × Gold Rush</code></td><td><code>fieldClear()</code></td></tr>
       <tr id="P9"><td class="k"><a href="#P9">P9</a></td><td>Death</td><td>a combo that wasn't cashed in is lost</td><td><code>die()</code></td></tr>
       <tr id="P10"><td class="k"><a href="#P10">P10</a></td><td>Best</td><td>stored in the browser, key <code>zack.best</code>, separate per address</td><td><code>over()</code></td></tr>
     </tbody>
@@ -190,7 +191,6 @@ tbody tr:target{background:rgba(255,210,63,.12)}
       <tr id="M2"><td class="k"><a href="#M2">M2</a></td><td>Multiplier</td><td><code>1 + ⌊combo / 5⌋</code>, max ×15 (from combo 70)</td><td><code>mult()</code></td></tr>
       <tr id="M3"><td class="k"><a href="#M3">M3</a></td><td>Combo timer (full)</td><td><code>max(1.15 s; 2.3 s − 0.012 × run time)</code> → minimum from about 96 s</td><td><code>comboMax()</code></td></tr>
       <tr id="M4"><td class="k"><a href="#M4">M4</a></td><td>Refilling the timer</td><td>every hit: full · Close Call: +0.4 s (up to full) · <b>Arena: waits</b> (ring turns icy blue) while no enemy is within dash range + 120 · runs at half speed during Gold Rush</td><td><code>comboT</code></td></tr>
-      <tr id="M7"><td class="k"><a href="#M7">M7</a></td><td>Chaser refill (Arena)</td><td>fewer than 3 red Chasers on the field → a new one every 0.25 s; every second one appears close (300–360 away) and materializes for 0.5 s (harmless, already hittable) with a red ring</td><td><code>refillChaser()</code>, <code>MIN_CHASERS</code></td></tr>
       <tr id="M8"><td class="k"><a href="#M8">M8</a></td><td>Bot test (14 runs each)</td><td>before: 38 s, 4.3 combo losses, ×1.85 avg, 3,803 pts · after: 35 s, 0.2 losses, ×4.35 avg, 13,325 pts</td><td>–</td></tr>
       <tr id="M5"><td class="k"><a href="#M5">M5</a></td><td>Display</td><td>ring around the spark, red below 30 %, “×N” above it</td><td><code>render()</code></td></tr>
       <tr id="M6"><td class="k"><a href="#M6">M6</a></td><td>Sound per hit</td><td>pentatonic scale from 330 Hz, rises with the combo (up to step 22)</td><td><code>note()</code></td></tr>
@@ -293,8 +293,42 @@ tbody tr:target{background:rgba(255,210,63,.12)}
 </section>
 
 <!-- ===================================================== -->
+<section id="waves">
+  <h2>Waves &amp; Shockwave</h2>
+  <p>The Arena runs in <b>waves</b>. A wave ends as soon as all its enemies are gone – your pace, not the clock. Then a short break: the combo timer waits, the music drops back and builds up, and the next wave starts on a drop.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Code</th><th>What</th><th>Value</th><th>Code ref</th></tr></thead>
+    <tbody>
+      <tr id="W1"><td class="k"><a href="#W1">W1</a></td><td>Waves 1–5</td><td>1: 5 Chasers · 2: 6 + first Dasher · 3: 6 + 2 Spikies · 4: 7 + Dasher + Gold · 5: Bounty Wave (3 crowns, 2 Dashers)</td><td><code>waveList()</code></td></tr>
+      <tr id="W2"><td class="k"><a href="#W2">W2</a></td><td>From wave 6</td><td>count <code>8 + 2.5·n</code> (max 42); Dashers up to 30 %, Spikies up to 28 %, crowns 6 %; Gold in 35 % of waves; every 5th: Bounty Wave (30 % crowns); every 7th: Swarm (Chasers only, ×1.3); order shuffled</td><td><code>COUNT</code>, <code>DANGER</code></td></tr>
+      <tr id="W3"><td class="k"><a href="#W3">W3</a></td><td>Spawning</td><td>one enemy every <code>max(0.08; 0.3 − 0.016·n)</code> s; Chasers/Spikies appear 280–520 away with a red ring (gold ring for crowns) and materialize 0.5 s; Dashers from the edge with warning line</td><td><code>spawnAt()</code>, <code>SPAWN</code></td></tr>
+      <tr id="W4"><td class="k"><a href="#W4">W4</a></td><td>Enemy speed</td><td>uses “heat” = (wave − 1) × 6 s instead of run time</td><td><code>heat()</code></td></tr>
+      <tr id="W5"><td class="k"><a href="#W5">W5</a></td><td>Par time</td><td><code>1.5 + 0.38 × expected enemy count</code> s (wave 1: 3.4 s, wave 5: 5.7 s, wave 10: 14.6 s)</td><td><code>par()</code>, <code>PAR</code></td></tr>
+      <tr id="W6"><td class="k"><a href="#W6">W6</a></td><td>Wave clear</td><td>“Wave N cleared!” with time; <code>50·n × mult × Gold Rush</code>; under par: + <code>(par − time) × 25·n × mult</code> and a Shockwave next wave; 0.7 s slow motion</td><td><code>waveClear()</code></td></tr>
+      <tr id="W7"><td class="k"><a href="#W7">W7</a></td><td>Break</td><td>2.6 s (first wave after 1.2 s); “Get ready · Wave N”; music: layers drop out, filter closes, noise riser → crash + bass drop on the next wave</td><td><code>BREAK_T</code>, <code>Music.setBreak()</code></td></tr>
+      <tr id="W8"><td class="k"><a href="#W8">W8</a></td><td>Shockwave</td><td>icy crystal near you at the start of the wave after an under-par clear; hit it to charge; your next dash explodes where it lands (radius 170) and hits everything around it (also Spikies, multi-hit capped at ×8); only consumed if it catches something</td><td><code>shockTargets()</code>, <code>SHOCK_R</code></td></tr>
+      <tr id="W9"><td class="k"><a href="#W9">W9</a></td><td>HUD</td><td>top right: Wave N, time / par (icy bar, red when over), enemies left</td><td><code>waveHud()</code></td></tr>
+      <tr id="W10"><td class="k"><a href="#W10">W10</a></td><td>Bot test</td><td>12 runs, aiming bot with human-like jitter: median run 67 s, median wave 7, ~50 % of waves under par; first big moment ~6.5 s, longest reward gap ~4.3 s</td><td>–</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ===================================================== -->
+<section id="records">
+  <h2>Records</h2>
+  <p>Menu → <b>Records</b>. Stored on this device under <code>zack.stats</code>.</p>
+  <ul>
+    <li><b>Highlights:</b> best score, highest wave, best combo, most kills, longest run, biggest Shockwave.</li>
+    <li><b>Top 10 runs:</b> points, wave, combo, kills, time, date.</li>
+    <li><b>Fastest wave clears:</b> your best time for every wave, icy blue when under par.</li>
+    <li><b>Career:</b> runs, kills, points, waves under par.</li>
+    <li><b>Results screen:</b> badges for new personal records (e.g. “Top 10 · #2”, “Wave 3 in 2.9 s”).</li>
+  </ul>
+</section>
+
+<!-- ===================================================== -->
 <section id="extras">
-  <h2>Clutch, Bounty, Clean Sweep, Levels</h2>
+  <h2>Clutch, Bounty</h2>
   <div class="cards">
     <div class="card" id="N-G">
       <h3><span class="dot" style="background:var(--foe)"></span>Clutch!</h3>
@@ -312,26 +346,7 @@ tbody tr:target{background:rgba(255,210,63,.12)}
         <dt>N-K3 Value</dt><dd>50 instead of 10</dd>
         <dt>N-K4 Code ref</dt><dd><code>BOUNTY_CHANCE</code></dd>
       </dl>
-    </div>
-    <div class="card" id="N-F">
-      <h3><span class="dot" style="background:var(--spark)"></span>Clean Sweep</h3>
-      <dl>
-        <dt>N-F1 Condition</dt><dd>after a hit, no hostile enemy is left on screen (Gold doesn't count), from 3 s</dd>
-        <dt>N-F2 Reward</dt><dd>100 × mult × Gold Rush, “Clean Sweep!”</dd>
-        <dt>N-F3 Effect</dt><dd>0.8 s slow motion (35 %), 1.2 s without new enemies, big ring, crash + bass drop</dd>
-        <dt>N-F4 Limit</dt><dd>at most every 4 s</dd>
-      </dl>
-    </div>
-    <div class="card" id="N-S">
-      <h3><span class="dot" style="background:var(--ink)"></span>Levels</h3>
-      <dl>
-        <dt>N-S1 Pace</dt><dd>every 30 s of run time: “Level N!”</dd>
-        <dt>N-S2 Breather</dt><dd>2 s without new enemies</dd>
-        <dt>N-S3 Tint</dt><dd>1 none · 2 icy blue · 3 coral · 4 orange · 5 blue · 6 gold, then repeats (smooth crossfade)</dd>
-        <dt>N-S4 Display</dt><dd>top right with a bar to the next level</dd>
-        <dt>N-S5 Note</dt><dd>pure show – difficulty keeps rising continuously</dd>
-      </dl>
-    </div>
+    </div>
   </div>
 </section>
 
@@ -394,7 +409,7 @@ tbody tr:target{background:rgba(255,210,63,.12)}
       <tr id="MU6"><td class="k"><a href="#MU6">MU6</a></td><td class="num">6</td><td>×13</td><td>+ arpeggio an octave higher, ride</td></tr>
       <tr id="MU7"><td class="k"><a href="#MU7">MU7</a></td><td>Gold Rush</td><td>Gold</td><td>bells, filter fully open</td></tr>
       <tr id="MU8"><td class="k"><a href="#MU8">MU8</a></td><td>Overdrive</td><td>×5 / ×10 / ×15</td><td>fast hi-hats</td></tr>
-      <tr id="MU9"><td class="k"><a href="#MU9">MU9</a></td><td>Accents</td><td>–</td><td>crash on Gold Rush, Clean Sweep, Level (+ bass drop); noise burst on Clutch</td></tr>
+      <tr id="MU9"><td class="k"><a href="#MU9">MU9</a></td><td>Accents</td><td>–</td><td>crash on Gold Rush, wave clear, wave start (+ bass drop); noise burst on Clutch</td></tr>
       <tr id="MU10"><td class="k"><a href="#MU10">MU10</a></td><td>Death / pause</td><td>–</td><td>death: filter closes, fades out · pause: silent</td></tr>
       <tr id="MU11"><td class="k"><a href="#MU11">MU11</a></td><td>Menu / results</td><td>–</td><td>calm pad (menu with a quiet arpeggio)</td></tr>
       <tr id="MU12"><td class="k"><a href="#MU12">MU12</a></td><td>Volume</td><td>–</td><td>slider in the menu 0–100 % (default 75 %), quadratic: play = (slider)² × 1.5 → about 0.84 at 75 % · menu ×0.8 · results ×0.65. Slider and “Music off” button are remembered (<code>zack.vol</code>, <code>zack.music</code>)</td></tr>
@@ -428,7 +443,7 @@ tbody tr:target{background:rgba(255,210,63,.12)}
     <tbody>
       <tr id="T1"><td class="k"><a href="#T1">T1</a></td><td>combo 5 / 10 / 20 / 35 / 50 / 75 / 100</td><td>Nice! · Sweet! · Whoa! · Insane! · Are you kidding?! · Legendary! · Godlike!</td></tr>
       <tr id="T2"><td class="k"><a href="#T2">T2</a></td><td>2 / 3 / 4 / 5+ in one dash</td><td>Double! · Triple! · Quad! · Rampage!</td></tr>
-      <tr id="T3"><td class="k"><a href="#T3">T3</a></td><td>Bonuses</td><td>Gold Rush! · Overdrive! · Cashed In! +X · Close Call +X · POINT BLANK ×2 · Clutch! · Bounty! · Clean Sweep! · Level N!</td></tr>
+      <tr id="T3"><td class="k"><a href="#T3">T3</a></td><td>Bonuses</td><td>Gold Rush! · Overdrive! · Cashed In! +X · Close Call +X · POINT BLANK ×2 · Clutch! · Bounty! · Wave N! · Wave N cleared! · Bounty Wave! · Swarm! · Shockwave!</td></tr>
       <tr id="T4"><td class="k"><a href="#T4">T4</a></td><td>Best beaten</td><td>New Best!</td></tr>
       <tr id="T5"><td class="k"><a href="#T5">T5</a></td><td>Menu taglines (random)</td><td>One click, one dash. Miss and you're a sitting duck. · Aim, click, Zack. That's all there is. · A near miss is still a miss. But it pays. · Feels like a record kind of day.</td></tr>
     </tbody>

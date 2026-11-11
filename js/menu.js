@@ -7,7 +7,7 @@ function showMenu(){
   reset();st='menu';
   $('tag').textContent=TAGS[Math.random()*TAGS.length|0];
   $('mBest').hidden=!(best>0);$('mBestV').textContent=fmt(best);
-  $('ovResult').hidden=true;$('ovMenu').hidden=false;$('ov').classList.add('menu-on');$('ov').hidden=false;
+  $('ovResult').hidden=true;$('ovRecords').hidden=true;$('ovMenu').hidden=false;$('ov').classList.add('menu-on');$('ov').classList.remove('rec-on');$('ov').hidden=false;
   if(!$('ovRules').hidden)toggleHow();
   buildSkins();
 }

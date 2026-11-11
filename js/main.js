@@ -11,13 +11,14 @@ function frame(ts){
 
 /* ---------- Eingabe ---------- */
 function toWorld(e){const r=cv.getBoundingClientRect();aim.x=(e.clientX-r.left)/r.width*W;aim.y=(e.clientY-r.top)/r.height*H;}
-function act(){if(st==='menu'||(st==='over'&&overLock<=0))start();else if(st==='pause')togglePause();else dash();}
+function act(){if(st==='menu'&&!$('ovRecords').hidden)return;if(st==='menu'||(st==='over'&&overLock<=0))start();else if(st==='pause')togglePause();else dash();}
 function togglePause(){if(st==='play'){st='pause';$('pz').textContent='Resume';}else if(st==='pause'){st='play';$('pz').textContent='Pause';last=0;}}
 stage.addEventListener('pointermove',toWorld);
 stage.addEventListener('pointerdown',e=>{if(e.target.closest('button,.nostart'))return;e.preventDefault();toWorld(e);act();});
 addEventListener('keydown',e=>{
   if(e.key===' '||e.key==='Enter'){if(e.target.closest&&e.target.closest('button,input'))return;e.preventDefault();if(!e.repeat)act();}
   else if(e.key==='Escape'&&st==='over')showMenu();
+  else if(e.key==='Escape'&&st==='menu'&&!$('ovRecords').hidden)hideRecords();
   else if(e.key==='p'||e.key==='P'||e.key==='Escape')togglePause();});
 addEventListener('blur',()=>{if(st==='play')togglePause();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&st==='play')togglePause();});
@@ -25,6 +26,8 @@ $('go').addEventListener('click',()=>{if(st==='menu')start();$('go').blur();});
 $('again').addEventListener('click',()=>{if(st==='over'&&overLock<=0)start();$('again').blur();});
 $('toMenu').addEventListener('click',()=>{if(st==='over')showMenu();$('toMenu').blur();});
 $('how').addEventListener('click',toggleHow);
+$('rec').addEventListener('click',()=>{if(st==='menu')showRecords();$('rec').blur();});
+$('recBack').addEventListener('click',()=>{hideRecords();$('recBack').blur();});
 $('pz').addEventListener('click',()=>{togglePause();$('pz').blur();});
 $('snd').addEventListener('click',()=>{muted=!muted;$('snd').textContent=muted?'Sound on':'Sound off';if(!muted)wake();$('snd').blur();});
 /* Musik: Knopf oben und Regler im Menü halten sich gegenseitig aktuell */

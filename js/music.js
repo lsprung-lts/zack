@@ -27,6 +27,7 @@ const Music=(()=>{
   const VOL=m=>REL[m]*Math.pow(vol/100,2)*1.5;
   const hz=m=>440*Math.pow(2,(m-69)/12);
 
+  let brk=false;                                           // Wellen-Pause: Breakdown bis zum Drop
   let on=true,vol=75,bus=null,filt,pump,padF,bassF,dly,noise,mode='off',next=0,step=0,level=0,running=false;
   try{on=localStorage.getItem('zack.music')!=='0';const v=localStorage.getItem('zack.vol');if(v!==null&&!isNaN(+v))vol=Math.max(0,Math.min(100,+v));}catch(e){}
 
@@ -129,7 +130,7 @@ const Music=(()=>{
     filt.frequency.cancelScheduledValues(now);filt.frequency.setValueAtTime(Math.max(60,filt.frequency.value),now);
     bus.gain.setTargetAtTime(VOL(m),now,m==='pause'?.05:.4);
     if(m==='play'&&prev!=='pause'){                         // neue Runde startet auf der Eins mit Becken
-      step=0;next=now+.06;crash(next,.05);
+      brk=false;step=0;next=now+.06;crash(next,.05);
     }
   }
 
@@ -151,12 +152,21 @@ const Music=(()=>{
       if(mode==='pause')return;
       const now=ac.currentTime;
       if(!running||next<now-.1){next=now+.06;running=true;}  // nach Pause oder Hänger sauber neu einrasten
-      level=intensity();
+      level=brk?0:intensity();
       if(mode!=='dead'){
-        const cut=mode==='play'?(frenzy>0?14000:CUT[level]):mode==='menu'?900:700;
+        const cut=mode==='play'?(brk?550:frenzy>0?14000:CUT[level]):mode==='menu'?900:700;
         filt.frequency.setTargetAtTime(cut,now,.3);
       }
       while(next<now+LOOK){schedule(step,next);next+=STEP;step++;}
+    },
+    /* Wellen-Pause: Spuren fallen weg, Filter zu, Rauschen steigt bis zum nächsten Wellenstart (dort folgt der Drop) */
+    setBreak(b,dur){
+      brk=b;if(!b||!bus||!on||muted||mode!=='play')return;
+      const t=ac.currentTime+.05,d=dur||2.5,src=ac.createBufferSource(),fl=ac.createBiquadFilter(),v=ac.createGain();
+      src.buffer=noise;src.loop=true;fl.type='bandpass';fl.Q.value=1.4;
+      fl.frequency.setValueAtTime(300,t);fl.frequency.exponentialRampToValueAtTime(6000,t+d);
+      v.gain.setValueAtTime(.0001,t);v.gain.exponentialRampToValueAtTime(.06,t+d*.95);v.gain.linearRampToValueAtTime(0,t+d+.05);
+      src.connect(fl).connect(v).connect(bus);src.start(t);src.stop(t+d+.1);
     },
     /* Akzente aus dem Spiel: Becken auf der nächsten Sechzehntel */
     accent(kind){

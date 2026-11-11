@@ -31,6 +31,7 @@ function drawFoe(e,c){c=c||g;
     if(am>0){c.beginPath();for(let i=0;i<20;i++){const a=i/20*6.283,rr=i%2?e.r-2:e.r+3+am*15;c.lineTo(Math.cos(a)*rr,Math.sin(a)*rr);}c.closePath();c.fill();}
     c.fillStyle=C.igel;c.beginPath();c.arc(0,0,e.r,0,6.3);c.fill();
     c.fillStyle='#1b1036';c.beginPath();c.arc(0,0,e.r*.42*(hot?1:.6+am*.4),0,6.3);c.fill();
+  }else if(e.k==='s'){drawShockCrystal(c,e);
   }else{
     const blink=e.life<2&&Math.sin(clock*24)>0?.35:1,s=1+Math.sin(clock*8)*.12;
     c.globalAlpha=blink;c.fillStyle='rgba(255,243,176,.2)';c.beginPath();c.arc(0,0,(e.r+14)*s,0,6.3);c.fill();
@@ -65,10 +66,14 @@ function render(){
   /* Spieler mit Serien-Ring */
   if(st!=='dying'&&st!=='over'){
     const m=mult(),ready=cd<=0;
+    if(shockReady){g.strokeStyle='rgba(92,225,230,'+(.5+Math.sin(clock*20)*.3)+')';g.lineWidth=2;g.setLineDash([4,6]);g.lineDashOffset=clock*40;
+      g.beginPath();g.arc(p.x,p.y,44,0,6.3);g.stroke();g.setLineDash([]);}            // Shockwave geladen
     if(boost>0){g.strokeStyle='rgba(92,225,230,'+(.35+Math.sin(clock*14)*.2)*Math.min(1,boost)+')';g.lineWidth=3;
       g.beginPath();g.arc(p.x,p.y,36+Math.sin(clock*9)*3,0,6.3);g.stroke();}
     if(combo>0){g.lineWidth=5;g.strokeStyle='rgba(246,239,255,.14)';g.beginPath();g.arc(p.x,p.y,28,0,6.3);g.stroke();
-      const fr=comboT/comboMax();g.strokeStyle=comboHold?'rgba(92,225,230,'+(.6+Math.sin(clock*6)*.3)+')':fr<.3?C.foe:C.you;   // eisblau = wartetg.beginPath();g.arc(p.x,p.y,28,-1.571,-1.571+fr*6.283);g.stroke();
+      /* Ring: eisblau = Timer wartet, rot = gleich vorbei */
+      const fr=comboT/comboMax();g.strokeStyle=comboHold?'rgba(92,225,230,'+(.6+Math.sin(clock*6)*.3)+')':fr<.3?C.foe:C.you;
+      g.beginPath();g.arc(p.x,p.y,28,-1.571,-1.571+fr*6.283);g.stroke();
       g.font='18px '+DISP;g.textAlign='center';g.textBaseline='middle';g.fillStyle=C.you;g.fillText('×'+m,p.x,p.y-46);}
     g.fillStyle='rgba(255,210,63,'+(ready?.25:.08)+')';g.beginPath();g.arc(p.x,p.y,17+Math.sin(clock*7)*2,0,6.3);g.fill();
     g.fillStyle=ready?C.you:'#8d7fae';g.beginPath();g.arc(p.x,p.y,10,0,6.3);g.fill();
@@ -92,9 +97,8 @@ function render(){
       g.font='600 14px "Outfit",sans-serif';g.fillStyle='rgba(246,239,255,.7)';g.fillText(recordHit?'Best beaten':'Best '+fmt(best),W/2,112);}
     g.font='18px '+DISP;g.textAlign='left';g.fillStyle=combo>0?C.you:'rgba(246,239,255,.4)';g.fillText('Combo '+combo,26,34);
     g.textAlign='right';g.fillStyle='rgba(246,239,255,.4)';g.fillText('Run '+attempt,W-26,34);
-    /* Stufe mit Fortschrittsbalken bis zur nächsten */
-    const lf=(runT%LVL_T)/LVL_T;g.fillStyle='rgba(246,239,255,.55)';g.fillText('Level '+lvl,W-26,60);
-    g.fillStyle='rgba(246,239,255,.12)';g.fillRect(W-126,74,100,3);g.fillStyle='rgba(246,239,255,.5)';g.fillRect(W-126,74,100*lf,3);
+    waveHud(g);                                    // Welle, Zeit gegen Par, verbleibende Gegner (waves.js)
+    g.font='18px '+DISP;
     if(frenzy>0){g.textAlign='center';g.fillStyle=C.gold;g.fillText('Gold Rush  '+frenzy.toFixed(1)+' s  ·  everything ×2',W/2,H-30);}
     if(boost>0){g.textAlign='center';g.fillStyle=C.igel;g.fillText('Overdrive  '+boost.toFixed(1)+' s  ·  longer dashes, no cooldown',W/2,frenzy>0?H-58:H-30);}
     g.textAlign='center';

@@ -9,7 +9,8 @@ Keine Bibliotheken, kein Build-Schritt.
 - `js/*.js` – klassische Skripte (kein ES-Modul), in dieser Reihenfolge geladen:
   `core` (Konstanten, Zustand, Soundeffekte, Spurfarben) → `music` (mitwachsende
   Musik, WebAudio-Sequencer) → `rules` (Regeln, Spawn, Sprung,
-  Tod, Ergebnis) → `menu` → `update` (Simulation) → `render` (Zeichnen, Größe)
+  Tod, Ergebnis) → `waves` (Wellen, Par, Shockwave) → `records` (Statistik,
+  Highscore-Seite) → `menu` → `update` (Simulation) → `render` (Zeichnen, Größe)
   → `main` (Schleife, Eingabe, Start). Alle teilen sich den globalen Gültigkeitsbereich,
   Reihenfolge beachten. Läuft auch ohne Server per Doppelklick.
 

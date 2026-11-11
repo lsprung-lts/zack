@@ -29,6 +29,7 @@
       <div class="row">
         <button class="primary" id="go">Play</button>
         <button class="ghost big" id="how" aria-expanded="false">How to play</button>
+        <button class="ghost big" id="rec">Records</button>
       </div>
       <p class="press">or press <kbd>Space</kbd></p>
       <div class="prefs">
@@ -50,19 +51,26 @@
         <li>At <b>×5, ×10, ×15</b> you hit <b>Overdrive</b>: longer dashes, no cooldown after misses.</li>
         <li>Only hit the icy-blue <b>Spikies</b> when their spikes are in. <b>Gold</b> starts the <b>Gold Rush</b>.</li>
         <li>A hit while the ring is <b>red</b>: <b>Clutch!</b> Enemies wearing a <b>crown</b> are worth ×5.</li>
-        <li>Wipe the field for a <b>Clean Sweep</b> bonus. Every 30 s brings a new <b>level</b>.</li>
+        <li>Enemies come in <b>waves</b>. Clear a wave fast: <b>time bonus</b> – beat the <b>par time</b> and the next wave brings a <b>Shockwave</b>.</li>
+        <li>Grab the icy crystal: your next dash <b>explodes</b> where it lands and takes everything around with it.</li>
         <li>Your points add up across all runs and unlock new <b>trail colors</b>.</li>
       </ul>
+     </div>
+     <div class="screen recs nostart" id="ovRecords" hidden>
+      <div class="rhead"><h2 class="rtitle">Records</h2><button class="ghost big" id="recBack">Back</button></div>
+      <div id="recBody"></div>
      </div>
      <div class="screen" id="ovResult" hidden>
       <h1 id="ovTitle">ZACK</h1>
       <p class="sub" id="ovSub"></p>
       <dl class="stats" id="ovStats">
+        <div><dt>Wave</dt><dd id="sWave">1</dd></div>
         <div><dt>Best combo</dt><dd id="sCombo">0</dd></div>
         <div><dt>Kills</dt><dd id="sKills">0</dd></div>
         <div><dt>Accuracy</dt><dd id="sAcc">0%</dd></div>
         <div><dt>Time</dt><dd id="sTime">0 s</dd></div>
       </dl>
+      <p class="news" id="ovNews" hidden></p>
       <p class="unlock" id="ovUnlock"></p>
       <div class="row">
         <button class="primary" id="again">Again</button>
@@ -79,6 +87,8 @@
 <script src="js/core.js"></script>
 <script src="js/music.js"></script>
 <script src="js/rules.js"></script>
+<script src="js/waves.js"></script>
+<script src="js/records.js"></script>
 <script src="js/menu.js"></script>
 <script src="js/update.js"></script>
 <script src="js/render.js"></script>
