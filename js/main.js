@@ -12,7 +12,7 @@ function frame(ts){
 /* ---------- Eingabe ---------- */
 function toWorld(e){const r=cv.getBoundingClientRect();aim.x=(e.clientX-r.left)/r.width*W;aim.y=(e.clientY-r.top)/r.height*H;}
 function act(){if(st==='menu'||(st==='over'&&overLock<=0))start();else if(st==='pause')togglePause();else dash();}
-function togglePause(){if(st==='play'){st='pause';$('pz').textContent='Weiter';}else if(st==='pause'){st='play';$('pz').textContent='Pause';last=0;}}
+function togglePause(){if(st==='play'){st='pause';$('pz').textContent='Resume';}else if(st==='pause'){st='play';$('pz').textContent='Pause';last=0;}}
 stage.addEventListener('pointermove',toWorld);
 stage.addEventListener('pointerdown',e=>{if(e.target.closest('button,.nostart'))return;e.preventDefault();toWorld(e);act();});
 addEventListener('keydown',e=>{
@@ -26,12 +26,12 @@ $('again').addEventListener('click',()=>{if(st==='over'&&overLock<=0)start();$('
 $('toMenu').addEventListener('click',()=>{if(st==='over')showMenu();$('toMenu').blur();});
 $('how').addEventListener('click',toggleHow);
 $('pz').addEventListener('click',()=>{togglePause();$('pz').blur();});
-$('snd').addEventListener('click',()=>{muted=!muted;$('snd').textContent=muted?'Ton an':'Ton aus';if(!muted)wake();$('snd').blur();});
+$('snd').addEventListener('click',()=>{muted=!muted;$('snd').textContent=muted?'Sound on':'Sound off';if(!muted)wake();$('snd').blur();});
 /* Musik: Knopf oben und Regler im Menü halten sich gegenseitig aktuell */
 function syncMusicUi(){const v=Music.vol,on=Music.on&&v>0;
-  $('mus').textContent=Music.on?'Musik aus':'Musik an';
+  $('mus').textContent=Music.on?'Music off':'Music on';
   $('vol').value=v;$('vol').style.setProperty('--v',v+'%');
-  $('volV').textContent=Music.on?v+' %':'aus';$('vol').closest('.vol').classList.toggle('off',!on);}
+  $('volV').textContent=Music.on?v+'%':'off';$('vol').closest('.vol').classList.toggle('off',!on);}
 $('mus').addEventListener('click',()=>{wake();Music.toggle();syncMusicUi();$('mus').blur();});
 $('vol').addEventListener('input',e=>{wake();if(!Music.on)Music.toggle();Music.setVol(+e.target.value);syncMusicUi();});
 syncMusicUi();

@@ -3,19 +3,19 @@
 /* ---------- Regeln ---------- */
 const mult=()=>Math.min(15,1+Math.floor(combo/5));
 const comboMax=()=>Math.max(1.15,2.3-runT*.012);
-const MILE={5:'Sauber!',10:'Leiwand!',20:'Oida!',35:'Wahnsinn!',50:'Bist du deppert!',75:'Legende!',100:'Gottgleich!'};
-const MULTI=['','','Doppel!','Tripel!','Quadrupel!','Kehraus!'];
+const MILE={5:'Nice!',10:'Sweet!',20:'Whoa!',35:'Insane!',50:'Are you kidding?!',75:'Legendary!',100:'Godlike!'};
+const MULTI=['','','Double!','Triple!','Quad!','Rampage!'];
 const BOOST_AT={20:1,45:1,70:1};                 // ×5, ×10, ×15 zünden Vollgas
 const GRAZE=28;                                  // Abstand über der Todesgrenze, der als "haarscharf" gilt
 const reach=()=>RANGE*(boost>0?1.5:1);
 const bonusMul=()=>frenzy>0?2:1;
 function checkRecord(){
-  if(best>0&&!recordHit&&score>best){recordHit=true;call('Neuer Rekord!',C.you);for(let j=0;j<4;j++)tone(note(10+j),.25,'square',.05,0,j*.07);}}
+  if(best>0&&!recordHit&&score>best){recordHit=true;call('New Best!',C.you);for(let j=0;j<4;j++)tone(note(10+j),.25,'square',.05,0,j*.07);}}
 /* Serie läuft aus: ab 5 Treffern wird sie gutgeschrieben statt zu verfallen */
 function bank(){
   if(combo<5)return;
   const pts=combo*5*mult()*bonusMul();score+=pts;punch=1;
-  call('Einkassiert! +'+fmt(pts),C.you);
+  call('Cashed In! +'+fmt(pts),C.you);
   floats.push({x:p.x,y:p.y-60,text:'+'+fmt(pts),life:1.1,col:C.you,big:true});
   for(let j=0;j<4;j++)tone(note(7+j*2),.18,'triangle',.06,0,j*.05);
   checkRecord();
@@ -24,7 +24,7 @@ function bank(){
 function graze(e){
   const pts=5*mult()*bonusMul();score+=pts;
   if(combo>0)comboT=Math.min(comboMax(),comboT+.4);
-  floats.push({x:e.x,y:e.y-20,text:'Haarscharf +'+fmt(pts),life:.8,col:C.igel,big:false});
+  floats.push({x:e.x,y:e.y-20,text:'Close Call +'+fmt(pts),life:.8,col:C.igel,big:false});
   burst(p.x,p.y,C.igel,8,260);tone(1500,.07,'sine',.04,2200);
   checkRecord();
 }
@@ -63,8 +63,8 @@ const BOUNTY_CHANCE=.04;                         // Anteil Verfolger mit Krone (
 const RESCUE_AT=.3;                              // Serien-Timer unter 30 % = „rot“
 function rescue(){
   const pts=20*mult()*bonusMul();score+=pts;
-  call('Gerettet!',C.foe);
-  floats.push({x:p.x,y:p.y-84,text:'Gerettet +'+fmt(pts),life:1,col:C.foe,big:true});
+  call('Clutch!',C.foe);
+  floats.push({x:p.x,y:p.y-84,text:'Clutch +'+fmt(pts),life:1,col:C.foe,big:true});
   rings.push({x:p.x,y:p.y,r:24,max:130,life:.4,dur:.4,col:'255,93,115'});
   tone(392,.24,'triangle',.07,1568);tone(1175,.2,'sine',.05,0,.09);
   Music.accent('rescue');
@@ -74,15 +74,15 @@ const onField=e=>e.x>-e.r&&e.x<W+e.r&&e.y>-e.r&&e.y<H+e.r;
 function fieldClear(){
   clearCd=4;slow=.8;spawnT=Math.max(spawnT,1.2);punch=1;
   const pts=100*mult()*bonusMul();score+=pts;
-  call('Sauber gmacht!',C.you);
-  floats.push({x:W/2,y:H/2+60,text:'Feld leer +'+fmt(pts),life:1.3,col:C.you,big:true});
+  call('Clean Sweep!',C.you);
+  floats.push({x:W/2,y:H/2+60,text:'Field cleared +'+fmt(pts),life:1.3,col:C.you,big:true});
   rings.push({x:p.x,y:p.y,r:30,max:1500,life:.9,dur:.9,col:'255,210,63'});
   if(!calm)flash=Math.max(flash,.25);
   [0,4,7,12].forEach((s,j)=>tone(330*Math.pow(2,(s+12)/12),.4,'triangle',.05,0,j*.06));
   Music.accent('clear');
 }
 function lvlUp(){
-  call('Stufe '+lvl+'!',C.ink);
+  call('Level '+lvl+'!',C.ink);
   spawnT=Math.max(spawnT,2);                     // 2 s Atempause
   rings.push({x:W/2,y:H/2,r:40,max:900,life:1,dur:1,col:'246,239,255'});
   [0,7,12].forEach((s,j)=>tone(440*Math.pow(2,s/12),.35,'square',.035,0,j*.1));
@@ -105,7 +105,7 @@ function dash(){
   for(const e of foes){const q=segDist(e.x,e.y,sx,sy,ex,ey);
     if(q.d<e.r+15){if(spiky(e)){if(!fatal||q.t<fatal.t)fatal={e,t:q.t};}else hit.push({e,t:q.t});}}
   if(fatal){const fx=sx+(ex-sx)*fatal.t,fy=sy+(ey-sy)*fatal.t;
-    trails.push({x1:sx,y1:sy,x2:fx,y2:fy,life:.22,b:boost>0});p.x=fx;p.y=fy;die('Aufgespießt');return;}
+    trails.push({x1:sx,y1:sy,x2:fx,y2:fy,life:.22,b:boost>0});p.x=fx;p.y=fy;die('Skewered');return;}
   trails.push({x1:sx,y1:sy,x2:ex,y2:ey,life:.22,b:boost>0});p.x=ex;p.y=ey;
   if(!hit.length){cd=boost>0?0:frenzy>0?.08:.38;inv=.08;hiss(.12,.05,900);return;}
   hit.sort((a,b)=>a.t-b.t);hits++;cd=0;inv=.24;
@@ -115,14 +115,14 @@ function dash(){
     combo++;kills++;bestCombo=Math.max(bestCombo,combo);
     const pts=e.pts*mult()*n*(close?2:1)*(frenzy>0?2:1);score+=pts;
     floats.push({x:e.x,y:e.y-18,text:'+'+fmt(pts),life:.9,col:close?C.you:C.ink,big:close||n>1});
-    if(close)floats.push({x:e.x,y:e.y-44,text:'KNAPP ×2',life:.8,col:C.you});
+    if(close)floats.push({x:e.x,y:e.y-44,text:'POINT BLANK ×2',life:.8,col:C.you});
     burst(e.x,e.y,e.k==='g'?C.gold:e.k==='i'?C.igel:e.k==='r'?C.run:C.foe,24,520);
     tone(note(Math.min(combo,22)),.14,'triangle',.08,0,i*.045);
-    if(e.k==='g'){frenzy=5;call('Rausch!',C.gold);for(let j=0;j<5;j++)tone(note(8+j*2),.2,'sine',.06,0,j*.06);Music.accent('gold');}
-    if(e.crown){call('Kopfgeld!',C.gold);burst(e.x,e.y,C.gold,30,600);
+    if(e.k==='g'){frenzy=5;call('Gold Rush!',C.gold);for(let j=0;j<5;j++)tone(note(8+j*2),.2,'sine',.06,0,j*.06);Music.accent('gold');}
+    if(e.crown){call('Bounty!',C.gold);burst(e.x,e.y,C.gold,30,600);
       tone(1319,.08,'square',.04,0,.02);tone(1760,.3,'square',.04,0,.09);}
     if(MILE[combo]){call(MILE[combo]+'  ×'+mult());tone(note(5),.3,'square',.04,0,.05);tone(note(9),.3,'square',.04,0,.12);}
-    if(BOOST_AT[combo]){boost=4;call('Vollgas!',C.igel);for(let j=0;j<6;j++)tone(note(5+j*2),.16,'sawtooth',.035,0,.15+j*.04);}
+    if(BOOST_AT[combo]){boost=4;call('Overdrive!',C.igel);for(let j=0;j<6;j++)tone(note(5+j*2),.16,'sawtooth',.035,0,.15+j*.04);}
     foes.splice(foes.indexOf(e),1);});
   comboT=comboMax();punch=1;
   if(n>=2)call(MULTI[Math.min(n,5)],C.ink);
@@ -142,16 +142,16 @@ function over(){
   st='over';overLock=.35;const old=best,rec=score>old;
   if(rec){best=score;try{localStorage.setItem('zack.best',best)}catch(e){}}
   const gap=old-score;
-  $('ovTitle').textContent=rec&&old>0?'Neuer Rekord!':(!rec&&old>0&&score>=old*.8)?'So knapp!':reason+'!';
-  $('ovSub').textContent=fmt(score)+' Punkte · '+(rec?(old>0?fmt(score-old)+' über dem alten Rekord':'dein erster Rekord')
-    :old<=0?'noch kein Rekord, da geht was':(score>=old*.8?'nur '+fmt(gap)+' am Rekord vorbei':'Rekord: '+fmt(old)+', dir fehlen '+fmt(gap)));
+  $('ovTitle').textContent=rec&&old>0?'New Best!':(!rec&&old>0&&score>=old*.8)?'So close!':reason+'!';
+  $('ovSub').textContent=fmt(score)+' points · '+(rec?(old>0?fmt(score-old)+' above your old best':'your first best')
+    :old<=0?'no best yet, go for it':(score>=old*.8?'only '+fmt(gap)+' short of your best':'Best: '+fmt(old)+', you need '+fmt(gap)+' more'));
   $('sCombo').textContent=bestCombo;$('sKills').textContent=kills;
-  $('sAcc').textContent=(dashes?Math.round(hits/dashes*100):0)+' %';$('sTime').textContent=Math.round(runT)+' s';
+  $('sAcc').textContent=(dashes?Math.round(hits/dashes*100):0)+'%';$('sTime').textContent=Math.round(runT)+' s';
   /* Gesamtpunkte für Spurfarben */
   const before=total;total+=score;try{localStorage.setItem('zack.total',total)}catch(e){}
   const fresh=SKINS.filter(s=>s.need>before&&s.need<=total),next=SKINS.find(s=>s.need>total);
-  $('ovUnlock').innerHTML=fresh.length?'Neue Spurfarbe frei: <b>'+fresh.map(s=>s.name).join(', ')+'</b>! Im Menü auswählen.'
-    :next?'Noch <b>'+fmt(next.need-total)+'</b> Punkte bis zur Spurfarbe <b>'+next.name+'</b>':'Alle Spurfarben freigespielt. Respekt!';
+  $('ovUnlock').innerHTML=fresh.length?'New trail unlocked: <b>'+fresh.map(s=>s.name).join(', ')+'</b>! Pick it in the menu.'
+    :next?'<b>'+fmt(next.need-total)+'</b> more points to unlock the <b>'+next.name+'</b> trail':'All trails unlocked. Respect!';
   $('ovUnlock').classList.toggle('new',fresh.length>0);
   $('ovMenu').hidden=true;$('ovResult').hidden=false;$('ov').classList.remove('menu-on','how');$('ov').hidden=false;
 }

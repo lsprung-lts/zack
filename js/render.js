@@ -88,14 +88,14 @@ function render(){
     g.fillText(fmt(shown+.4),0,0);g.restore();
     if(best>0){const bw=360,bx=W/2-bw/2,by=92,fr=Math.min(1,shown/best);
       g.fillStyle='rgba(246,239,255,.14)';g.fillRect(bx,by,bw,6);g.fillStyle=recordHit?C.you:C.foe;g.fillRect(bx,by,bw*fr,6);
-      g.font='600 14px "Outfit",sans-serif';g.fillStyle='rgba(246,239,255,.7)';g.fillText(recordHit?'Rekord gebrochen':'Rekord '+fmt(best),W/2,112);}
-    g.font='18px '+DISP;g.textAlign='left';g.fillStyle=combo>0?C.you:'rgba(246,239,255,.4)';g.fillText('Serie '+combo,26,34);
-    g.textAlign='right';g.fillStyle='rgba(246,239,255,.4)';g.fillText('Versuch '+attempt,W-26,34);
+      g.font='600 14px "Outfit",sans-serif';g.fillStyle='rgba(246,239,255,.7)';g.fillText(recordHit?'Best beaten':'Best '+fmt(best),W/2,112);}
+    g.font='18px '+DISP;g.textAlign='left';g.fillStyle=combo>0?C.you:'rgba(246,239,255,.4)';g.fillText('Combo '+combo,26,34);
+    g.textAlign='right';g.fillStyle='rgba(246,239,255,.4)';g.fillText('Run '+attempt,W-26,34);
     /* Stufe mit Fortschrittsbalken bis zur nächsten */
-    const lf=(runT%LVL_T)/LVL_T;g.fillStyle='rgba(246,239,255,.55)';g.fillText('Stufe '+lvl,W-26,60);
+    const lf=(runT%LVL_T)/LVL_T;g.fillStyle='rgba(246,239,255,.55)';g.fillText('Level '+lvl,W-26,60);
     g.fillStyle='rgba(246,239,255,.12)';g.fillRect(W-126,74,100,3);g.fillStyle='rgba(246,239,255,.5)';g.fillRect(W-126,74,100*lf,3);
-    if(frenzy>0){g.textAlign='center';g.fillStyle=C.gold;g.fillText('Rausch  '+frenzy.toFixed(1)+' s  ·  alles doppelt',W/2,H-30);}
-    if(boost>0){g.textAlign='center';g.fillStyle=C.igel;g.fillText('Vollgas  '+boost.toFixed(1)+' s  ·  weiter und ohne Pause',W/2,frenzy>0?H-58:H-30);}
+    if(frenzy>0){g.textAlign='center';g.fillStyle=C.gold;g.fillText('Gold Rush  '+frenzy.toFixed(1)+' s  ·  everything ×2',W/2,H-30);}
+    if(boost>0){g.textAlign='center';g.fillStyle=C.igel;g.fillText('Overdrive  '+boost.toFixed(1)+' s  ·  longer dashes, no cooldown',W/2,frenzy>0?H-58:H-30);}
     g.textAlign='center';
   }
   calls.forEach((c,i)=>{const t=c.t,s=t<.12?.5+t/.12*.7:1.2-Math.min(.2,(t-.12)*1.5),a=t>.8?1-(t-.8)/.3:1;

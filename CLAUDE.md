@@ -40,7 +40,10 @@ dann http://localhost:5173 öffnen.
   Echtzeit weiter. `prefers-reduced-motion` (`calm`) schaltet Wackeln und
   Blitzen ab.
 - Ton über WebAudio (`tone()`, `hiss()`), erst nach einer Nutzereingabe.
-- Texte sind Deutsch mit Wiener Einschlag ("Leiwand!", "Oida!").
+- Spieltexte und Wiki sind **Englisch**: kurz und knackig ("Sweet!", "Clutch!", "Gold Rush").
+  Begriffe: Combo, Gold Rush (Rausch), Overdrive (Vollgas), Close Call, Cashed In, Clutch,
+  Bounty, Clean Sweep, Level; Gegner Chaser, Dasher, Spiky, Gold. CLAUDE.md, Code-Kommentare
+  und Commit-Nachrichten bleiben Deutsch.
 - Grafikstil (Nachtviolett, gelber Funke, korallrote Gegner, Bungee/Outfit)
   bleibt so.
 - Simpel halten.

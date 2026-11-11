@@ -7,7 +7,7 @@ const $=id=>document.getElementById(id);
 const calm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 const rnd=(a,b)=>a+Math.random()*(b-a);
 const ease=(k,dt)=>1-Math.exp(-k*dt);          // bildratenunabhängiges Glätten
-const fmt=n=>Math.round(n).toLocaleString('de-AT');
+const fmt=n=>Math.round(n).toLocaleString('en-US');
 const DISP='"Bungee","Arial Black",Impact,sans-serif';
 const C={you:'#ffd23f',foe:'#ff5d73',run:'#ff9a3c',igel:'#5ce1e6',gold:'#fff3b0',ink:'#f6efff'};
 
@@ -43,12 +43,12 @@ const LVL_TINT=[[0,0,0,0],[92,225,230,.07],[255,93,115,.07],[255,154,60,.07],[12
 
 /* ---------- Spurfarben (über alle Runden freigespielt) ---------- */
 const SKINS=[
-  {id:'funke',     name:'Funke',         need:0,      rgb:[255,210,63]},
-  {id:'paradeiser',name:'Paradeiser',    need:10000,  rgb:[255,93,115]},
-  {id:'donau',     name:'Donau',         need:30000,  rgb:[122,162,255]},
-  {id:'herz',      name:'Goldenes Herz', need:75000,  rgb:[255,243,176]},
-  {id:'prater',    name:'Prater',        need:150000, rgb:null},          // Regenbogen
-  {id:'opernball', name:'Opernball',     need:300000, rgb:[246,239,255]},
+  {id:'funke',     name:'Spark',         need:0,      rgb:[255,210,63]},
+  {id:'paradeiser',name:'Tomato',        need:10000,  rgb:[255,93,115]},
+  {id:'donau',     name:'Danube',        need:30000,  rgb:[122,162,255]},
+  {id:'herz',      name:'Golden Heart',  need:75000,  rgb:[255,243,176]},
+  {id:'prater',    name:'Funfair',       need:150000, rgb:null},          // Regenbogen
+  {id:'opernball', name:'Opera Ball',    need:300000, rgb:[246,239,255]},
 ];
 let total=0,skinId='funke';
 try{total=+localStorage.getItem('zack.total')||0;skinId=localStorage.getItem('zack.trail')||'funke';}catch(e){}

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Outfit:wght@400;600&display=swap" rel="stylesheet">
 <style>
-/* Gleiche Farbwelt wie das Spiel. Werte hier von Hand aus js/*.js übernommen –
-   bei Änderungen an Spielwerten bitte mitpflegen (Stand siehe Kopfzeile). */
+/* Same color world as the game. Values copied by hand from js/*.js –
+   please keep in sync when game values change (version shown in the header). */
 :root{
   color-scheme:dark;
   --night:#0e0820;--arena:#1b1036;--line:#2c1a55;
@@ -80,383 +80,384 @@ tbody tr:target{background:rgba(255,210,63,.12)}
 </head>
 <body>
 <div class="wrap">
-<nav aria-label="Inhalt">
+<nav aria-label="Contents">
   <p class="brand">ZACK<small>WIKI</small></p>
-  <p class="meta">Stand: v1.0.1 · 10.11.2026<br>Quelle: <code>js/*.js</code></p>
+  <p class="meta">Version: after v1.0.1 (English) · Nov 11, 2026<br>Source: <code>js/*.js</code></p>
   <ol id="toc">
-    <li><a href="#ueberblick">Überblick</a></li>
-    <li><a href="#steuerung">Steuerung &amp; Sprung</a></li>
-    <li><a href="#ablauf">Ablauf &amp; Zustände</a></li>
-    <li><a href="#punkte">Punkte</a></li>
-    <li><a href="#serie">Serie &amp; Multiplikator</a></li>
-    <li><a href="#gegner">Gegner</a></li>
-    <li><a href="#boni">Rausch, Vollgas, Haarscharf</a></li>
-    <li><a href="#neu2">Gerettet, Kopfgeld, Feld leer, Stufen</a></li>
-    <li><a href="#zeit">Schwierigkeit über Zeit</a></li>
-    <li><a href="#rechner">Punkte-Rechner</a></li>
-    <li><a href="#gefuehl">Spielgefühl (Juice)</a></li>
-    <li><a href="#musik">Musik</a></li>
-    <li><a href="#spuren">Spurfarben</a></li>
-    <li><a href="#texte">Ausrufe &amp; Texte</a></li>
-    <li><a href="#technik">Technik</a></li>
-    <li><a href="#plan">Geplant</a></li>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#controls">Controls &amp; dash</a></li>
+    <li><a href="#flow">Flow &amp; states</a></li>
+    <li><a href="#points">Points</a></li>
+    <li><a href="#combo">Combo &amp; multiplier</a></li>
+    <li><a href="#enemies">Enemies</a></li>
+    <li><a href="#bonus">Gold Rush, Overdrive, Close Call</a></li>
+    <li><a href="#extras">Clutch, Bounty, Clean Sweep, Levels</a></li>
+    <li><a href="#time">Difficulty over time</a></li>
+    <li><a href="#calc">Points calculator</a></li>
+    <li><a href="#feel">Game feel (juice)</a></li>
+    <li><a href="#music">Music</a></li>
+    <li><a href="#trails">Trail colors</a></li>
+    <li><a href="#texts">Callouts &amp; texts</a></li>
+    <li><a href="#tech">Tech</a></li>
+    <li><a href="#plan">Planned</a></li>
   </ol>
 </nav>
 
 <main>
 <!-- ===================================================== -->
-<section id="ueberblick">
-  <h2>Überblick</h2>
-  <p class="lead">Du bist ein Funke. Du bewegst dich nur durch Sprünge – und alles, was auf der Sprunglinie liegt, ist weg. Triffst du, darfst du sofort wieder springen. Triffst du nicht, bist du kurz wehrlos. Ein Gegner berührt dich: aus.</p>
-  <div class="flow"><span>Zielen</span><i>→</i><span>Sprung</span><i>→</i><span>Treffer</span><i>→</i><span>Serie wächst</span><i>→</i><span>Multiplikator</span><i>→</i><span>Rekord</span></div>
+<section id="overview">
+  <h2>Overview</h2>
+  <p class="lead">You are a spark. You only move by dashing – and everything on the dash line is gone. Hit something and you can dash again right away. Miss and you're briefly defenseless. Get touched by an enemy: game over.</p>
+  <div class="flow"><span>Aim</span><i>→</i><span>Dash</span><i>→</i><span>Hit</span><i>→</i><span>Combo grows</span><i>→</i><span>Multiplier</span><i>→</i><span>Best</span></div>
   <div class="mine" id="mine">
-    <div><span>Dein Rekord (dieses Gerät)</span><b id="myBest">–</b></div>
+    <div><span>Your best (this device)</span><b id="myBest">–</b></div>
   </div>
-  <a class="play" href="../">Spielen</a>
-  <p class="note">Jede Zeile in den Tabellen hat ein Kürzel (z. B. <code>G-R2</code>). Wenn dir etwas auffällt, nenn einfach das Kürzel: „<code>G-R2</code> ist zu schnell“. Ein Klick aufs Kürzel gibt dir einen direkten Link.</p>
+  <a class="play" href="../">Play</a>
+  <p class="note">Every row in the tables has a code (e.g. <code>E-D2</code>). If something feels off, just name the code: “<code>E-D2</code> is too fast”. Clicking a code gives you a direct link.</p>
 </section>
 
 <!-- ===================================================== -->
-<section id="steuerung">
-  <h2>Steuerung &amp; Sprung</h2>
+<section id="controls">
+  <h2>Controls &amp; dash</h2>
   <div class="tw"><table>
-    <thead><tr><th>Kürzel</th><th>Was</th><th>Wert</th><th>Code</th></tr></thead>
+    <thead><tr><th>Code</th><th>What</th><th>Value</th><th>Code ref</th></tr></thead>
     <tbody>
-      <tr id="S1"><td class="k"><a href="#S1">S1</a></td><td>Zielen</td><td>Maus / Finger</td><td><code>toWorld()</code></td></tr>
-      <tr id="S2"><td class="k"><a href="#S2">S2</a></td><td>Springen</td><td>Klick, Tippen, <code>Leertaste</code>, <code>Enter</code></td><td><code>act()</code></td></tr>
-      <tr id="S3"><td class="k"><a href="#S3">S3</a></td><td>Pause</td><td><code>P</code>, <code>Esc</code>, Fenster verlassen pausiert automatisch</td><td><code>togglePause()</code></td></tr>
-      <tr id="S4"><td class="k"><a href="#S4">S4</a></td><td>Sprungweite</td><td class="num">330 Einheiten <span class="pill">Vollgas: 495</span></td><td><code>RANGE</code>, <code>reach()</code></td></tr>
-      <tr id="S5"><td class="k"><a href="#S5">S5</a></td><td>Sprungdauer</td><td>sofort (kein Flug)</td><td><code>dash()</code></td></tr>
-      <tr id="S6"><td class="k"><a href="#S6">S6</a></td><td>Trefferbreite der Linie</td><td class="num">Gegnerradius + 15</td><td><code>dash()</code></td></tr>
-      <tr id="S7"><td class="k"><a href="#S7">S7</a></td><td>Abstand zum Rand</td><td class="num">mind. 18</td><td><code>dash()</code></td></tr>
-      <tr id="S8"><td class="k"><a href="#S8">S8</a></td><td>Abklingzeit nach Fehlsprung</td><td class="num">0,38 s <span class="pill">Rausch: 0,08 s</span> <span class="pill">Vollgas: 0 s</span></td><td><code>cd</code></td></tr>
-      <tr id="S9"><td class="k"><a href="#S9">S9</a></td><td>Abklingzeit nach Treffer</td><td class="num">0 s</td><td><code>cd=0</code></td></tr>
-      <tr id="S10"><td class="k"><a href="#S10">S10</a></td><td>Unverwundbar nach Treffer / Fehlsprung / Start</td><td class="num">0,24 s / 0,08 s / 0,6 s</td><td><code>inv</code></td></tr>
-      <tr id="S11"><td class="k"><a href="#S11">S11</a></td><td>Igel mit Stacheln auf der Linie</td><td>Sprung endet dort – tot („Aufgespießt“)</td><td><code>dash()</code></td></tr>
+      <tr id="S1"><td class="k"><a href="#S1">S1</a></td><td>Aim</td><td>mouse / finger</td><td><code>toWorld()</code></td></tr>
+      <tr id="S2"><td class="k"><a href="#S2">S2</a></td><td>Dash</td><td>click, tap, <code>Space</code>, <code>Enter</code></td><td><code>act()</code></td></tr>
+      <tr id="S3"><td class="k"><a href="#S3">S3</a></td><td>Pause</td><td><code>P</code>, <code>Esc</code>; leaving the window pauses automatically</td><td><code>togglePause()</code></td></tr>
+      <tr id="S4"><td class="k"><a href="#S4">S4</a></td><td>Dash range</td><td class="num">330 units <span class="pill">Overdrive: 495</span></td><td><code>RANGE</code>, <code>reach()</code></td></tr>
+      <tr id="S5"><td class="k"><a href="#S5">S5</a></td><td>Dash duration</td><td>instant (no travel time)</td><td><code>dash()</code></td></tr>
+      <tr id="S6"><td class="k"><a href="#S6">S6</a></td><td>Hit width of the line</td><td class="num">enemy radius + 15</td><td><code>dash()</code></td></tr>
+      <tr id="S7"><td class="k"><a href="#S7">S7</a></td><td>Distance to the edge</td><td class="num">at least 18</td><td><code>dash()</code></td></tr>
+      <tr id="S8"><td class="k"><a href="#S8">S8</a></td><td>Cooldown after a miss</td><td class="num">0.38 s <span class="pill">Gold Rush: 0.08 s</span> <span class="pill">Overdrive: 0 s</span></td><td><code>cd</code></td></tr>
+      <tr id="S9"><td class="k"><a href="#S9">S9</a></td><td>Cooldown after a hit</td><td class="num">0 s</td><td><code>cd=0</code></td></tr>
+      <tr id="S10"><td class="k"><a href="#S10">S10</a></td><td>Invulnerable after hit / miss / start</td><td class="num">0.24 s / 0.08 s / 0.6 s</td><td><code>inv</code></td></tr>
+      <tr id="S11"><td class="k"><a href="#S11">S11</a></td><td>Spiky with spikes out on the line</td><td>dash stops there – dead (“Skewered”)</td><td><code>dash()</code></td></tr>
     </tbody>
   </table></div>
 </section>
 
 <!-- ===================================================== -->
-<section id="ablauf">
-  <h2>Ablauf &amp; Zustände</h2>
+<section id="flow">
+  <h2>Flow &amp; states</h2>
   <div class="flow"><span>menu</span><i>→</i><span>play</span><i>⇄</i><span>pause</span><i>→</i><span>dying</span><i>→</i><span>over</span><i>→</i><span>play / menu</span></div>
   <div class="tw"><table>
-    <thead><tr><th>Kürzel</th><th>Was</th><th>Wert</th></tr></thead>
+    <thead><tr><th>Code</th><th>What</th><th>Value</th></tr></thead>
     <tbody>
-      <tr id="A1"><td class="k"><a href="#A1">A1</a></td><td>Spielfeld (logisch)</td><td class="num">1280 × 720, skaliert aufs Fenster</td></tr>
-      <tr id="A2"><td class="k"><a href="#A2">A2</a></td><td>Start einer Runde</td><td>Funke in der Mitte, 4 Verfolger</td></tr>
-      <tr id="A3"><td class="k"><a href="#A3">A3</a></td><td>Tod</td><td>0,75 s Zeitlupe (Welt läuft mit 12 %), dann Ergebnis</td></tr>
-      <tr id="A4"><td class="k"><a href="#A4">A4</a></td><td>Sperre nach Ergebnis</td><td class="num">0,35 s (kein versehentlicher Neustart)</td></tr>
-      <tr id="A5"><td class="k"><a href="#A5">A5</a></td><td>Ergebnis-Titel</td><td>„Neuer Rekord!“ · „So knapp!“ (≥ 80 % vom Rekord) · sonst Todesgrund</td></tr>
-      <tr id="A6"><td class="k"><a href="#A6">A6</a></td><td>Ergebnis-Werte</td><td>Beste Serie, Abschüsse, Trefferquote (Treffer-Sprünge / alle Sprünge), Zeit</td></tr>
-      <tr id="A7"><td class="k"><a href="#A7">A7</a></td><td>Todesgründe</td><td>Erwischt (Verfolger) · Überfahren (Raser) · Aufgespießt (Igel)</td></tr>
-      <tr id="A8"><td class="k"><a href="#A8">A8</a></td><td>Menü-Hintergrund</td><td>bis zu 7 Verfolger kreisen frei</td></tr>
+      <tr id="A1"><td class="k"><a href="#A1">A1</a></td><td>Playfield (logical)</td><td class="num">1280 × 720, scaled to the window</td></tr>
+      <tr id="A2"><td class="k"><a href="#A2">A2</a></td><td>Start of a run</td><td>spark in the center, 4 Chasers</td></tr>
+      <tr id="A3"><td class="k"><a href="#A3">A3</a></td><td>Death</td><td>0.75 s slow motion (world at 12 %), then results</td></tr>
+      <tr id="A4"><td class="k"><a href="#A4">A4</a></td><td>Lock after results</td><td class="num">0.35 s (no accidental restart)</td></tr>
+      <tr id="A5"><td class="k"><a href="#A5">A5</a></td><td>Results title</td><td>“New Best!” · “So close!” (≥ 80 % of best) · otherwise cause of death</td></tr>
+      <tr id="A6"><td class="k"><a href="#A6">A6</a></td><td>Results stats</td><td>best combo, kills, accuracy (hitting dashes / all dashes), time</td></tr>
+      <tr id="A7"><td class="k"><a href="#A7">A7</a></td><td>Causes of death</td><td>Caught (Chaser) · Flattened (Dasher) · Skewered (Spiky)</td></tr>
+      <tr id="A8"><td class="k"><a href="#A8">A8</a></td><td>Menu background</td><td>up to 7 Chasers roam freely</td></tr>
     </tbody>
   </table></div>
 </section>
 
 <!-- ===================================================== -->
-<section id="punkte">
-  <h2>Punkte</h2>
-  <p><b>Treffer:</b> <code>Grundwert × Multiplikator × Anzahl im Sprung × (Knapp ? 2 : 1) × (Rausch ? 2 : 1)</code></p>
+<section id="points">
+  <h2>Points</h2>
+  <p><b>Hit:</b> <code>base × multiplier × enemies in this dash × (point blank ? 2 : 1) × (Gold Rush ? 2 : 1)</code></p>
   <div class="tw"><table>
-    <thead><tr><th>Kürzel</th><th>Quelle</th><th>Formel / Wert</th><th>Code</th></tr></thead>
+    <thead><tr><th>Code</th><th>Source</th><th>Formula / value</th><th>Code ref</th></tr></thead>
     <tbody>
-      <tr id="P1"><td class="k"><a href="#P1">P1</a></td><td>Verfolger</td><td class="num">10</td><td><code>spawn('d')</code></td></tr>
-      <tr id="P2"><td class="k"><a href="#P2">P2</a></td><td>Igel</td><td class="num">25</td><td><code>spawn('i')</code></td></tr>
-      <tr id="P3"><td class="k"><a href="#P3">P3</a></td><td>Raser</td><td class="num">30</td><td><code>spawn('r')</code></td></tr>
+      <tr id="P1"><td class="k"><a href="#P1">P1</a></td><td>Chaser</td><td class="num">10</td><td><code>spawn('d')</code></td></tr>
+      <tr id="P2"><td class="k"><a href="#P2">P2</a></td><td>Spiky</td><td class="num">25</td><td><code>spawn('i')</code></td></tr>
+      <tr id="P3"><td class="k"><a href="#P3">P3</a></td><td>Dasher</td><td class="num">30</td><td><code>spawn('r')</code></td></tr>
       <tr id="P4"><td class="k"><a href="#P4">P4</a></td><td>Gold</td><td class="num">250</td><td><code>spawn('g')</code></td></tr>
-      <tr id="P5"><td class="k"><a href="#P5">P5</a></td><td>Mehrfachtreffer</td><td>jeder Treffer im Sprung × Anzahl (2 Gegner = je ×2, 3 = je ×3 …)</td><td><code>n</code></td></tr>
-      <tr id="P6"><td class="k"><a href="#P6">P6</a></td><td>KNAPP</td><td>Gegner war beim Absprung näher als Radius + 72 → ×2</td><td><code>close</code></td></tr>
-      <tr id="P7"><td class="k"><a href="#P7">P7</a></td><td>Einkassiert</td><td>Serie läuft ab (ab 5): <code>Serie × 5 × Multiplikator × Rausch</code></td><td><code>bank()</code></td></tr>
-      <tr id="P8"><td class="k"><a href="#P8">P8</a></td><td>Haarscharf</td><td><code>5 × Multiplikator × Rausch</code></td><td><code>graze()</code></td></tr>
-      <tr id="P11"><td class="k"><a href="#P11">P11</a></td><td>Gerettet!</td><td><code>20 × Multiplikator × Rausch</code></td><td><code>rescue()</code></td></tr>
-      <tr id="P12"><td class="k"><a href="#P12">P12</a></td><td>Kopfgeld (Verfolger mit Krone)</td><td class="num">50 statt 10 (×5)</td><td><code>spawn('d')</code></td></tr>
-      <tr id="P13"><td class="k"><a href="#P13">P13</a></td><td>Feld leergeräumt</td><td><code>100 × Multiplikator × Rausch</code></td><td><code>fieldClear()</code></td></tr>
-      <tr id="P9"><td class="k"><a href="#P9">P9</a></td><td>Tod</td><td>nicht eingezahlte Serie verfällt</td><td><code>die()</code></td></tr>
-      <tr id="P10"><td class="k"><a href="#P10">P10</a></td><td>Rekord</td><td>lokal im Browser, Schlüssel <code>zack.best</code>, pro Adresse getrennt</td><td><code>over()</code></td></tr>
+      <tr id="P5"><td class="k"><a href="#P5">P5</a></td><td>Multi-hit</td><td>each hit in the dash × count (2 enemies = ×2 each, 3 = ×3 each …)</td><td><code>n</code></td></tr>
+      <tr id="P6"><td class="k"><a href="#P6">P6</a></td><td>POINT BLANK</td><td>enemy was closer than radius + 72 when you dashed → ×2</td><td><code>close</code></td></tr>
+      <tr id="P7"><td class="k"><a href="#P7">P7</a></td><td>Cashed In</td><td>combo runs out (from 5): <code>combo × 5 × multiplier × Gold Rush</code></td><td><code>bank()</code></td></tr>
+      <tr id="P8"><td class="k"><a href="#P8">P8</a></td><td>Close Call</td><td><code>5 × multiplier × Gold Rush</code></td><td><code>graze()</code></td></tr>
+      <tr id="P11"><td class="k"><a href="#P11">P11</a></td><td>Clutch!</td><td><code>20 × multiplier × Gold Rush</code></td><td><code>rescue()</code></td></tr>
+      <tr id="P12"><td class="k"><a href="#P12">P12</a></td><td>Bounty (Chaser with crown)</td><td class="num">50 instead of 10 (×5)</td><td><code>spawn('d')</code></td></tr>
+      <tr id="P13"><td class="k"><a href="#P13">P13</a></td><td>Clean Sweep</td><td><code>100 × multiplier × Gold Rush</code></td><td><code>fieldClear()</code></td></tr>
+      <tr id="P9"><td class="k"><a href="#P9">P9</a></td><td>Death</td><td>a combo that wasn't cashed in is lost</td><td><code>die()</code></td></tr>
+      <tr id="P10"><td class="k"><a href="#P10">P10</a></td><td>Best</td><td>stored in the browser, key <code>zack.best</code>, separate per address</td><td><code>over()</code></td></tr>
     </tbody>
   </table></div>
 </section>
 
 <!-- ===================================================== -->
-<section id="serie">
-  <h2>Serie &amp; Multiplikator</h2>
+<section id="combo">
+  <h2>Combo &amp; multiplier</h2>
   <div class="tw"><table>
-    <thead><tr><th>Kürzel</th><th>Was</th><th>Formel / Wert</th><th>Code</th></tr></thead>
+    <thead><tr><th>Code</th><th>What</th><th>Formula / value</th><th>Code ref</th></tr></thead>
     <tbody>
-      <tr id="M1"><td class="k"><a href="#M1">M1</a></td><td>Serie</td><td>+1 pro getroffenem Gegner</td><td><code>combo</code></td></tr>
-      <tr id="M2"><td class="k"><a href="#M2">M2</a></td><td>Multiplikator</td><td><code>1 + ⌊Serie / 5⌋</code>, max. ×15 (ab Serie 70)</td><td><code>mult()</code></td></tr>
-      <tr id="M3"><td class="k"><a href="#M3">M3</a></td><td>Serien-Timer (voll)</td><td><code>max(1,15 s; 2,3 s − 0,012 × Spielzeit)</code> → Minimum ab ca. 96 s</td><td><code>comboMax()</code></td></tr>
-      <tr id="M4"><td class="k"><a href="#M4">M4</a></td><td>Timer auffüllen</td><td>jeder Treffer: voll · Haarscharf: +0,4 s (max. voll)</td><td><code>comboT</code></td></tr>
-      <tr id="M5"><td class="k"><a href="#M5">M5</a></td><td>Anzeige</td><td>Ring um den Funken, rot unter 30 %, „×N“ darüber</td><td><code>render()</code></td></tr>
-      <tr id="M6"><td class="k"><a href="#M6">M6</a></td><td>Ton pro Treffer</td><td>Pentatonik ab 330 Hz, steigt mit der Serie (bis Stufe 22)</td><td><code>note()</code></td></tr>
+      <tr id="M1"><td class="k"><a href="#M1">M1</a></td><td>Combo</td><td>+1 per enemy hit</td><td><code>combo</code></td></tr>
+      <tr id="M2"><td class="k"><a href="#M2">M2</a></td><td>Multiplier</td><td><code>1 + ⌊combo / 5⌋</code>, max ×15 (from combo 70)</td><td><code>mult()</code></td></tr>
+      <tr id="M3"><td class="k"><a href="#M3">M3</a></td><td>Combo timer (full)</td><td><code>max(1.15 s; 2.3 s − 0.012 × run time)</code> → minimum from about 96 s</td><td><code>comboMax()</code></td></tr>
+      <tr id="M4"><td class="k"><a href="#M4">M4</a></td><td>Refilling the timer</td><td>every hit: full · Close Call: +0.4 s (up to full)</td><td><code>comboT</code></td></tr>
+      <tr id="M5"><td class="k"><a href="#M5">M5</a></td><td>Display</td><td>ring around the spark, red below 30 %, “×N” above it</td><td><code>render()</code></td></tr>
+      <tr id="M6"><td class="k"><a href="#M6">M6</a></td><td>Sound per hit</td><td>pentatonic scale from 330 Hz, rises with the combo (up to step 22)</td><td><code>note()</code></td></tr>
     </tbody>
   </table></div>
 </section>
 
 <!-- ===================================================== -->
-<section id="gegner">
-  <h2>Gegner</h2>
-  <p>Gegner erscheinen am Rand, mindestens 380 vom Funken entfernt. Maximal 42 gleichzeitig. Berührung = tot, wenn der Abstand kleiner als Radius + 7 ist.</p>
+<section id="enemies">
+  <h2>Enemies</h2>
+  <p>Enemies appear at the edge, at least 380 away from the spark. At most 42 at once. Contact = death when the distance is below radius + 7.</p>
   <div class="cards">
-    <div class="card" id="G-D">
-      <h3><span class="dot" style="background:var(--foe)"></span>Verfolger <span class="pill">k = 'd'</span></h3>
-      <p>Läuft dir weich nach (Lenkung <code>ease(2.6)</code>).</p>
+    <div class="card" id="E-D">
+      <h3><span class="dot" style="background:var(--foe)"></span>Chaser <span class="pill">k = 'd'</span></h3>
+      <p>Follows you smoothly (steering <code>ease(2.6)</code>).</p>
       <dl>
-        <dt><a href="#G-D">G-D1</a> Radius</dt><dd>16</dd>
-        <dt>G-D2 Tempo</dt><dd>75 + min(95; 1,2 × t) + 0…30 → max. 170–200</dd>
-        <dt>G-D3 Punkte</dt><dd>10</dd>
-        <dt>G-D4 Ab</dt><dd>Start</dd>
+        <dt><a href="#E-D">E-D1</a> Radius</dt><dd>16</dd>
+        <dt>E-D2 Speed</dt><dd>75 + min(95; 1.2 × t) + 0…30 → max 170–200</dd>
+        <dt>E-D3 Points</dt><dd>10</dd>
+        <dt>E-D4 From</dt><dd>start</dd>
       </dl>
     </div>
-    <div class="card" id="G-R">
-      <h3><span class="dot" style="background:var(--run)"></span>Raser <span class="pill">k = 'r'</span></h3>
-      <p>Zeigt eine Warnlinie, dann schießt er geradeaus in deine Richtung (±4,6° Streuung).</p>
+    <div class="card" id="E-R">
+      <h3><span class="dot" style="background:var(--run)"></span>Dasher <span class="pill">k = 'r'</span></h3>
+      <p>Shows a warning line, then shoots straight towards you (±4.6° spread).</p>
       <dl>
-        <dt><a href="#G-R">G-R1</a> Radius</dt><dd>14</dd>
-        <dt>G-R2 Tempo</dt><dd>540 + 2,5 × t → max. 820 (ab 112 s)</dd>
-        <dt>G-R3 Vorwarnung</dt><dd>0,85 s (harmlos)</dd>
-        <dt>G-R4 Punkte</dt><dd>30</dd>
-        <dt>G-R5 Ab</dt><dd>10 s</dd>
+        <dt><a href="#E-R">E-R1</a> Radius</dt><dd>14</dd>
+        <dt>E-R2 Speed</dt><dd>540 + 2.5 × t → max 820 (from 112 s)</dd>
+        <dt>E-R3 Warning</dt><dd>0.85 s (harmless)</dd>
+        <dt>E-R4 Points</dt><dd>30</dd>
+        <dt>E-R5 From</dt><dd>10 s</dd>
       </dl>
     </div>
-    <div class="card" id="G-I">
-      <h3><span class="dot" style="background:var(--ice)"></span>Igel <span class="pill">k = 'i'</span></h3>
-      <p>Langsam. Stacheln im 2,7-s-Takt: nur ohne Stacheln treffbar.</p>
+    <div class="card" id="E-S">
+      <h3><span class="dot" style="background:var(--ice)"></span>Spiky <span class="pill">k = 'i'</span></h3>
+      <p>Slow. Spikes on a 2.7 s cycle: can only be hit without spikes.</p>
       <dl>
-        <dt><a href="#G-I">G-I1</a> Radius</dt><dd>21</dd>
-        <dt>G-I2 Tempo</dt><dd>55 + min(60; 0,7 × t) → max. 115</dd>
-        <dt>G-I3 Takt</dt><dd>1,55 s sicher · 1,15 s tödlich</dd>
-        <dt>G-I4 Warnung</dt><dd>Stacheln wachsen 0,3 s vor Gefahr</dd>
-        <dt>G-I5 Punkte</dt><dd>25</dd>
-        <dt>G-I6 Ab</dt><dd>22 s</dd>
+        <dt><a href="#E-S">E-S1</a> Radius</dt><dd>21</dd>
+        <dt>E-S2 Speed</dt><dd>55 + min(60; 0.7 × t) → max 115</dd>
+        <dt>E-S3 Cycle</dt><dd>1.55 s safe · 1.15 s deadly</dd>
+        <dt>E-S4 Warning</dt><dd>spikes grow 0.3 s before they're deadly</dd>
+        <dt>E-S5 Points</dt><dd>25</dd>
+        <dt>E-S6 From</dt><dd>22 s</dd>
       </dl>
     </div>
-    <div class="card" id="G-G">
+    <div class="card" id="E-G">
       <h3><span class="dot" style="background:var(--gold)"></span>Gold <span class="pill">k = 'g'</span></h3>
-      <p>Prallt im Feld herum, harmlos. Treffer startet den Rausch.</p>
+      <p>Bounces around the field, harmless. A hit starts the Gold Rush.</p>
       <dl>
-        <dt><a href="#G-G">G-G1</a> Radius</dt><dd>15</dd>
-        <dt>G-G2 Tempo</dt><dd>90, prallt am Rand ab</dd>
-        <dt>G-G3 Lebensdauer</dt><dd>6,5 s (blinkt die letzten 2 s)</dd>
-        <dt>G-G4 Erscheint</dt><dd>erstes nach 11–17 s, dann alle 13–24 s</dd>
-        <dt>G-G5 Punkte</dt><dd>250</dd>
+        <dt><a href="#E-G">E-G1</a> Radius</dt><dd>15</dd>
+        <dt>E-G2 Speed</dt><dd>90, bounces off the edges</dd>
+        <dt>E-G3 Lifetime</dt><dd>6.5 s (blinks during the last 2 s)</dd>
+        <dt>E-G4 Appears</dt><dd>first after 11–17 s, then every 13–24 s</dd>
+        <dt>E-G5 Points</dt><dd>250</dd>
       </dl>
     </div>
   </div>
-  <h3>Spawn-Mischung <span class="pill">G-S</span></h3>
+  <h3>Spawn mix <span class="pill">E-M</span></h3>
   <div class="tw"><table>
-    <thead><tr><th>Spielzeit</th><th>Verfolger</th><th>Raser</th><th>Igel</th></tr></thead>
+    <thead><tr><th>Run time</th><th>Chaser</th><th>Dasher</th><th>Spiky</th></tr></thead>
     <tbody>
       <tr><td>0–10 s</td><td class="num">100 %</td><td class="num">–</td><td class="num">–</td></tr>
       <tr><td>10–22 s</td><td class="num">83 %</td><td class="num">17 %</td><td class="num">–</td></tr>
-      <tr><td>ab 22 s</td><td class="num">62 %</td><td class="num">17 %</td><td class="num">21 %</td></tr>
+      <tr><td>from 22 s</td><td class="num">62 %</td><td class="num">17 %</td><td class="num">21 %</td></tr>
     </tbody>
   </table></div>
 </section>
 
 <!-- ===================================================== -->
-<section id="boni">
-  <h2>Rausch, Vollgas, Haarscharf</h2>
+<section id="bonus">
+  <h2>Gold Rush, Overdrive, Close Call</h2>
   <div class="cards">
     <div class="card" id="B-R">
-      <h3><span class="dot" style="background:var(--gold)"></span>Rausch</h3>
+      <h3><span class="dot" style="background:var(--gold)"></span>Gold Rush</h3>
       <dl>
-        <dt>B-R1 Auslöser</dt><dd>Gold treffen</dd>
-        <dt>B-R2 Dauer</dt><dd>5 s</dd>
-        <dt>B-R3 Wirkung</dt><dd>Gegner halb so schnell, alle Punkte ×2, Fehlsprung-Pause 0,08 s</dd>
-        <dt>B-R4 Anzeige</dt><dd>goldener Schimmer, Countdown unten</dd>
+        <dt>B-R1 Trigger</dt><dd>hit Gold</dd>
+        <dt>B-R2 Duration</dt><dd>5 s</dd>
+        <dt>B-R3 Effect</dt><dd>enemies at half speed, all points ×2, miss cooldown 0.08 s</dd>
+        <dt>B-R4 Display</dt><dd>golden shimmer, countdown at the bottom</dd>
       </dl>
     </div>
     <div class="card" id="B-V">
-      <h3><span class="dot" style="background:var(--ice)"></span>Vollgas</h3>
+      <h3><span class="dot" style="background:var(--ice)"></span>Overdrive</h3>
       <dl>
-        <dt>B-V1 Auslöser</dt><dd>Serie 20, 45, 70 (= ×5, ×10, ×15)</dd>
-        <dt>B-V2 Dauer</dt><dd>4 s</dd>
-        <dt>B-V3 Wirkung</dt><dd>Sprungweite ×1,5 (495), keine Fehlsprung-Pause</dd>
-        <dt>B-V4 Anzeige</dt><dd>eisblaue Spur, pulsierender Ring, Countdown</dd>
+        <dt>B-V1 Trigger</dt><dd>combo 20, 45, 70 (= ×5, ×10, ×15)</dd>
+        <dt>B-V2 Duration</dt><dd>4 s</dd>
+        <dt>B-V3 Effect</dt><dd>dash range ×1.5 (495), no cooldown after misses</dd>
+        <dt>B-V4 Display</dt><dd>icy-blue trail, pulsing ring, countdown</dd>
       </dl>
     </div>
     <div class="card" id="B-H">
-      <h3><span class="dot" style="background:var(--ice)"></span>Haarscharf</h3>
+      <h3><span class="dot" style="background:var(--ice)"></span>Close Call</h3>
       <dl>
-        <dt>B-H1 Bedingung</dt><dd>Gegner kommt bis auf Todesgrenze + 28 heran, du überlebst, er ist wieder draußen</dd>
-        <dt>B-H2 Belohnung</dt><dd>5 × Mult × Rausch Punkte, +0,4 s Serien-Timer</dd>
-        <dt>B-H3 Grenzen</dt><dd>einmal pro Gegner · nicht Gold · nicht Raser in Vorwarnung · nicht während Unverwundbarkeit</dd>
+        <dt>B-H1 Condition</dt><dd>an enemy gets within death distance + 28, you survive, and it moves out again</dd>
+        <dt>B-H2 Reward</dt><dd>5 × mult × Gold Rush points, +0.4 s combo timer</dd>
+        <dt>B-H3 Limits</dt><dd>once per enemy · not Gold · not a Dasher during its warning · not while invulnerable</dd>
       </dl>
     </div>
   </div>
 </section>
 
 <!-- ===================================================== -->
-<section id="neu2">
-  <h2>Gerettet, Kopfgeld, Feld leer, Stufen</h2>
+<section id="extras">
+  <h2>Clutch, Bounty, Clean Sweep, Levels</h2>
   <div class="cards">
     <div class="card" id="N-G">
-      <h3><span class="dot" style="background:var(--foe)"></span>Gerettet!</h3>
+      <h3><span class="dot" style="background:var(--foe)"></span>Clutch!</h3>
       <dl>
-        <dt>N-G1 Bedingung</dt><dd>Treffer bei Serie ≥ 5, während der Serien-Ring rot ist (unter 30 %)</dd>
-        <dt>N-G2 Belohnung</dt><dd>20 × Mult × Rausch, roter Ring, eigener Ton</dd>
-        <dt>N-G3 Code</dt><dd><code>RESCUE_AT</code>, <code>rescue()</code></dd>
+        <dt>N-G1 Condition</dt><dd>a hit at combo ≥ 5 while the combo ring is red (below 30 %)</dd>
+        <dt>N-G2 Reward</dt><dd>20 × mult × Gold Rush, red ring, its own sound</dd>
+        <dt>N-G3 Code ref</dt><dd><code>RESCUE_AT</code>, <code>rescue()</code></dd>
       </dl>
     </div>
     <div class="card" id="N-K">
-      <h3><span class="dot" style="background:var(--spark)"></span>Kopfgeld</h3>
+      <h3><span class="dot" style="background:var(--spark)"></span>Bounty</h3>
       <dl>
-        <dt>N-K1 Wer</dt><dd>Verfolger mit Krone und goldenem Schein</dd>
-        <dt>N-K2 Chance</dt><dd>4 % der Verfolger, ab 5 s</dd>
-        <dt>N-K3 Wert</dt><dd>50 statt 10</dd>
-        <dt>N-K4 Code</dt><dd><code>BOUNTY_CHANCE</code></dd>
+        <dt>N-K1 Who</dt><dd>Chaser with a crown and a golden glow</dd>
+        <dt>N-K2 Chance</dt><dd>4 % of Chasers, from 5 s</dd>
+        <dt>N-K3 Value</dt><dd>50 instead of 10</dd>
+        <dt>N-K4 Code ref</dt><dd><code>BOUNTY_CHANCE</code></dd>
       </dl>
     </div>
     <div class="card" id="N-F">
-      <h3><span class="dot" style="background:var(--spark)"></span>Feld leergeräumt</h3>
+      <h3><span class="dot" style="background:var(--spark)"></span>Clean Sweep</h3>
       <dl>
-        <dt>N-F1 Bedingung</dt><dd>Nach einem Treffer ist kein feindlicher Gegner mehr im Bild (Gold zählt nicht), ab 3 s</dd>
-        <dt>N-F2 Belohnung</dt><dd>100 × Mult × Rausch, „Sauber gmacht!“</dd>
-        <dt>N-F3 Wirkung</dt><dd>0,8 s Zeitlupe (35 %), 1,2 s kein Nachschub, großer Ring, Becken + Bass-Drop</dd>
-        <dt>N-F4 Sperre</dt><dd>höchstens alle 4 s</dd>
+        <dt>N-F1 Condition</dt><dd>after a hit, no hostile enemy is left on screen (Gold doesn't count), from 3 s</dd>
+        <dt>N-F2 Reward</dt><dd>100 × mult × Gold Rush, “Clean Sweep!”</dd>
+        <dt>N-F3 Effect</dt><dd>0.8 s slow motion (35 %), 1.2 s without new enemies, big ring, crash + bass drop</dd>
+        <dt>N-F4 Limit</dt><dd>at most every 4 s</dd>
       </dl>
     </div>
     <div class="card" id="N-S">
-      <h3><span class="dot" style="background:var(--ink)"></span>Stufen</h3>
+      <h3><span class="dot" style="background:var(--ink)"></span>Levels</h3>
       <dl>
-        <dt>N-S1 Takt</dt><dd>alle 30 s Spielzeit: „Stufe N!“</dd>
-        <dt>N-S2 Atempause</dt><dd>2 s kein neuer Gegner</dd>
-        <dt>N-S3 Farbton</dt><dd>1 keiner · 2 eisblau · 3 koralle · 4 orange · 5 blau · 6 gold, dann von vorn (weich überblendet)</dd>
-        <dt>N-S4 Anzeige</dt><dd>oben rechts mit Balken bis zur nächsten Stufe</dd>
-        <dt>N-S5 Hinweis</dt><dd>reine Show, die Schwierigkeit steigt weiter stufenlos</dd>
+        <dt>N-S1 Pace</dt><dd>every 30 s of run time: “Level N!”</dd>
+        <dt>N-S2 Breather</dt><dd>2 s without new enemies</dd>
+        <dt>N-S3 Tint</dt><dd>1 none · 2 icy blue · 3 coral · 4 orange · 5 blue · 6 gold, then repeats (smooth crossfade)</dd>
+        <dt>N-S4 Display</dt><dd>top right with a bar to the next level</dd>
+        <dt>N-S5 Note</dt><dd>pure show – difficulty keeps rising continuously</dd>
       </dl>
     </div>
   </div>
 </section>
 
 <!-- ===================================================== -->
-<section id="zeit">
-  <h2>Schwierigkeit über Zeit</h2>
-  <p>Alles hängt an der Spielzeit <code>t</code> (Sekunden seit Rundenstart). Werte für typische Zeitpunkte:</p>
+<section id="time">
+  <h2>Difficulty over time</h2>
+  <p>Everything depends on the run time <code>t</code> (seconds since the run started). Values at typical points in time:</p>
   <div class="tw"><table id="tTable">
-    <thead><tr><th>Kürzel</th><th>Wert</th><th>Formel</th></tr></thead>
+    <thead><tr><th>Code</th><th>Value</th><th>Formula</th></tr></thead>
     <tbody></tbody>
   </table></div>
-  <p class="note">Ab etwa <b>112 s</b> ist alles am Maximum. Danach wird es nicht mehr schwerer – nur noch voller (bis 42 Gegner).</p>
+  <p class="note">From about <b>112 s</b> everything is at its maximum. After that it doesn't get harder – only fuller (up to 42 enemies).</p>
 </section>
 
 <!-- ===================================================== -->
-<section id="rechner">
-  <h2>Punkte-Rechner</h2>
-  <p>Zum Ausprobieren, was ein Treffer wert ist.</p>
-  <form class="calc" id="calc" onsubmit="return false">
-    <label>Gegner<select id="cK"><option value="10">Verfolger (10)</option><option value="25">Igel (25)</option><option value="30">Raser (30)</option><option value="250">Gold (250)</option></select></label>
-    <label>Serie vor dem Sprung<input id="cC" type="number" min="0" max="200" value="19"></label>
-    <label>Gegner im selben Sprung<input id="cN" type="number" min="1" max="8" value="1"></label>
-    <label class="chk"><input id="cKn" type="checkbox"> KNAPP (×2)</label>
-    <label class="chk"><input id="cRa" type="checkbox"> Rausch (×2)</label>
+<section id="calc">
+  <h2>Points calculator</h2>
+  <p>Try out what a hit is worth.</p>
+  <form class="calc" id="calcForm" onsubmit="return false">
+    <label>Enemy<select id="cK"><option value="10">Chaser (10)</option><option value="50">Bounty Chaser (50)</option><option value="25">Spiky (25)</option><option value="30">Dasher (30)</option><option value="250">Gold (250)</option></select></label>
+    <label>Combo before the dash<input id="cC" type="number" min="0" max="200" value="19"></label>
+    <label>Enemies in the same dash<input id="cN" type="number" min="1" max="8" value="1"></label>
+    <label class="chk"><input id="cKn" type="checkbox"> POINT BLANK (×2)</label>
+    <label class="chk"><input id="cRa" type="checkbox"> Gold Rush (×2)</label>
     <output id="cOut" for="cK cC cN cKn cRa"></output>
   </form>
 </section>
 
 <!-- ===================================================== -->
-<section id="gefuehl">
-  <h2>Spielgefühl (Juice)</h2>
+<section id="feel">
+  <h2>Game feel (juice)</h2>
   <div class="tw"><table>
-    <thead><tr><th>Kürzel</th><th>Effekt</th><th>Wert</th></tr></thead>
+    <thead><tr><th>Code</th><th>Effect</th><th>Value</th></tr></thead>
     <tbody>
-      <tr id="J1"><td class="k"><a href="#J1">J1</a></td><td>Treffer-Stopp (Welt friert ein)</td><td class="num">0,045 s + 0,018 s × Anzahl (max. 4)</td></tr>
-      <tr id="J2"><td class="k"><a href="#J2">J2</a></td><td>Wackeln</td><td class="num">0,3 + 0,14 × Anzahl (max. 1), klingt in 0,25 s ab</td></tr>
-      <tr id="J3"><td class="k"><a href="#J3">J3</a></td><td>Aufblitzen</td><td class="num">0,06 + 0,04 × Anzahl (max. 0,22)</td></tr>
-      <tr id="J4"><td class="k"><a href="#J4">J4</a></td><td>Partikel pro Treffer / Tod</td><td class="num">24 / 90 (max. 700 gleichzeitig)</td></tr>
-      <tr id="J5"><td class="k"><a href="#J5">J5</a></td><td>Sprungspur</td><td class="num">0,22 s, gelb · eisblau bei Vollgas</td></tr>
-      <tr id="J6"><td class="k"><a href="#J6">J6</a></td><td>Punktanzeige</td><td>zählt weich hoch, hüpft bei Treffer</td></tr>
-      <tr id="J7"><td class="k"><a href="#J7">J7</a></td><td>Rekord-Balken</td><td>unter der Punktzahl, wird gelb beim Überholen</td></tr>
-      <tr id="J8"><td class="k"><a href="#J8">J8</a></td><td>Reduzierte Bewegung</td><td>Systemeinstellung schaltet Wackeln, Blitzen und Menü-Animation ab</td></tr>
+      <tr id="J1"><td class="k"><a href="#J1">J1</a></td><td>Hit stop (world freezes)</td><td class="num">0.045 s + 0.018 s × count (max 4)</td></tr>
+      <tr id="J2"><td class="k"><a href="#J2">J2</a></td><td>Screen shake</td><td class="num">0.3 + 0.14 × count (max 1), fades in 0.25 s</td></tr>
+      <tr id="J3"><td class="k"><a href="#J3">J3</a></td><td>Flash</td><td class="num">0.06 + 0.04 × count (max 0.22)</td></tr>
+      <tr id="J4"><td class="k"><a href="#J4">J4</a></td><td>Particles per hit / death</td><td class="num">24 / 90 (max 700 at once)</td></tr>
+      <tr id="J5"><td class="k"><a href="#J5">J5</a></td><td>Dash trail</td><td class="num">0.22 s, trail color · icy blue during Overdrive</td></tr>
+      <tr id="J6"><td class="k"><a href="#J6">J6</a></td><td>Score display</td><td>counts up smoothly, bounces on hits</td></tr>
+      <tr id="J7"><td class="k"><a href="#J7">J7</a></td><td>Best bar</td><td>below the score, turns yellow once you beat it</td></tr>
+      <tr id="J8"><td class="k"><a href="#J8">J8</a></td><td>Reduced motion</td><td>system setting turns off shake, flash and menu animation</td></tr>
     </tbody>
   </table></div>
 </section>
 
 <!-- ===================================================== -->
-<section id="musik">
-  <h2>Musik</h2>
-  <p>Synthwave, 124 BPM, Akkorde Cis-Moll → A → E → H (je 2 Takte). Live erzeugt in <code>js/music.js</code>, keine Audiodateien. Die Treffertöne (E-Dur-Pentatonik) passen zu jedem Akkord.</p>
+<section id="music">
+  <h2>Music</h2>
+  <p>Synthwave, 124 BPM, chords C♯m → A → E → B (2 bars each). Generated live in <code>js/music.js</code>, no audio files. The hit sounds (E major pentatonic) fit every chord.</p>
   <div class="tw"><table>
-    <thead><tr><th>Kürzel</th><th>Intensität</th><th>Ab</th><th>Was dazukommt</th></tr></thead>
+    <thead><tr><th>Code</th><th>Intensity</th><th>From</th><th>What gets added</th></tr></thead>
     <tbody>
-      <tr id="MU0"><td class="k"><a href="#MU0">MU0</a></td><td class="num">0</td><td>Serie 0</td><td>Pad (pumpt), Bass auf Vierteln, Filter fast zu</td></tr>
-      <tr id="MU1"><td class="k"><a href="#MU1">MU1</a></td><td class="num">1</td><td>Serie läuft</td><td>+ Bassdrum (Pad und Bass ducken darunter)</td></tr>
-      <tr id="MU2"><td class="k"><a href="#MU2">MU2</a></td><td class="num">2</td><td>×2</td><td>+ Hi-Hat auf den Offbeats</td></tr>
-      <tr id="MU3"><td class="k"><a href="#MU3">MU3</a></td><td class="num">3</td><td>×4</td><td>+ Clap auf 2 und 4, Bass in Achteln</td></tr>
-      <tr id="MU4"><td class="k"><a href="#MU4">MU4</a></td><td class="num">4</td><td>×7</td><td>+ Arpeggio mit Echo, Wirbel vor jedem Akkordwechsel</td></tr>
-      <tr id="MU5"><td class="k"><a href="#MU5">MU5</a></td><td class="num">5</td><td>×10</td><td>+ Hi-Hat in Sechzehnteln</td></tr>
-      <tr id="MU6"><td class="k"><a href="#MU6">MU6</a></td><td class="num">6</td><td>×13</td><td>+ Arpeggio eine Oktave höher, Ride</td></tr>
-      <tr id="MU7"><td class="k"><a href="#MU7">MU7</a></td><td>Rausch</td><td>Gold</td><td>Glocken, Filter ganz offen</td></tr>
-      <tr id="MU8"><td class="k"><a href="#MU8">MU8</a></td><td>Vollgas</td><td>×5 / ×10 / ×15</td><td>schnelle Hi-Hats</td></tr>
-      <tr id="MU9"><td class="k"><a href="#MU9">MU9</a></td><td>Akzente</td><td>–</td><td>Becken bei Rausch, Feld leer, Stufe (+ Bass-Drop); Rauschen bei Gerettet</td></tr>
-      <tr id="MU10"><td class="k"><a href="#MU10">MU10</a></td><td>Tod / Pause</td><td>–</td><td>Tod: Filter fällt zu, blendet aus · Pause: stumm</td></tr>
-      <tr id="MU11"><td class="k"><a href="#MU11">MU11</a></td><td>Menü / Ergebnis</td><td>–</td><td>ruhiges Pad (Menü mit leisem Arpeggio)</td></tr>
-      <tr id="MU12"><td class="k"><a href="#MU12">MU12</a></td><td>Lautstärke</td><td>–</td><td>Regler im Menü 0–100 % (Standard 75 %), quadratisch: Spiel = (Regler)² × 1,5 → bei 75 % ≈ 0,84 · Menü ×0,8 · Ergebnis ×0,65. Regler und Knopf „Musik aus“ werden gemerkt (<code>zack.vol</code>, <code>zack.music</code>)</td></tr>
+      <tr id="MU0"><td class="k"><a href="#MU0">MU0</a></td><td class="num">0</td><td>combo 0</td><td>pad (pumping), bass on quarter notes, filter almost closed</td></tr>
+      <tr id="MU1"><td class="k"><a href="#MU1">MU1</a></td><td class="num">1</td><td>combo running</td><td>+ kick drum (pad and bass duck under it)</td></tr>
+      <tr id="MU2"><td class="k"><a href="#MU2">MU2</a></td><td class="num">2</td><td>×2</td><td>+ hi-hat on the offbeats</td></tr>
+      <tr id="MU3"><td class="k"><a href="#MU3">MU3</a></td><td class="num">3</td><td>×4</td><td>+ clap on 2 and 4, bass in eighth notes</td></tr>
+      <tr id="MU4"><td class="k"><a href="#MU4">MU4</a></td><td class="num">4</td><td>×7</td><td>+ arpeggio with echo, drum roll before every chord change</td></tr>
+      <tr id="MU5"><td class="k"><a href="#MU5">MU5</a></td><td class="num">5</td><td>×10</td><td>+ hi-hat in sixteenth notes</td></tr>
+      <tr id="MU6"><td class="k"><a href="#MU6">MU6</a></td><td class="num">6</td><td>×13</td><td>+ arpeggio an octave higher, ride</td></tr>
+      <tr id="MU7"><td class="k"><a href="#MU7">MU7</a></td><td>Gold Rush</td><td>Gold</td><td>bells, filter fully open</td></tr>
+      <tr id="MU8"><td class="k"><a href="#MU8">MU8</a></td><td>Overdrive</td><td>×5 / ×10 / ×15</td><td>fast hi-hats</td></tr>
+      <tr id="MU9"><td class="k"><a href="#MU9">MU9</a></td><td>Accents</td><td>–</td><td>crash on Gold Rush, Clean Sweep, Level (+ bass drop); noise burst on Clutch</td></tr>
+      <tr id="MU10"><td class="k"><a href="#MU10">MU10</a></td><td>Death / pause</td><td>–</td><td>death: filter closes, fades out · pause: silent</td></tr>
+      <tr id="MU11"><td class="k"><a href="#MU11">MU11</a></td><td>Menu / results</td><td>–</td><td>calm pad (menu with a quiet arpeggio)</td></tr>
+      <tr id="MU12"><td class="k"><a href="#MU12">MU12</a></td><td>Volume</td><td>–</td><td>slider in the menu 0–100 % (default 75 %), quadratic: play = (slider)² × 1.5 → about 0.84 at 75 % · menu ×0.8 · results ×0.65. Slider and “Music off” button are remembered (<code>zack.vol</code>, <code>zack.music</code>)</td></tr>
     </tbody>
   </table></div>
 </section>
 
 <!-- ===================================================== -->
-<section id="spuren">
-  <h2>Spurfarben</h2>
-  <p>Alle Punkte aus allen Runden werden zusammengezählt (<code>zack.total</code>). Damit schaltest du Farben für die Sprungspur frei, im Menü auswählbar. Bei Vollgas bleibt die Spur eisblau.</p>
+<section id="trails">
+  <h2>Trail colors</h2>
+  <p>All points from all runs are added up (<code>zack.total</code>). They unlock colors for your dash trail, selectable in the menu. During Overdrive the trail stays icy blue.</p>
   <div class="tw"><table>
-    <thead><tr><th>Kürzel</th><th>Farbe</th><th>Ab Gesamtpunkten</th></tr></thead>
+    <thead><tr><th>Code</th><th>Color</th><th>Total points needed</th></tr></thead>
     <tbody>
-      <tr id="SP1"><td class="k"><a href="#SP1">SP1</a></td><td><span class="dot" style="display:inline-block;vertical-align:middle;background:#ffd23f"></span> Funke</td><td class="num">0</td></tr>
-      <tr id="SP2"><td class="k"><a href="#SP2">SP2</a></td><td><span class="dot" style="display:inline-block;vertical-align:middle;background:#ff5d73"></span> Paradeiser</td><td class="num">10.000</td></tr>
-      <tr id="SP3"><td class="k"><a href="#SP3">SP3</a></td><td><span class="dot" style="display:inline-block;vertical-align:middle;background:#7aa2ff"></span> Donau</td><td class="num">30.000</td></tr>
-      <tr id="SP4"><td class="k"><a href="#SP4">SP4</a></td><td><span class="dot" style="display:inline-block;vertical-align:middle;background:#fff3b0"></span> Goldenes Herz</td><td class="num">75.000</td></tr>
-      <tr id="SP5"><td class="k"><a href="#SP5">SP5</a></td><td><span class="dot" style="display:inline-block;vertical-align:middle;background:conic-gradient(#ff5d73,#ffd23f,#5ce1e6,#7aa2ff,#ff5d73)"></span> Prater (Regenbogen)</td><td class="num">150.000</td></tr>
-      <tr id="SP6"><td class="k"><a href="#SP6">SP6</a></td><td><span class="dot" style="display:inline-block;vertical-align:middle;background:#f6efff"></span> Opernball</td><td class="num">300.000</td></tr>
+      <tr id="SP1"><td class="k"><a href="#SP1">SP1</a></td><td><span class="dot" style="display:inline-block;vertical-align:middle;background:#ffd23f"></span> Spark</td><td class="num">0</td></tr>
+      <tr id="SP2"><td class="k"><a href="#SP2">SP2</a></td><td><span class="dot" style="display:inline-block;vertical-align:middle;background:#ff5d73"></span> Tomato</td><td class="num">10,000</td></tr>
+      <tr id="SP3"><td class="k"><a href="#SP3">SP3</a></td><td><span class="dot" style="display:inline-block;vertical-align:middle;background:#7aa2ff"></span> Danube</td><td class="num">30,000</td></tr>
+      <tr id="SP4"><td class="k"><a href="#SP4">SP4</a></td><td><span class="dot" style="display:inline-block;vertical-align:middle;background:#fff3b0"></span> Golden Heart</td><td class="num">75,000</td></tr>
+      <tr id="SP5"><td class="k"><a href="#SP5">SP5</a></td><td><span class="dot" style="display:inline-block;vertical-align:middle;background:conic-gradient(#ff5d73,#ffd23f,#5ce1e6,#7aa2ff,#ff5d73)"></span> Funfair (rainbow)</td><td class="num">150,000</td></tr>
+      <tr id="SP6"><td class="k"><a href="#SP6">SP6</a></td><td><span class="dot" style="display:inline-block;vertical-align:middle;background:#f6efff"></span> Opera Ball</td><td class="num">300,000</td></tr>
     </tbody>
   </table></div>
-  <p>Am Rundenende steht, ob eine neue Farbe frei ist oder wie viel bis zur nächsten fehlt.</p>
+  <p>At the end of each run you see whether a new color was unlocked or how many points are missing for the next one.</p>
 </section>
 
 <!-- ===================================================== -->
-<section id="texte">
-  <h2>Ausrufe &amp; Texte</h2>
+<section id="texts">
+  <h2>Callouts &amp; texts</h2>
   <div class="tw"><table>
-    <thead><tr><th>Kürzel</th><th>Wann</th><th>Text</th></tr></thead>
+    <thead><tr><th>Code</th><th>When</th><th>Text</th></tr></thead>
     <tbody>
-      <tr id="T1"><td class="k"><a href="#T1">T1</a></td><td>Serie 5 / 10 / 20 / 35 / 50 / 75 / 100</td><td>Sauber! · Leiwand! · Oida! · Wahnsinn! · Bist du deppert! · Legende! · Gottgleich!</td></tr>
-      <tr id="T2"><td class="k"><a href="#T2">T2</a></td><td>2 / 3 / 4 / 5+ in einem Sprung</td><td>Doppel! · Tripel! · Quadrupel! · Kehraus!</td></tr>
-      <tr id="T3"><td class="k"><a href="#T3">T3</a></td><td>Boni</td><td>Rausch! · Vollgas! · Einkassiert! +X · Haarscharf +X · KNAPP ×2 · Gerettet! · Kopfgeld! · Sauber gmacht! · Stufe N!</td></tr>
-      <tr id="T4"><td class="k"><a href="#T4">T4</a></td><td>Rekord geknackt</td><td>Neuer Rekord!</td></tr>
-      <tr id="T5"><td class="k"><a href="#T5">T5</a></td><td>Menü-Sprüche (zufällig)</td><td>Ein Klick, ein Sprung. Wer danebenhaut, steht blöd da. · Zielen, klicken, Zack. Mehr is ned dabei. · Knapp vorbei is a vorbei. Und bringt Punkte. · Heut is a guater Tag für an Rekord.</td></tr>
+      <tr id="T1"><td class="k"><a href="#T1">T1</a></td><td>combo 5 / 10 / 20 / 35 / 50 / 75 / 100</td><td>Nice! · Sweet! · Whoa! · Insane! · Are you kidding?! · Legendary! · Godlike!</td></tr>
+      <tr id="T2"><td class="k"><a href="#T2">T2</a></td><td>2 / 3 / 4 / 5+ in one dash</td><td>Double! · Triple! · Quad! · Rampage!</td></tr>
+      <tr id="T3"><td class="k"><a href="#T3">T3</a></td><td>Bonuses</td><td>Gold Rush! · Overdrive! · Cashed In! +X · Close Call +X · POINT BLANK ×2 · Clutch! · Bounty! · Clean Sweep! · Level N!</td></tr>
+      <tr id="T4"><td class="k"><a href="#T4">T4</a></td><td>Best beaten</td><td>New Best!</td></tr>
+      <tr id="T5"><td class="k"><a href="#T5">T5</a></td><td>Menu taglines (random)</td><td>One click, one dash. Miss and you're a sitting duck. · Aim, click, Zack. That's all there is. · A near miss is still a miss. But it pays. · Feels like a record kind of day.</td></tr>
     </tbody>
   </table></div>
 </section>
 
 <!-- ===================================================== -->
-<section id="technik">
-  <h2>Technik</h2>
+<section id="tech">
+  <h2>Tech</h2>
   <div class="tw"><table>
-    <thead><tr><th>Kürzel</th><th>Was</th><th>Wie</th></tr></thead>
+    <thead><tr><th>Code</th><th>What</th><th>How</th></tr></thead>
     <tbody>
-      <tr id="X1"><td class="k"><a href="#X1">X1</a></td><td>Aufbau</td><td><code>index.html</code> + <code>css/style.css</code> + <code>js/*.js</code> (klassische Skripte), Canvas 2D, keine Bibliotheken, kein Build</td></tr>
-      <tr id="X2"><td class="k"><a href="#X2">X2</a></td><td>Bildrate</td><td>rechnet mit echter Zeit (<code>update(rdt)</code>, max. 0,05 s pro Schritt) – gleich bei 60 und 144 Hz</td></tr>
-      <tr id="X3"><td class="k"><a href="#X3">X3</a></td><td>Glätten</td><td><code>ease(k, dt) = 1 − e<sup>−k·dt</sup></code></td></tr>
-      <tr id="X4"><td class="k"><a href="#X4">X4</a></td><td>Ton</td><td>WebAudio, synthetisch (<code>tone()</code>, <code>hiss()</code>), erst nach erster Eingabe</td></tr>
-      <tr id="X5"><td class="k"><a href="#X5">X5</a></td><td>Schärfe</td><td>Canvas mit Gerätepixeln (max. 2×)</td></tr>
-      <tr id="X6"><td class="k"><a href="#X6">X6</a></td><td>Veröffentlichen</td><td>Push auf <code>main</code> → GitHub Actions → <a href="https://lsprung-lts.github.io/zack/">lsprung-lts.github.io/zack</a> · Tag <code>v*</code> → Release</td></tr>
+      <tr id="X1"><td class="k"><a href="#X1">X1</a></td><td>Structure</td><td><code>index.html</code> + <code>css/style.css</code> + <code>js/*.js</code> (classic scripts), Canvas 2D, no libraries, no build step</td></tr>
+      <tr id="X2"><td class="k"><a href="#X2">X2</a></td><td>Frame rate</td><td>uses real time (<code>update(rdt)</code>, max 0.05 s per step) – same at 60 and 144 Hz</td></tr>
+      <tr id="X3"><td class="k"><a href="#X3">X3</a></td><td>Smoothing</td><td><code>ease(k, dt) = 1 − e<sup>−k·dt</sup></code></td></tr>
+      <tr id="X4"><td class="k"><a href="#X4">X4</a></td><td>Sound</td><td>WebAudio, synthesized (<code>tone()</code>, <code>hiss()</code>, <code>Music</code>), only after the first input</td></tr>
+      <tr id="X5"><td class="k"><a href="#X5">X5</a></td><td>Sharpness</td><td>canvas at device pixels (max 2×)</td></tr>
+      <tr id="X6"><td class="k"><a href="#X6">X6</a></td><td>Publishing</td><td>push to <code>main</code> → GitHub Actions → <a href="https://lsprung-lts.github.io/zack/">lsprung-lts.github.io/zack</a> · tag <code>v*</code> → release</td></tr>
     </tbody>
   </table></div>
 </section>
 
 <!-- ===================================================== -->
 <section id="plan">
-  <h2>Geplant</h2>
+  <h2>Planned</h2>
   <ul>
-    <li>Neuer Gegner „Bomber“ mit Kettenreaktion</li>
-    <li>Medaillen / Ränge nach Punkten</li>
-    <li>Online-Bestenliste und Tages-Challenge mit fester Gegnerfolge</li>
-    <li>später evtl. Geister-Duell oder Echtzeit-Multiplayer</li>
+    <li>Power-up “Trigger Happy”: no cooldown after misses for a few seconds, rarer than Gold</li>
+    <li>New enemy “Bomber” with chain reactions</li>
+    <li>Medals / ranks based on points</li>
+    <li>Online leaderboard and a daily challenge with a fixed enemy sequence</li>
+    <li>later maybe ghost duel or real-time multiplayer</li>
   </ul>
 </section>
 </main>
@@ -465,21 +466,21 @@ tbody tr:target{background:rgba(255,210,63,.12)}
 <script>
 (function(){
 'use strict';
-const fmt=n=>Math.round(n).toLocaleString('de-AT');
-const f1=n=>n.toLocaleString('de-AT',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmt=n=>Math.round(n).toLocaleString('en-US');
+const f2=n=>n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 
-/* Eigener Rekord – nur sichtbar, wenn Wiki und Spiel unter derselben Adresse laufen */
-try{const b=+localStorage.getItem('zack.best')||0;document.getElementById('myBest').textContent=b?fmt(b):'noch keiner';}
+/* Your best – only visible when the wiki and the game run under the same address */
+try{const b=+localStorage.getItem('zack.best')||0;document.getElementById('myBest').textContent=b?fmt(b):'none yet';}
 catch(e){document.getElementById('mine').hidden=true;}
 
-/* Schwierigkeit über Zeit – Formeln 1:1 aus index.html */
+/* Difficulty over time – formulas taken 1:1 from js/*.js */
 const T=[0,10,22,30,60,90,120];
 const rows=[
-  ['Z1','Serien-Timer (s)','max(1,15; 2,3 − 0,012·t)',t=>f1(Math.max(1.15,2.3-t*.012))],
-  ['Z2','Neuer Gegner alle (s)','max(0,27; 0,95 − 0,009·t)',t=>f1(Math.max(.27,.95-t*.009))],
-  ['Z3','Verfolger-Tempo','75 + min(95; 1,2·t) + 0…30',t=>{const b=75+Math.min(95,t*1.2);return fmt(b)+'–'+fmt(b+30);}],
-  ['Z4','Raser-Tempo','min(820; 540 + 2,5·t)',t=>t<10?'–':fmt(Math.min(820,540+t*2.5))],
-  ['Z5','Igel-Tempo','55 + min(60; 0,7·t)',t=>t<22?'–':fmt(55+Math.min(60,t*.7))],
+  ['Z1','Combo timer (s)','max(1.15; 2.3 − 0.012·t)',t=>f2(Math.max(1.15,2.3-t*.012))],
+  ['Z2','New enemy every (s)','max(0.27; 0.95 − 0.009·t)',t=>f2(Math.max(.27,.95-t*.009))],
+  ['Z3','Chaser speed','75 + min(95; 1.2·t) + 0…30',t=>{const b=75+Math.min(95,t*1.2);return fmt(b)+'–'+fmt(b+30);}],
+  ['Z4','Dasher speed','min(820; 540 + 2.5·t)',t=>t<10?'–':fmt(Math.min(820,540+t*2.5))],
+  ['Z5','Spiky speed','55 + min(60; 0.7·t)',t=>t<22?'–':fmt(55+Math.min(60,t*.7))],
 ];
 const tb=document.querySelector('#tTable');
 const head=tb.tHead.rows[0];
@@ -490,7 +491,7 @@ rows.forEach(([k,name,formula,fn])=>{
   tb.tBodies[0].appendChild(tr);
 });
 
-/* Punkte-Rechner – gleiche Formel wie dash() */
+/* Points calculator – same formula as dash() */
 const $=id=>document.getElementById(id);
 function calc(){
   const base=+$('cK').value,c0=Math.max(0,+$('cC').value|0),n=Math.max(1,+$('cN').value|0);
@@ -498,11 +499,11 @@ function calc(){
   let total=0,parts=[];
   for(let i=0;i<n;i++){const m=Math.min(15,1+Math.floor((c0+i+1)/5));const p=base*m*n*kn*ra;total+=p;parts.push(fmt(p));}
   const m1=Math.min(15,1+Math.floor((c0+1)/5));
-  $('cOut').innerHTML='+'+fmt(total)+'<small>'+(n>1?'pro Gegner: '+parts.join(' + ')+' · ':'')+'Multiplikator beim ersten Treffer ×'+m1+' · Serie danach '+(c0+n)+'</small>';
+  $('cOut').innerHTML='+'+fmt(total)+'<small>'+(n>1?'per enemy: '+parts.join(' + ')+' · ':'')+'multiplier on the first hit ×'+m1+' · combo afterwards '+(c0+n)+'</small>';
 }
 ['cK','cC','cN','cKn','cRa'].forEach(id=>$(id).addEventListener('input',calc));calc();
 
-/* Inhaltsverzeichnis: aktuellen Abschnitt markieren */
+/* Table of contents: highlight the current section */
 const links=[...document.querySelectorAll('#toc a')];
 if('IntersectionObserver' in window){
   const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id));}});},{rootMargin:'-20% 0px -70% 0px'});

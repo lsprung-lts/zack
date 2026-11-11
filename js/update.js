@@ -34,7 +34,7 @@ function update(rdt){
       e.x+=e.vx*edt;e.y+=e.vy*edt;if(e.k==='i')e.ph+=edt;}
     if(st!=='play'||e.k==='g'||(e.k==='r'&&e.warn>0))continue;
     const dd=Math.hypot(e.x-p.x,e.y-p.y);
-    if(inv<=0&&dd<e.r+7){die(e.k==='r'?'Überfahren':e.k==='i'?'Aufgespießt':'Erwischt');continue;}
+    if(inv<=0&&dd<e.r+7){die(e.k==='r'?'Flattened':e.k==='i'?'Skewered':'Caught');continue;}
     if(dd<e.r+7+GRAZE){if(!e.gz&&inv<=0)e.gz=1;}     // drin im knappen Bereich
     else if(e.gz===1){e.gz=2;graze(e);}            // wieder draußen und noch am Leben
   }

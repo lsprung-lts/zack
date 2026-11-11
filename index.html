@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,8 +13,8 @@
 <div class="bar">
   <span class="name">ZACK</span>
   <span id="hz">– Hz</span>
-  <button class="ghost" id="mus">Musik aus</button>
-  <button class="ghost" id="snd">Ton aus</button>
+  <button class="ghost" id="mus">Music off</button>
+  <button class="ghost" id="snd">Sound off</button>
   <button class="ghost" id="pz">Pause</button>
 </div>
 <main id="main">
@@ -22,58 +22,58 @@
     <canvas id="cv" aria-label="Arena"></canvas>
     <div class="overlay menu-on" id="ov">
      <div class="screen" id="ovMenu">
-      <p class="kicker">Ein Klick · ein Sprung · ein Funke</p>
+      <p class="kicker">One click · one dash · one spark</p>
       <h1 class="logo" aria-label="Zack"><span style="--i:0">Z</span><span style="--i:1">A</span><span style="--i:2">C</span><span style="--i:3">K</span><i class="zap" aria-hidden="true"></i></h1>
-      <p class="sub" id="tag">Ein Klick, ein Sprung. Wer danebenhaut, steht blöd da.</p>
-      <p class="best" id="mBest" hidden>Rekord <b id="mBestV">0</b></p>
+      <p class="sub" id="tag">One click, one dash. Miss and you're a sitting duck.</p>
+      <p class="best" id="mBest" hidden>Best <b id="mBestV">0</b></p>
       <div class="row">
-        <button class="primary" id="go">Los geht's</button>
-        <button class="ghost big" id="how" aria-expanded="false">So geht's</button>
+        <button class="primary" id="go">Play</button>
+        <button class="ghost big" id="how" aria-expanded="false">How to play</button>
       </div>
-      <p class="press">oder <kbd>Leertaste</kbd> drücken</p>
+      <p class="press">or press <kbd>Space</kbd></p>
       <div class="prefs">
-        <div class="skins nostart" id="skins" role="radiogroup" aria-label="Spurfarbe"></div>
-        <label class="vol nostart" for="vol"><span>Musik</span><input type="range" id="vol" min="0" max="100" step="1" value="75"><output id="volV" for="vol">75 %</output></label>
+        <div class="skins nostart" id="skins" role="radiogroup" aria-label="Trail color"></div>
+        <label class="vol nostart" for="vol"><span>Music</span><input type="range" id="vol" min="0" max="100" step="1" value="75"><output id="volV" for="vol">75%</output></label>
       </div>
       <div class="cast nostart" id="cast">
-        <figure><canvas data-k="d"></canvas><figcaption><b>Verfolger</b>rennt dir nach</figcaption></figure>
-        <figure><canvas data-k="r"></canvas><figcaption><b>Raser</b>warnt, dann zischt er</figcaption></figure>
-        <figure><canvas data-k="i"></canvas><figcaption><b>Igel</b>nur ohne Stacheln</figcaption></figure>
-        <figure><canvas data-k="g"></canvas><figcaption><b>Gold</b>bringt den Rausch</figcaption></figure>
+        <figure><canvas data-k="d"></canvas><figcaption><b>Chaser</b>runs after you</figcaption></figure>
+        <figure><canvas data-k="r"></canvas><figcaption><b>Dasher</b>warns, then zooms</figcaption></figure>
+        <figure><canvas data-k="i"></canvas><figcaption><b>Spiky</b>only without spikes</figcaption></figure>
+        <figure><canvas data-k="g"></canvas><figcaption><b>Gold</b>starts the Gold Rush</figcaption></figure>
       </div>
       <ul class="rules nostart" id="ovRules" hidden>
-        <li><b>Zielen und klicken:</b> Du springst durch alles, was auf der Linie liegt.</li>
-        <li><b>Treffer</b> laden den Sprung sofort nach. <b>Daneben</b> heißt kurz wehrlos.</li>
-        <li><b>Serie halten:</b> Alle 5 Treffer steigt der Multiplikator. Der Ring um dich läuft ab.</li>
-        <li><b>Knapp ist doppelt:</b> Wer bis zum letzten Moment wartet, kassiert ×2.</li>
-        <li><b>Haarscharf</b> vorbeilassen bringt Punkte und Zeit. Läuft die Serie aus, wird sie <b>einkassiert</b>.</li>
-        <li>Bei <b>×5, ×10, ×15</b> gibt's <b>Vollgas</b>: weitere Sprünge, keine Pause nach Fehlern.</li>
-        <li><b>Eisblaue Igel</b> nur treffen, wenn die Stacheln drin sind. <b>Gold</b> bringt den Rausch.</li>
-        <li>Treffer bei <b>rotem Ring</b>: <b>Gerettet!</b> Gegner mit <b>Krone</b> sind ×5 wert.</li>
-        <li><b>Feld leer</b> geräumt? Fetter Bonus. Alle 30 s kommt eine neue <b>Stufe</b>.</li>
-        <li>Deine Punkte zählen über alle Runden: Sie schalten neue <b>Spurfarben</b> frei.</li>
+        <li><b>Aim and click:</b> you dash through everything on the line.</li>
+        <li><b>Hits</b> recharge your dash instantly. A <b>miss</b> leaves you briefly defenseless.</li>
+        <li><b>Keep the combo:</b> every 5 hits raise the multiplier. The ring around you runs down.</li>
+        <li><b>Point blank pays double:</b> wait until the last moment for ×2.</li>
+        <li>A <b>close call</b> earns points and time. When your combo runs out, it gets <b>cashed in</b>.</li>
+        <li>At <b>×5, ×10, ×15</b> you hit <b>Overdrive</b>: longer dashes, no cooldown after misses.</li>
+        <li>Only hit the icy-blue <b>Spikies</b> when their spikes are in. <b>Gold</b> starts the <b>Gold Rush</b>.</li>
+        <li>A hit while the ring is <b>red</b>: <b>Clutch!</b> Enemies wearing a <b>crown</b> are worth ×5.</li>
+        <li>Wipe the field for a <b>Clean Sweep</b> bonus. Every 30 s brings a new <b>level</b>.</li>
+        <li>Your points add up across all runs and unlock new <b>trail colors</b>.</li>
       </ul>
      </div>
      <div class="screen" id="ovResult" hidden>
       <h1 id="ovTitle">ZACK</h1>
       <p class="sub" id="ovSub"></p>
       <dl class="stats" id="ovStats">
-        <div><dt>Beste Serie</dt><dd id="sCombo">0</dd></div>
-        <div><dt>Abschüsse</dt><dd id="sKills">0</dd></div>
-        <div><dt>Trefferquote</dt><dd id="sAcc">0 %</dd></div>
-        <div><dt>Zeit</dt><dd id="sTime">0 s</dd></div>
+        <div><dt>Best combo</dt><dd id="sCombo">0</dd></div>
+        <div><dt>Kills</dt><dd id="sKills">0</dd></div>
+        <div><dt>Accuracy</dt><dd id="sAcc">0%</dd></div>
+        <div><dt>Time</dt><dd id="sTime">0 s</dd></div>
       </dl>
       <p class="unlock" id="ovUnlock"></p>
       <div class="row">
-        <button class="primary" id="again">Nochmal</button>
-        <button class="ghost big" id="toMenu">Menü</button>
+        <button class="primary" id="again">Again</button>
+        <button class="ghost big" id="toMenu">Menu</button>
       </div>
      </div>
     </div>
   </div>
 </main>
 <div class="bar">
-  <span class="hint">Maus zielt · <kbd>Klick</kbd> oder <kbd>Leertaste</kbd> springt · <kbd>P</kbd> Pause · am Handy: tippen</span>
+  <span class="hint">Mouse aims · <kbd>Click</kbd> or <kbd>Space</kbd> dashes · <kbd>P</kbd> pause · on mobile: tap</span>
 </div>
 
 <script src="js/core.js"></script>
