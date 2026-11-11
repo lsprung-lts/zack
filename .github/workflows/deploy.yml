@@ -34,9 +34,14 @@ jobs:
 
       - name: Website zusammenstellen (Build)
         # Nur das, was online gehört, kommt in den Ordner _site.
+        # Danach bekommt jede CSS-/JS-Adresse die Commit-Kennung angehängt (z. B. js/render.js?v=5bb8100).
+        # So holt der Browser nach jedem Update sofort die neuen Dateien statt seiner gespeicherten Kopie.
         run: |
           mkdir _site
           cp -r index.html css js _site/
+          V="${GITHUB_SHA::7}"
+          sed -i -E "s#(src=\"js/[a-z]+\.js)\"#\1?v=$V\"#g; s#(href=\"css/[a-z]+\.css)\"#\1?v=$V\"#g" _site/index.html
+          grep -c "?v=$V" _site/index.html
 
       - name: Pages vorbereiten
         uses: actions/configure-pages@v6
