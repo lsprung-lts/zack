@@ -64,14 +64,13 @@ function render(){
   for(const e of foes)drawFoe(e);
   /* Spieler mit Serien-Ring */
   if(st!=='dying'&&st!=='over'){
-    const m=mult(),ready=cd<=0;
+    const ready=cd<=0;
     if(boost>0){g.strokeStyle='rgba(92,225,230,'+(.35+Math.sin(clock*14)*.2)*Math.min(1,boost)+')';g.lineWidth=3;
       g.beginPath();g.arc(p.x,p.y,36+Math.sin(clock*9)*3,0,6.3);g.stroke();}
     if(combo>0){g.lineWidth=5;g.strokeStyle='rgba(246,239,255,.14)';g.beginPath();g.arc(p.x,p.y,28,0,6.3);g.stroke();
       /* Ring: eisblau = Timer wartet, rot = gleich vorbei */
       const fr=comboT/comboMax();g.strokeStyle=comboHold?'rgba(92,225,230,'+(.6+Math.sin(clock*6)*.3)+')':fr<.3?C.foe:C.you;
-      g.beginPath();g.arc(p.x,p.y,28,-1.571,-1.571+fr*6.283);g.stroke();
-      g.font='18px '+DISP;g.textAlign='center';g.textBaseline='middle';g.fillStyle=C.you;g.fillText('×'+m,p.x,p.y-46);}
+      g.beginPath();g.arc(p.x,p.y,28,-1.571,-1.571+fr*6.283);g.stroke();}
     g.fillStyle='rgba(255,210,63,'+(ready?.25:.08)+')';g.beginPath();g.arc(p.x,p.y,17+Math.sin(clock*7)*2,0,6.3);g.fill();
     g.fillStyle=ready?C.you:'#8d7fae';g.beginPath();g.arc(p.x,p.y,10,0,6.3);g.fill();
     g.fillStyle='#fff';g.beginPath();g.arc(p.x,p.y,4.5,0,6.3);g.fill();
@@ -82,7 +81,7 @@ function render(){
     g.beginPath();g.moveTo(q.x,q.y);g.lineTo(q.x-q.vx*.035,q.y-q.vy*.035);g.stroke();}
   g.globalCompositeOperation='source-over';g.globalAlpha=1;
   g.textAlign='center';g.textBaseline='middle';g.lineJoin='round';
-  for(const f of floats){g.globalAlpha=Math.min(1,f.life*3);g.font=(f.big?26:19)+'px '+DISP;
+  for(const f of floats){g.globalAlpha=Math.min(1,f.life*3)*(f.small?.9:1);g.font=(f.small?16:f.big?26:19)+'px '+DISP;
     const fx=Math.max(70,Math.min(W-70,f.x));g.lineWidth=5;g.strokeStyle='#120a28';g.strokeText(f.text,fx,f.y);g.fillStyle=f.col;g.fillText(f.text,fx,f.y);}
   g.globalAlpha=1;
   /* Anzeige */
@@ -92,21 +91,54 @@ function render(){
     if(best>0){const bw=360,bx=W/2-bw/2,by=92,fr=Math.min(1,shown/best);
       g.fillStyle='rgba(246,239,255,.14)';g.fillRect(bx,by,bw,6);g.fillStyle=recordHit?C.you:C.foe;g.fillRect(bx,by,bw*fr,6);
       g.font='600 14px "Outfit",sans-serif';g.fillStyle='rgba(246,239,255,.7)';g.fillText(recordHit?'Best beaten':'Best '+fmt(best),W/2,112);}
-    g.font='18px '+DISP;g.textAlign='left';g.fillStyle=combo>0?C.you:'rgba(246,239,255,.4)';g.fillText('Combo '+combo,26,34);
+    drawComboHud(g);g.font='18px '+DISP;
     g.textAlign='right';g.fillStyle='rgba(246,239,255,.4)';g.fillText('Run '+attempt,W-26,34);
     /* Stufe mit Fortschrittsbalken bis zur nächsten */
     const lf=(runT%LVL_T)/LVL_T;g.fillStyle='rgba(246,239,255,.55)';g.fillText('Level '+lvl,W-26,60);
     g.fillStyle='rgba(246,239,255,.12)';g.fillRect(W-126,74,100,3);g.fillStyle='rgba(246,239,255,.5)';g.fillRect(W-126,74,100*lf,3);
-    if(frenzy>0){g.textAlign='center';g.fillStyle=C.gold;g.fillText('Gold Rush  '+frenzy.toFixed(1)+' s  ·  everything ×2',W/2,H-30);}
-    if(boost>0){g.textAlign='center';g.fillStyle=C.igel;g.fillText('Overdrive  '+boost.toFixed(1)+' s  ·  longer dashes, no cooldown',W/2,frenzy>0?H-58:H-30);}
+    drawEffects(g);
     g.textAlign='center';
   }
-  calls.forEach((c,i)=>{const t=c.t,s=t<.12?.5+t/.12*.7:1.2-Math.min(.2,(t-.12)*1.5),a=t>.8?1-(t-.8)/.3:1;
-    g.save();g.translate(W/2,230+i*84);g.scale(s,s);g.transform(1,0,-.14,1,0,0);g.globalAlpha=Math.max(0,a);
+  calls.slice(0,1).forEach(c=>{const t=c.t,s=t<.12?.5+t/.12*.7:1.2-Math.min(.2,(t-.12)*1.5),a=t>.8?1-(t-.8)/.3:1;   // nur die aktuelle große Meldung
+    g.save();g.translate(W/2,230);g.scale(s,s);g.transform(1,0,-.14,1,0,0);g.globalAlpha=Math.max(0,a);
     g.font='68px '+DISP;g.lineWidth=10;g.strokeStyle='#120a28';g.strokeText(c.text,0,0);g.fillStyle=c.col;g.fillText(c.text,0,0);g.restore();});
   g.globalAlpha=1;
   if(flash>0){g.fillStyle='rgba(255,255,255,'+flash+')';g.fillRect(-20,-20,W+40,H+40);}
   if(st==='pause'){g.fillStyle='rgba(14,8,32,.7)';g.fillRect(-20,-20,W+40,H+40);g.fillStyle=C.ink;g.font='64px '+DISP;g.fillText('Pause',W/2,H/2);}
+}
+
+/* ---------- Combo-Element oben links: Multiplikator groß, 5 Punkte bis zum nächsten, Zeitbalken ---------- */
+function drawComboHud(g){
+  const m=mult(),on=combo>0,x=26,y=44;
+  g.save();g.textAlign='left';g.textBaseline='middle';g.lineJoin='round';
+  g.font='44px '+DISP;const tw=g.measureText('×'+m).width;
+  g.save();g.translate(x+tw/2,y);const s=1+multPop*.35;g.scale(s,s);
+  g.lineWidth=7;g.strokeStyle='#120a28';g.strokeText('×'+m,-tw/2,0);
+  g.fillStyle=on?(frenzy>0?C.gold:C.you):'rgba(246,239,255,.3)';g.fillText('×'+m,-tw/2,0);g.restore();
+  const px=x+tw+20;
+  if(m>=15){g.font='16px '+DISP;g.fillStyle=C.you;g.fillText('MAX',px,y);}
+  else{const done=combo%5;
+    for(let i=0;i<5;i++){g.beginPath();g.arc(px+i*18,y,6,0,6.3);
+      if(i<done){g.fillStyle=C.you;g.fill();}else{g.lineWidth=2;g.strokeStyle='rgba(246,239,255,'+(on?.35:.18)+')';g.stroke();}}}
+  g.font='600 13px "Outfit",sans-serif';g.fillStyle='rgba(246,239,255,'+(on?.7:.35)+')';
+  g.fillText('COMBO '+combo+(m<15?'  ·  '+(5-combo%5)+' to ×'+(m+1):''),x,y+34);
+  const bw=180,fr=on?Math.max(0,Math.min(1,comboT/comboMax())):0;
+  g.fillStyle='rgba(246,239,255,.12)';g.fillRect(x,y+46,bw,4);
+  g.fillStyle=comboHold?C.igel:fr<.3?C.foe:C.you;g.fillRect(x,y+46,bw*fr,4);
+  g.restore();
+}
+/* ---------- Gold Rush / Overdrive als kleine ablaufende Leisten unten ---------- */
+function drawEffects(g){
+  const fx=[];
+  if(frenzy>0)fx.push({t:'GOLD RUSH ×2',c:C.gold,f:frenzy/5});
+  if(boost>0)fx.push({t:'OVERDRIVE',c:C.igel,f:boost/4});
+  const w=190,h=30,gap=12,x0=W/2-(fx.length*w+(fx.length-1)*gap)/2;
+  fx.forEach((e,i)=>{const x=x0+i*(w+gap),y=H-48;
+    g.fillStyle='rgba(14,8,32,.75)';g.beginPath();if(g.roundRect)g.roundRect(x,y,w,h,10);else g.rect(x,y,w,h);g.fill();
+    g.lineWidth=2;g.strokeStyle=e.c;g.stroke();
+    g.fillStyle=e.c;g.fillRect(x+8,y+h-7,(w-16)*Math.max(0,Math.min(1,e.f)),3);
+    g.font='14px '+DISP;g.textAlign='center';g.textBaseline='middle';g.fillText(e.t,x+w/2,y+12);});
+  g.textAlign='center';
 }
 
 /* ---------- Größe ---------- */

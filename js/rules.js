@@ -15,8 +15,7 @@ function checkRecord(){
 function bank(){
   if(combo<5)return;
   const pts=combo*5*mult()*bonusMul();score+=pts;punch=1;
-  call('Cashed In! +'+fmt(pts),C.you);
-  floats.push({x:p.x,y:p.y-60,text:'+'+fmt(pts),life:1.1,col:C.you,big:true});
+  call('Cashed In +'+fmt(pts),C.you,1);
   for(let j=0;j<4;j++)tone(note(7+j*2),.18,'triangle',.06,0,j*.05);
   checkRecord();
 }
@@ -24,11 +23,15 @@ function bank(){
 function graze(e){
   const pts=5*mult()*bonusMul();score+=pts;
   if(combo>0)comboT=Math.min(comboMax(),comboT+.4);
-  floats.push({x:e.x,y:e.y-20,text:'Close Call +'+fmt(pts),life:.8,col:C.igel,big:false});
+  floats.push({x:e.x,y:e.y-20,text:'Close Call +'+fmt(pts),life:.8,col:C.igel,small:true});
   burst(p.x,p.y,C.igel,8,260);tone(1500,.07,'sine',.04,2200);
   checkRecord();
 }
-function call(text,col){calls.push({text,col:col||C.you,t:0});if(calls.length>2)calls.shift();}
+/* Meldungen: groß = Mitte, eine zur Zeit (max. 2 warten); klein = kurz beim Spieler */
+function call(text,col,small){
+  if(small){floats.push({x:p.x,y:p.y-64,text,life:.9,col:col||C.you,small:true});return;}
+  calls.push({text,col:col||C.you,t:0});if(calls.length>3)calls.splice(1,1);
+}
 function burst(x,y,col,n,spd){for(let i=0;i<n&&parts.length<700;i++){const a=rnd(0,6.283),s=rnd(.2,1)*spd;
   parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:rnd(.25,.7),max:.7,col,size:rnd(2,5)});}}
 
@@ -77,8 +80,7 @@ const BOUNTY_CHANCE=.04;                         // Anteil Verfolger mit Krone (
 const RESCUE_AT=.3;                              // Serien-Timer unter 30 % = „rot“
 function rescue(){
   const pts=20*mult()*bonusMul();score+=pts;
-  call('Clutch!',C.foe);
-  floats.push({x:p.x,y:p.y-84,text:'Clutch +'+fmt(pts),life:1,col:C.foe,big:true});
+  call('Clutch +'+fmt(pts),C.foe,1);
   rings.push({x:p.x,y:p.y,r:24,max:130,life:.4,dur:.4,col:'255,93,115'});
   tone(392,.24,'triangle',.07,1568);tone(1175,.2,'sine',.05,0,.09);
   Music.accent('rescue');
@@ -125,24 +127,26 @@ function dash(){
   hit.sort((a,b)=>a.t-b.t);hits++;cd=0;inv=.24;
   const n=hit.length,saved=combo>=5&&comboT<comboMax()*RESCUE_AT;
   const wasOnField=hit.some(h=>h.e.k!=='g'&&onField(h.e));
+  let sum=0,closeN=0,special=false;
   hit.forEach((h,i)=>{const e=h.e,close=Math.hypot(e.x-sx,e.y-sy)<e.r+72;
     combo++;kills++;bestCombo=Math.max(bestCombo,combo);
-    const pts=e.pts*mult()*n*(close?2:1)*(frenzy>0?2:1);score+=pts;
-    floats.push({x:e.x,y:e.y-18,text:'+'+fmt(pts),life:.9,col:close?C.you:C.ink,big:close||n>1});
-    if(close)floats.push({x:e.x,y:e.y-44,text:'POINT BLANK ×2',life:.8,col:C.you});
+    const pts=e.pts*mult()*n*(close?2:1)*(frenzy>0?2:1);score+=pts;sum+=pts;if(close)closeN++;
+    if(e.k==='g'||e.crown)special=true;
     burst(e.x,e.y,e.k==='g'?C.gold:e.k==='i'?C.igel:e.k==='r'?C.run:C.foe,24,520);
     tone(note(Math.min(combo,22)),.14,'triangle',.08,0,i*.045);
     if(e.k==='g'){frenzy=5;call('Gold Rush!',C.gold);for(let j=0;j<5;j++)tone(note(8+j*2),.2,'sine',.06,0,j*.06);Music.accent('gold');}
-    if(e.crown){call('Bounty!',C.gold);burst(e.x,e.y,C.gold,30,600);
+    if(e.crown){call('Bounty ×5',C.gold,1);burst(e.x,e.y,C.gold,30,600);
       tone(1319,.08,'square',.04,0,.02);tone(1760,.3,'square',.04,0,.09);}
     if(MILE[combo]){call(MILE[combo]+'  ×'+mult());tone(note(5),.3,'square',.04,0,.05);tone(note(9),.3,'square',.04,0,.12);}
     if(BOOST_AT[combo]){boost=4;call('Overdrive!',C.igel);for(let j=0;j<6;j++)tone(note(5+j*2),.16,'sawtooth',.035,0,.15+j*.04);}
     foes.splice(foes.indexOf(e),1);});
   comboT=comboMax();punch=1;
-  if(n>=2)call(MULTI[Math.min(n,5)],C.ink);
+  /* eine Zahl für den ganzen Sprung; Boni hängen als Marke dran */
+  floats.push({x:ex,y:ey-40,text:'+'+fmt(sum)+(closeN?'  ·  point blank ×2':''),life:.9,col:closeN?C.you:C.ink,big:n>1||closeN>0});
+  if(n>=2)call(MULTI[Math.min(n,5)],C.ink,n<4);    // Double/Triple klein, Quad/Rampage groß
   hiss(.08,.07,2500);
   hitStop=.045+.018*Math.min(n,4);
-  if(!calm){shake=Math.min(1,.3+.14*n);flash=Math.min(.22,.06+.04*n);}
+  if(!calm&&(n>=2||special)){shake=Math.min(1,.3+.14*n);flash=Math.min(.22,.06+.04*n);}   // Einzeltreffer: nur Partikel und Ton
   if(saved)rescue();
   if(wasOnField&&clearCd<=0&&runT>3&&!foes.some(e=>e.k!=='g'&&onField(e)))fieldClear();
   checkRecord();

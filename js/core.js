@@ -41,6 +41,7 @@ const MIN_CHASERS=3;                               // so viele rote Chaser sind 
 const NEAR_SPAWN=[300,360];                        // Nachschub-Chaser erscheinen teils in diesem Abstand …
 const SPAWN_IN=.5;                                 // … und materialisieren 0,5 s lang (harmlos, aber schon treffbar)
 let comboHold=false,refillT=0;
+let lastMult=1,multPop=0;                          // Multiplikator-Sprung: kurzes Aufploppen im Combo-Element
 
 /* ---------- Stufen, Feld leer, Ringe ---------- */
 let slow=0,clearCd=0,lvl=1,rings=[];

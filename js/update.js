@@ -5,7 +5,9 @@ function update(rdt){
   clock+=rdt;
   shake=Math.max(0,shake-rdt*4);flash=Math.max(0,flash-rdt*1.6);punch=Math.max(0,punch-rdt*5);
   if(overLock>0)overLock-=rdt;
-  for(let i=calls.length-1;i>=0;i--){calls[i].t+=rdt;if(calls[i].t>1.1)calls.splice(i,1);}
+  /* Große Meldungen nacheinander statt übereinander; wartet eine weitere, läuft die aktuelle schneller ab */
+  if(calls.length){calls[0].t+=rdt*(calls.length>1?1.7:1);if(calls[0].t>1.1)calls.shift();}
+  const mNow=mult();if(mNow>lastMult)multPop=1;lastMult=mNow;multPop=Math.max(0,multPop-rdt*3);
   shown+=(score-shown)*ease(14,rdt);
   if(st==='dying'){dieT-=rdt;if(dieT<=0)over();}
   let dt=rdt;

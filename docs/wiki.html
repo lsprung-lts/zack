@@ -192,7 +192,7 @@ tbody tr:target{background:rgba(255,210,63,.12)}
       <tr id="M4"><td class="k"><a href="#M4">M4</a></td><td>Refilling the timer</td><td>every hit: full · Close Call: +0.4 s (up to full) · <b>Arena: waits</b> (ring turns icy blue) while no enemy is within dash range + 120 · runs at half speed during Gold Rush</td><td><code>comboT</code></td></tr>
       <tr id="M7"><td class="k"><a href="#M7">M7</a></td><td>Chaser refill (Arena)</td><td>fewer than 3 red Chasers on the field → a new one every 0.25 s; every second one appears close (300–360 away) and materializes for 0.5 s (harmless, already hittable) with a red ring</td><td><code>refillChaser()</code>, <code>MIN_CHASERS</code></td></tr>
       <tr id="M8"><td class="k"><a href="#M8">M8</a></td><td>Bot test (14 runs each)</td><td>before: 38 s, 4.3 combo losses, ×1.85 avg, 3,803 pts · after: 35 s, 0.2 losses, ×4.35 avg, 13,325 pts</td><td>–</td></tr>
-      <tr id="M5"><td class="k"><a href="#M5">M5</a></td><td>Display</td><td>ring around the spark, red below 30 %, “×N” above it</td><td><code>render()</code></td></tr>
+      <tr id="M5"><td class="k"><a href="#M5">M5</a></td><td>Display</td><td>top left: big <b>×N</b> with 5 dots towards the next multiplier (“MAX” at ×15), “COMBO 23 · 2 to ×6” and a time bar (icy = waiting, red below 30 %); the multiplier pops when it goes up. Around the spark: the same timer as a ring</td><td><code>render()</code></td></tr>
       <tr id="M6"><td class="k"><a href="#M6">M6</a></td><td>Sound per hit</td><td>pentatonic scale from 330 Hz, rises with the combo (up to step 22)</td><td><code>note()</code></td></tr>
     </tbody>
   </table></div>
@@ -367,12 +367,14 @@ tbody tr:target{background:rgba(255,210,63,.12)}
     <thead><tr><th>Code</th><th>Effect</th><th>Value</th></tr></thead>
     <tbody>
       <tr id="J1"><td class="k"><a href="#J1">J1</a></td><td>Hit stop (world freezes)</td><td class="num">0.045 s + 0.018 s × count (max 4)</td></tr>
-      <tr id="J2"><td class="k"><a href="#J2">J2</a></td><td>Screen shake</td><td class="num">0.3 + 0.14 × count (max 1), fades in 0.25 s</td></tr>
-      <tr id="J3"><td class="k"><a href="#J3">J3</a></td><td>Flash</td><td class="num">0.06 + 0.04 × count (max 0.22)</td></tr>
+      <tr id="J2"><td class="k"><a href="#J2">J2</a></td><td>Screen shake</td><td class="num">only for multi-hits, Gold and Bounty: 0.3 + 0.14 × count (max 1), fades in 0.25 s</td></tr>
+      <tr id="J3"><td class="k"><a href="#J3">J3</a></td><td>Flash</td><td class="num">only for multi-hits, Gold and Bounty: 0.06 + 0.04 × count (max 0.22)</td></tr>
       <tr id="J4"><td class="k"><a href="#J4">J4</a></td><td>Particles per hit / death</td><td class="num">24 / 90 (max 700 at once)</td></tr>
       <tr id="J5"><td class="k"><a href="#J5">J5</a></td><td>Dash trail</td><td class="num">0.22 s, trail color · icy blue during Overdrive</td></tr>
-      <tr id="J6"><td class="k"><a href="#J6">J6</a></td><td>Score display</td><td>counts up smoothly, bounces on hits</td></tr>
+      <tr id="J6"><td class="k"><a href="#J6">J6</a></td><td>Score display</td><td>counts up smoothly, bounces on hits; <b>one number per dash</b> (sum of all hits), bonuses as a tag, e.g. “+360 · point blank ×2”</td></tr>
       <tr id="J7"><td class="k"><a href="#J7">J7</a></td><td>Best bar</td><td>below the score, turns yellow once you beat it</td></tr>
+      <tr id="J10"><td class="k"><a href="#J10">J10</a></td><td>Callouts</td><td><b>Big</b> (center, one at a time, queued ones play faster): milestones, Gold Rush, Overdrive, Level, Clean Sweep, New Best, Quad/Rampage · <b>small</b> (next to the spark): Double/Triple, Bounty ×5, Clutch +X, Cashed In +X, Close Call +X</td></tr>
+      <tr id="J11"><td class="k"><a href="#J11">J11</a></td><td>Effect bars</td><td>Gold Rush and Overdrive as small bars at the bottom center that run down (gold / icy)</td></tr>
       <tr id="J8"><td class="k"><a href="#J8">J8</a></td><td>Reduced motion</td><td>system setting turns off shake, flash and menu animation</td></tr>
     </tbody>
   </table></div>
